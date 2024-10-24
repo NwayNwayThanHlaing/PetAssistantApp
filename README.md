@@ -61,7 +61,7 @@ Make sure you have the following installed on your machine:
 
    ```bash
    git clone https://gitlab.cim.rhul.ac.uk/wlis130/PROJECT.git
-   cd pet_assistant
+   cd PROJECT/product
    ```
 
 2. Install the dependencies:
@@ -84,12 +84,12 @@ To run the Flutter app on an iOS simulator, follow these steps:
    - Use the following command to run the app:
 
      ```bash
-     flutter run --target=product/lib/main.dart
+     flutter run
      ```
 
    - If you need to specify a device, use:
      ```bash
-     flutter run -d "Your Device Name" --target=product/lib/main.dart
+     flutter run -d "Your Device Name"
      ```
    - Make sure to replace `"Your Device Name"` with the actual name of your device. e.g - "iPhone 14 Pro"
 
