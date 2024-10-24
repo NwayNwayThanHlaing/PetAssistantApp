@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:product/ui/user/login.dart';
+import 'package:purrnote/ui/user/login.dart';
+import 'package:purrnote/ui/user/signup.dart';
 // import 'package:product/ui/home/home_page.dart';
 
 void main() {
@@ -12,10 +13,14 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
+      routes: {
+        '/login': (context) => const Login(),
+        '/signup': (context) => const Signup(),
+      },
       title: 'Pet Assistant App',
-      home: Login(),
+      home: const Login(),
     );
   }
 }

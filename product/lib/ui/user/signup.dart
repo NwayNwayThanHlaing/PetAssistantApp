@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:purrnote/app_theme.dart';
-import 'package:purrnote/components/forms/login_form.dart';
+import 'package:purrnote/components/forms/signup_form.dart';
 
-class Login extends StatefulWidget {
-  const Login({super.key});
+class Signup extends StatefulWidget {
+  const Signup({super.key});
 
   @override
-  State<Login> createState() => _LoginState();
+  State<Signup> createState() => _SignupState();
 }
 
-class _LoginState extends State<Login> {
+class _SignupState extends State<Signup> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -31,7 +31,7 @@ class _LoginState extends State<Login> {
         padding: EdgeInsets.all(50),
         child: Column(
           children: [
-            LoginForm(),
+            SignupForm(),
           ],
         ),
       ),
@@ -42,17 +42,17 @@ class _LoginState extends State<Login> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              'Don\'t have an account?',
+              'Already have an account?',
               style: TextStyle(color: AppTheme.secondaryColor),
             ),
             const SizedBox(width: 10),
             GestureDetector(
               onTap: () {
-                Navigator.pushReplacementNamed(context, '/signup');
+                Navigator.pushReplacementNamed(context, '/login');
               },
               child: RichText(
                 text: const TextSpan(
-                  text: 'Sign Up',
+                  text: 'Login',
                   style: TextStyle(
                     color: AppTheme.primaryColor,
                     fontWeight: FontWeight.bold,

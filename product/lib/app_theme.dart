@@ -6,7 +6,8 @@ class AppTheme {
   static const Color secondaryColor = Color.fromARGB(255, 59, 57, 57);
   static const Color hoverColor = Color.fromARGB(255, 206, 96, 69);
   static const Color backgroundColor = Color.fromARGB(255, 206, 200, 200);
-  static const Color barColor = Color.fromARGB(255, 226, 224, 227);
+  static const Color barColor = Color.fromARGB(255, 231, 227, 233);
+  static const Color lightTextColor = Color.fromARGB(255, 154, 145, 145);
 
   // Define text styles here
   static const TextStyle headline1 = TextStyle(
