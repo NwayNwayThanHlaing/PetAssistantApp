@@ -30,6 +30,8 @@ migrate_working_dir/
 .pub-cache/
 .pub/
 /build/
+.metadata
+.custom_lint.log
 
 # Symbolication related
 app.*.symbols
