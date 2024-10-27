@@ -1,7 +1,9 @@
 ## Week 5 (21 October 2024)
 
-- Project layout
-  - Created folders for proper project layout, aligned with the GitLab rules
+- Project layout with good practices
+  - Created a structured layout, aligned with the GitLab rules
+- Implemented LogIn and SignUp Pagea with proper UI and authentication
+- Created Dashboard or landing page
 
 ## Week 4 (14 October 2024)
 

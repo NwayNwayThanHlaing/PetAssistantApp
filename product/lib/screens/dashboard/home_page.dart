@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:purrnote/app_theme.dart';
-import 'package:purrnote/components/app_bar.dart';
-import '../../components/bottom_navbar.dart';
+import 'package:purrnote/widgets/app_bar.dart';
+import '../../widgets/bottom_navbar.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key, required this.title});
