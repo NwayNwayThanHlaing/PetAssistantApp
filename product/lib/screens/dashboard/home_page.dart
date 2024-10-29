@@ -1,44 +1,57 @@
 import 'package:flutter/material.dart';
-import 'package:purrnote/app_theme.dart';
 import 'package:purrnote/widgets/app_bar.dart';
-import '../../widgets/bottom_navbar.dart';
+import 'package:purrnote/widgets/bottom_navbar.dart';
+import 'package:purrnote/screens/dashboard/calendar_page.dart';
+import 'package:purrnote/screens/dashboard/pets_page.dart';
+import 'package:purrnote/screens/dashboard/vet_page.dart';
+import 'package:purrnote/screens/dashboard/profile_page.dart';
 
-class Home extends StatefulWidget {
-  const Home({super.key, required this.title});
-
-  final String title;
+class HomePage extends StatefulWidget {
+  const HomePage({super.key});
 
   @override
-  State<Home> createState() => _HomeState();
+  HomePageState createState() => HomePageState();
 }
 
-class _HomeState extends State<Home> {
-  int _currentIndex = 0;
+class HomePageState extends State<HomePage> {
+  int _selectedIndex = 0;
 
-  void _onTap(int index) {
+  final List<Widget> _pages = const [
+    HomeScreen(),
+    CalendarPage(),
+    PetsPage(),
+    VetPage(),
+    ProfilePage(),
+  ];
+
+  void _onItemTapped(int index) {
     setState(() {
-      _currentIndex = index;
+      _selectedIndex = index;
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomAppBar(title: widget.title),
-      backgroundColor: AppTheme.backgroundColor,
-      body: const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              'Welcome to PurrNote!',
-            ),
-          ],
-        ),
-      ),
+      appBar: const CustomAppBar(title: "Purrnote"),
+      body: _pages[_selectedIndex],
       bottomNavigationBar: CustomBottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: _onTap,
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
+      ),
+    );
+  }
+}
+
+class HomeScreen extends StatelessWidget {
+  const HomeScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const Center(
+      child: Text(
+        "Welcome to the Home Page!",
+        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
       ),
     );
   }

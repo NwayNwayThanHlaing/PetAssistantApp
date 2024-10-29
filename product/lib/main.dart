@@ -32,10 +32,9 @@ class MyApp extends StatelessWidget {
       title: 'Pet Assistant App',
       initialRoute: '/login', // Set the initial route
       routes: {
-        '/login': (context) => const Login(),
+        '/login': (context) => Login(),
         '/signup': (context) => const Signup(),
-        '/home': (context) =>
-            const Home(title: 'PurrNote'), // Add your home route
+        '/': (context) => const HomePage(),
       },
     );
   }

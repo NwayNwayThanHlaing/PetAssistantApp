@@ -1,4 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:purrnote/screens/dashboard/home_page.dart';
+import 'package:purrnote/screens/dashboard/calendar_page.dart';
+import 'package:purrnote/screens/dashboard/pets_page.dart';
+import 'package:purrnote/screens/dashboard/vet_page.dart';
+import 'package:purrnote/screens/dashboard/profile_page.dart';
 import '/app_theme.dart';
 
 class CustomBottomNavigationBar extends StatelessWidget {
@@ -11,12 +16,23 @@ class CustomBottomNavigationBar extends StatelessWidget {
     required this.onTap,
   });
 
+  final List<Widget> _pages = const [
+    HomePage(),
+    CalendarPage(),
+    PetsPage(),
+    VetPage(),
+    ProfilePage(),
+  ];
+
   @override
   Widget build(BuildContext context) {
     return BottomNavigationBar(
       type: BottomNavigationBarType.fixed,
       currentIndex: currentIndex,
-      onTap: onTap,
+      onTap: (index) {
+        navigateToPage(context, index);
+        onTap(index);
+      },
       items: const <BottomNavigationBarItem>[
         BottomNavigationBarItem(
           icon: Icon(Icons.home),
@@ -44,6 +60,13 @@ class CustomBottomNavigationBar extends StatelessWidget {
       selectedFontSize: 13,
       selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold),
       unselectedItemColor: const Color.fromARGB(255, 59, 57, 57),
+    );
+  }
+
+  void navigateToPage(BuildContext context, int index) {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => _pages[index]),
     );
   }
 }
