@@ -1,9 +1,25 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart'; // Import Riverpod
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:purrnote/screens/auth/signup.dart';
+import 'package:purrnote/screens/auth/login.dart';
+import 'package:purrnote/screens/dashboard/home_page.dart'; // Import your home page
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase/firebase_options.dart';
 
-void main() {
-  runApp(
-      const ProviderScope(child: MyApp())); // Wrap your app with ProviderScope
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Firebase initialization with error handling
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+  } catch (e) {
+    runApp(const ProviderScope(child: MaterialApp(home: ErrorScreen())));
+    return;
+  }
+
+  runApp(const ProviderScope(child: MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -12,101 +28,27 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      debugShowCheckedModeBanner: false,
+      title: 'Pet Assistant App',
+      initialRoute: '/login', // Set the initial route
+      routes: {
+        '/login': (context) => Login(),
+        '/signup': (context) => const Signup(),
+        '/': (context) => const HomePage(),
+      },
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  final String title;
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
-  }
-
-  void _decrementCounter() {
-    setState(() {
-      _counter--;
-    });
-  }
+// Error screen for Firebase initialization errors
+class ErrorScreen extends StatelessWidget {
+  const ErrorScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(widget.title),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-          ],
-        ),
-      ),
-      bottomNavigationBar: BottomAppBar(
-        color:
-            Colors.blueAccent, // Set the background color for the BottomAppBar
-        child: Row(
-          mainAxisAlignment:
-              MainAxisAlignment.spaceBetween, // Space buttons between
-          children: <Widget>[
-            // Left buttons
-            Row(
-              children: <Widget>[
-                FloatingActionButton(
-                  onPressed: _decrementCounter,
-                  tooltip: 'Decrement',
-                  child: const Icon(Icons.remove),
-                ),
-                FloatingActionButton(
-                  onPressed: _incrementCounter,
-                  tooltip: 'Increment',
-                  child: const Icon(Icons.add),
-                ),
-              ],
-            ),
-            // Right buttons
-            Row(
-              children: <Widget>[
-                FloatingActionButton(
-                  onPressed: _decrementCounter,
-                  tooltip: 'Decrement',
-                  child: const Icon(Icons.remove),
-                ),
-                FloatingActionButton(
-                  onPressed: _incrementCounter,
-                  tooltip: 'Increment',
-                  child: const Icon(Icons.add),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
+      appBar: AppBar(title: const Text('Error')),
+      body: const Center(child: Text('Failed to initialize Firebase.')),
     );
   }
 }
