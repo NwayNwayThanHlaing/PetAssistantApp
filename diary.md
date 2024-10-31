@@ -1,3 +1,8 @@
+## Week 6 (28 October 2024)
+
+- Implemented User profile, Change password, Account deletion
+- Changed framework since Flutter is not compatible for my project needs
+
 ## Week 5 (21 October 2024)
 
 - Project layout with good practices

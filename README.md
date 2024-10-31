@@ -6,7 +6,7 @@ You may edit it as you like, but please do not remove the default topics or the 
 
 # Pet Assistant
 
-**Pet Assistant** is a Flutter application designed to help pet owners manage their pets' health, appointments, and daily activities. This app aims to provide a convenient platform for users to keep track of their pets' needs and schedules.
+**Pet Assistant** is an application designed to help pet owners manage their pets' health, appointments, and daily activities. This app aims to provide a convenient platform for users to keep track of their pets' needs and schedules.
 
 ## Table of Contents
 
@@ -41,9 +41,9 @@ The **Pet Assistant** app allows users to:
 
 ## Technologies Used
 
-- **Flutter**: UI toolkit for building natively compiled applications
+- **React Native**: UI toolkit for building natively compiled applications
 - **Firebase**: Backend services for authentication and database
-- **Riverpod**: State management solution for Flutter
+- **React Context API**: Simple state management solution for React Native
 
 ## Getting Started
 
@@ -51,9 +51,9 @@ The **Pet Assistant** app allows users to:
 
 Make sure you have the following installed on your machine:
 
-- [Flutter SDK](https://flutter.dev/docs/get-started/install)
-- [Dart SDK](https://dart.dev/get-dart)
-- [Android Studio](https://developer.android.com/studio) or [Visual Studio Code](https://code.visualstudio.com/) (with Flutter and Dart plugins)
+Expo - a developer tool for creating experiences with interactive gestures and graphics using JavaScript and React.
+
+- Download Expo Go app on your android or ios device
 
 ### Installation
 
@@ -67,16 +67,16 @@ Make sure you have the following installed on your machine:
 2. Install the dependencies:
 
    ```bash
-   flutter pub get
+   npm install
    ```
 
 ## Running the App
 
-To run the Flutter app on an iOS simulator, follow these steps:
+To run the React Native app on an iOS simulator, follow these steps:
 
 1. **Open Xcode**:
 
-   - Launch Xcode and open the iOS Simulator from **Xcode > Open Developer Tool > Simulator**.
+   - Launch Xcode and open the iOS Simulator from **Xcode > Open Developer Tool > Simulator** if you would like to use simulator.
 
 2. **Run the App**:
 
@@ -84,14 +84,16 @@ To run the Flutter app on an iOS simulator, follow these steps:
    - Use the following command to run the app:
 
      ```bash
-     flutter run
+     npm expo start
      ```
 
-   - If you need to specify a device, use:
+     or
+
      ```bash
-     flutter run -d "Your Device Name"
+     npm start
      ```
-   - Make sure to replace `"Your Device Name"` with the actual name of your device. e.g - "iPhone 14 Pro"
+
+   - Scan the QR code shown on the terminal with your camera, it will then lead to Expo Go app and then will display the app.
 
 ## Usage
 
