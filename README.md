@@ -95,6 +95,8 @@ To run the React Native app on an iOS simulator, follow these steps:
 
    - Scan the QR code shown on the terminal with your camera, it will then lead to Expo Go app and then will display the app.
 
+   - You can also refer to README.md in product folder in PROJECT folder directory for more details.
+
 ## Usage
 
 Once the app is launched, you can:
