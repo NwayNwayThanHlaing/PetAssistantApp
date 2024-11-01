@@ -1,11 +1,15 @@
-// Import the functions you need from the SDKs you need
+// src/firebaseConfig.js
 import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
+import {
+  getAuth,
+  initializeAuth,
+  getReactNativePersistence,
+} from "firebase/auth"; // Import necessary functions
+import AsyncStorage from "@react-native-async-storage/async-storage"; // Import AsyncStorage
+import { getFirestore } from "firebase/firestore"; // Import Firestore
+import { getAnalytics, isSupported } from "firebase/analytics";
 
 // Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
   apiKey: "AIzaSyAqz90lvvGYfw_XRRzbfJ4fiitQzjjqTLk",
   authDomain: "fyp-purrnote.firebaseapp.com",
@@ -18,4 +22,21 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
+
+// Initialize Firebase Authentication with persistence
+export const auth = initializeAuth(app, {
+  persistence: getReactNativePersistence(AsyncStorage), // Use AsyncStorage for persistence
+});
+
+// Initialize Firestore
+export const firestore = getFirestore(app); // Initialize Firestore
+
+// Initialize Analytics only if supported
+let analytics;
+isSupported().then((supported) => {
+  if (supported) {
+    analytics = getAnalytics(app);
+  }
+});
+
+export { analytics }; // Export analytics if needed
