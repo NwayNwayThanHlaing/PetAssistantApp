@@ -11,21 +11,21 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
+import { colors } from "../styles/Theme";
 import { useTheme } from "../contexts/ThemeContext";
 import { auth } from "./firebaseConfig";
 import { signInWithEmailAndPassword } from "firebase/auth";
+import AuthStyles from "../styles/AuthStyles";
 
 const Login = ({ navigation }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const { textColor } = useTheme();
 
-  // Function to handle login
   const handleLogin = async () => {
     try {
       await signInWithEmailAndPassword(auth, email, password);
       Alert.alert("Success", "You have successfully logged in!");
-      //   navigation.navigate("Home");
+      navigation.navigate("Home");
     } catch (error) {
       Alert.alert("Login Failed", error.message);
     }
@@ -37,65 +37,23 @@ const Login = ({ navigation }) => {
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
       <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-        <View style={{ flex: 1, backgroundColor: "#f5f5f5" }}>
-          {/* Top section with logo */}
-          <View
-            style={{
-              backgroundColor: "#e0e0e0",
-              height: 250,
-              borderBottomLeftRadius: 100,
-              borderBottomRightRadius: 100,
-              justifyContent: "center",
-              alignItems: "center",
-              paddingTop: 30,
-            }}
-          >
+        <View style={AuthStyles.container}>
+          <View style={AuthStyles.logoContainer}>
             <Image
               source={require("../../assets/logo.png")}
-              style={{ width: 80, height: 80, resizeMode: "contain" }}
+              style={AuthStyles.logo}
             />
-            <Text
-              style={{
-                fontSize: 24,
-                fontWeight: "bold",
-                color: textColor,
-                fontFamily: "NerkoOne-Regular",
-              }}
-            >
-              PURRNOTE
-            </Text>
+            <Text style={[AuthStyles.title]}>PURRNOTE</Text>
           </View>
 
-          {/* Form section */}
-          <View style={{ paddingHorizontal: 30, marginTop: 60 }}>
-            <Text
-              style={{
-                fontSize: 24,
-                fontWeight: "bold",
-                color: textColor,
-                fontFamily: "NerkoOne-Regular",
-                marginBottom: 5,
-              }}
-            >
-              LOG IN
-            </Text>
-            <Text style={{ fontSize: 16, color: "#666", marginBottom: 20 }}>
-              Please log in to continue
-            </Text>
+          <View style={AuthStyles.formContainer}>
+            <Text style={[AuthStyles.heading]}>Log In</Text>
+            <Text style={AuthStyles.subheading}>Please log in to continue</Text>
 
             <TextInput
-              style={{
-                height: 50,
-                borderColor: "#ddd",
-                borderWidth: 1,
-                borderRadius: 10,
-                paddingHorizontal: 15,
-                marginBottom: 15,
-                backgroundColor: "#eee",
-                fontSize: 16,
-              }}
+              style={AuthStyles.input}
               placeholder="Email Address"
-              placeholderTextColor="#999"
+              placeholderTextColor={colors.primaryLight}
               textContentType="oneTimeCode"
               onChangeText={setEmail}
               value={email}
@@ -104,63 +62,24 @@ const Login = ({ navigation }) => {
             />
 
             <TextInput
-              style={{
-                height: 50,
-                borderColor: "#ddd",
-                borderWidth: 1,
-                borderRadius: 10,
-                paddingHorizontal: 15,
-                marginBottom: 15,
-                backgroundColor: "#eee",
-                fontSize: 16,
-              }}
+              style={AuthStyles.input}
               placeholder="Password"
-              placeholderTextColor="#999"
+              placeholderTextColor={colors.primaryLight}
               onChangeText={setPassword}
               value={password}
               secureTextEntry
               autoCapitalize="none"
             />
 
-            <TouchableOpacity
-              style={{
-                backgroundColor: "#ff7f50",
-                paddingVertical: 15,
-                borderRadius: 10,
-                alignItems: "center",
-                marginVertical: 20,
-                flexDirection: "row",
-                justifyContent: "center",
-              }}
-              onPress={handleLogin}
-            >
-              <Text
-                style={{
-                  color: "#fff",
-                  fontSize: 18,
-                  fontWeight: "bold",
-                  marginRight: 8,
-                }}
-              >
-                LOG IN
-              </Text>
+            <TouchableOpacity style={AuthStyles.button} onPress={handleLogin}>
+              <Text style={AuthStyles.buttonText}>Log In</Text>
               <MaterialIcons name="pets" size={24} color="white" />
             </TouchableOpacity>
 
             <TouchableOpacity onPress={() => navigation.navigate("SignUp")}>
-              <Text
-                style={{ textAlign: "center", fontSize: 14, color: "#444" }}
-              >
+              <Text style={AuthStyles.loginText}>
                 Don't have an account?{" "}
-                <Text
-                  style={{
-                    color: "#ff7f50",
-                    fontWeight: "bold",
-                    textDecorationLine: "underline",
-                  }}
-                >
-                  Sign Up
-                </Text>
+                <Text style={AuthStyles.loginLink}>Sign Up</Text>
               </Text>
             </TouchableOpacity>
           </View>
