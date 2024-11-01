@@ -1,14 +1,13 @@
-// src/contexts/ThemeContext.js
 import React, { createContext, useContext } from "react";
+import { colors } from "../styles/Theme";
 
-// Define the ThemeContext
 const ThemeContext = createContext({
-  textColor: "#4B4947", // Default text color
+  textColor: colors.primary, // Default text color globally
 });
 
 export const ThemeProvider = ({ children }) => {
   return (
-    <ThemeContext.Provider value={{ textColor: "#4B4947" }}>
+    <ThemeContext.Provider value={{ textColor: colors.primary }}>
       {children}
     </ThemeContext.Provider>
   );
