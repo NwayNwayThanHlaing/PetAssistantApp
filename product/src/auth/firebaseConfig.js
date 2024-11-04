@@ -1,12 +1,11 @@
-// src/firebaseConfig.js
-import { initializeApp } from "firebase/app";
+import { initializeApp, getApps, getApp } from "firebase/app";
 import {
   getAuth,
   initializeAuth,
   getReactNativePersistence,
-} from "firebase/auth"; // Import necessary functions
-import AsyncStorage from "@react-native-async-storage/async-storage"; // Import AsyncStorage
-import { getFirestore } from "firebase/firestore"; // Import Firestore
+} from "firebase/auth";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { getFirestore } from "firebase/firestore";
 import { getAnalytics, isSupported } from "firebase/analytics";
 
 // Your web app's Firebase configuration
@@ -14,24 +13,20 @@ const firebaseConfig = {
   apiKey: "AIzaSyAqz90lvvGYfw_XRRzbfJ4fiitQzjjqTLk",
   authDomain: "fyp-purrnote.firebaseapp.com",
   projectId: "fyp-purrnote",
-  storageBucket: "fyp-purrnote.firebasestorage.app",
+  storageBucket: "fyp-purrnote.appspot.com", // Corrected storageBucket
   messagingSenderId: "476410167113",
   appId: "1:476410167113:web:5065475f5bd458d124a498",
   measurementId: "G-3FC29QG1N3",
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
+// Initialize Firebase only if it hasn't been initialized already
+const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 
-// Initialize Firebase Authentication with persistence
 export const auth = initializeAuth(app, {
-  persistence: getReactNativePersistence(AsyncStorage), // Use AsyncStorage for persistence
+  persistence: getReactNativePersistence(AsyncStorage),
 });
+export const firestore = getFirestore(app);
 
-// Initialize Firestore
-export const firestore = getFirestore(app); // Initialize Firestore
-
-// Initialize Analytics only if supported
 let analytics;
 isSupported().then((supported) => {
   if (supported) {
@@ -39,4 +34,4 @@ isSupported().then((supported) => {
   }
 });
 
-export { analytics }; // Export analytics if needed
+export { analytics };
