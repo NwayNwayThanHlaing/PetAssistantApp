@@ -1,18 +1,22 @@
+// Home.js
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Image } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, Alert } from "react-native";
 
 const Home = ({ navigation }) => {
+  const handleLogout = () => {
+    // Add your logout logic here
+    Alert.alert("Logout", "You have successfully logged out!");
+    navigation.navigate("Login"); // Navigate back to the Login page
+  };
+
   return (
     <View style={styles.container}>
-      {/* Logo */}
-      <View style={styles.logoContainer}>
-        <Image source={require("../../assets/logo.png")} style={styles.logo} />
-        <Text style={styles.title}>Welcome to My App</Text>
-      </View>
+      <Text style={styles.title}>Welcome to the Home Page!</Text>
+      <Text style={styles.subtitle}>You are now logged in.</Text>
 
-      {/* Welcome Message */}
-      <Text style={styles.welcomeText}>Hello, User!</Text>
-      <Text style={styles.instructionText}>This is your home page.</Text>
+      <TouchableOpacity style={styles.button} onPress={handleLogout}>
+        <Text style={styles.buttonText}>Log Out</Text>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -23,32 +27,27 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "#f5f5f5",
-    padding: 20,
-  },
-  logoContainer: {
-    alignItems: "center",
-    marginBottom: 40,
-  },
-  logo: {
-    width: 80,
-    height: 80,
-    resizeMode: "contain",
   },
   title: {
     fontSize: 24,
     fontWeight: "bold",
-    marginTop: 10,
+    marginBottom: 20,
   },
-  welcomeText: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 10,
-  },
-  instructionText: {
+  subtitle: {
     fontSize: 16,
     color: "#666",
-    marginBottom: 30,
-    textAlign: "center",
+    marginBottom: 40,
+  },
+  button: {
+    backgroundColor: "#ff7f50",
+    paddingVertical: 15,
+    paddingHorizontal: 30,
+    borderRadius: 10,
+  },
+  buttonText: {
+    color: "#fff",
+    fontSize: 18,
+    fontWeight: "bold",
   },
 });
 

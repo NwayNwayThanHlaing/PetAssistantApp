@@ -12,7 +12,6 @@ import {
   Platform,
 } from "react-native";
 import { colors } from "../styles/Theme";
-import { useTheme } from "../contexts/ThemeContext";
 import { auth } from "./firebaseConfig";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import AuthStyles from "../styles/AuthStyles";
@@ -25,7 +24,7 @@ const Login = ({ navigation }) => {
     try {
       await signInWithEmailAndPassword(auth, email, password);
       Alert.alert("Success", "You have successfully logged in!");
-      navigation.navigate("Home");
+      navigation.navigate("Dashboard");
     } catch (error) {
       Alert.alert("Login Failed", error.message);
     }
