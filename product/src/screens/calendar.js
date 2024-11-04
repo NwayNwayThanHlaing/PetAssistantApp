@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet, Alert } from "react-native";
 
-const Home = ({ navigation }) => {
+const Calendar = ({ navigation }) => {
   const handleLogout = () => {
     // Add your logout logic here
     Alert.alert("Logout", "You have successfully logged out!");
@@ -10,7 +10,7 @@ const Home = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Welcome to the Home Page!</Text>
+      <Text style={styles.title}>Welcome to the Calendar Page!</Text>
       <Text style={styles.subtitle}>You are now logged in.</Text>
 
       <TouchableOpacity style={styles.button} onPress={handleLogout}>
@@ -50,4 +50,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Home;
+export default Calendar;
