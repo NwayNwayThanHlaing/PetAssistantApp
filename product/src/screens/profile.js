@@ -24,7 +24,6 @@ import { firestore, auth } from "../auth/firebaseConfig";
 import { doc, updateDoc } from "firebase/firestore";
 import { updateEmail } from "firebase/auth";
 import * as ImagePicker from "expo-image-picker";
-import { getFunctions, httpsCallable } from "firebase/functions";
 
 const fallbackImage = "../../assets/profile.jpg";
 const Profile = ({ navigation }) => {
@@ -265,8 +264,9 @@ const Profile = ({ navigation }) => {
               value={newPassword}
               onChangeText={setNewPassword}
             />
-            <Button
-              title="Update Password"
+
+            <TouchableOpacity
+              style={styles.updateButton}
               onPress={() =>
                 handleChangePassword(
                   currentPassword,
@@ -274,8 +274,16 @@ const Profile = ({ navigation }) => {
                   setModalVisible
                 )
               }
-            />
-            <Button title="Cancel" onPress={() => setModalVisible(false)} />
+            >
+              <Text style={styles.buttonText}>Update Password</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.cancelButton}
+              onPress={() => setModalVisible(false)}
+            >
+              <Text style={styles.buttonText}>Cancel</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </Modal>
@@ -428,12 +436,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     borderRadius: 5,
   },
-  saveButton: {
-    backgroundColor: "#007bff",
-    padding: 10,
-    borderRadius: 5,
-    alignItems: "center",
-  },
   buttonText: {
     color: "white",
     fontSize: 16,
@@ -443,7 +445,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   updateButton: {
-    backgroundColor: colors.primary,
+    backgroundColor: colors.accent,
     padding: 10,
     borderRadius: 5,
     alignItems: "center",

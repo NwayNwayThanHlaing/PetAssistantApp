@@ -17,7 +17,7 @@ const AppBar = ({ title, onLogout }) => {
         <View style={{ flexDirection: "row", alignItems: "center" }}>
           <Image
             source={require("../../assets/logo.png")}
-            style={{ width: 50, height: 50 }}
+            style={{ width: 70, height: 70 }}
           />
           <Text style={AppBarStyles.title}>{title}</Text>
         </View>

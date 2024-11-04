@@ -1,17 +1,16 @@
 import { StyleSheet } from "react-native";
 import { colors } from "./Theme";
-
 export const AppBarStyles = StyleSheet.create({
   safeArea: {
-    flex: 0, // Prevent the SafeAreaView from taking up unnecessary space
-    backgroundColor: colors.background, // Match with AppBar background color
+    flex: 0,
+    backgroundColor: colors.accent,
   },
   container: {
     backgroundColor: colors.background,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    padding: 20,
+    padding: 10,
     color: colors.primary,
     borderBottomWidth: 1,
     borderBottomColor: colors.primaryLightest,
@@ -23,6 +22,7 @@ export const AppBarStyles = StyleSheet.create({
     color: colors.primary,
   },
 });
+
 export const BottomNavBarStyles = StyleSheet.create({
   iconText: {
     color: colors.primary,
@@ -35,13 +35,12 @@ export const BottomNavBarStyles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: colors.primaryLightest,
     paddingVertical: 10,
-    position: "relative",
+    paddingBottom: 18,
   },
   button: {
-    flex: 1, // Each button takes equal width
+    flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    paddingBottom: 20,
   },
   accentBar: {
     position: "absolute",
@@ -51,6 +50,7 @@ export const BottomNavBarStyles = StyleSheet.create({
     borderRadius: 2,
   },
 });
+
 export const GlobalStyles = StyleSheet.create({
   container: {
     flex: 1,
