@@ -8,7 +8,8 @@ import Dashboard from "./screens/dashboard";
 import Vet from "./screens/vet";
 import Profile from "./screens/profile";
 import Calendar from "./screens/calendar";
-import Pets from "./screens/pets";
+import Pets from "./screens/pets/pets";
+import AddPet from "./screens/pets/addPet";
 
 const Stack = createNativeStackNavigator();
 
@@ -29,6 +30,7 @@ const MyStack = () => {
         <Stack.Screen name="Profile" component={Profile} />
         <Stack.Screen name="Calendar" component={Calendar} />
         <Stack.Screen name="Pets" component={Pets} />
+        <Stack.Screen name="AddPet" component={AddPet} />
       </Stack.Navigator>
     </NavigationContainer>
   );
