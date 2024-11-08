@@ -224,6 +224,47 @@ const PetProfile = ({ route, navigation }) => {
                 : "Edit Profile"}
             </Text>
           </TouchableOpacity>
+          <TouchableOpacity
+            style={{
+              ...styles.editButton,
+              backgroundColor: colors.primary,
+            }}
+            onPress={() => {
+              Alert.alert(
+                "Delete Pet Profile",
+                "Are you sure you want to delete this pet profile? This action cannot be undone.",
+                [
+                  {
+                    text: "Cancel",
+                    style: "cancel",
+                  },
+                  {
+                    text: "Delete",
+                    style: "destructive",
+                    onPress: async () => {
+                      try {
+                        const userId = auth.currentUser.uid;
+                        const petDocRef = doc(
+                          firestore,
+                          `users/${userId}/pets`,
+                          petId
+                        );
+                        await petDocRef.delete();
+                        navigation.goBack();
+                      } catch (error) {
+                        console.error("Error deleting pet:", error);
+                        Alert.alert("Error", "Failed to delete pet profile.");
+                      }
+                    },
+                  },
+                ]
+              );
+            }}
+          >
+            <Text style={{ ...styles.editButtonText, color: "white" }}>
+              Delete Profile
+            </Text>
+          </TouchableOpacity>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>

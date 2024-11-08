@@ -212,7 +212,7 @@ const AddPet = ({ navigation }) => {
             disabled={loading}
           >
             {isLoading ? (
-              <Text style={styles.addButtonText}>Add</Text>
+              <Text style={styles.addButtonText}>+ Add</Text>
             ) : (
               <Text style={styles.addButtonText}>Loading...</Text>
             )}

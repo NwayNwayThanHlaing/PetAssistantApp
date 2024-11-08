@@ -103,12 +103,6 @@ const Pets = ({ navigation }) => {
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.listContainer}
       />
-      <TouchableOpacity
-        style={styles.addButton}
-        onPress={() => navigation.navigate("AddPet")}
-      >
-        <Text style={styles.addButtonText}>Add more pet</Text>
-      </TouchableOpacity>
     </View>
   );
 };
