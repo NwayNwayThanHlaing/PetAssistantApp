@@ -29,6 +29,7 @@ const fallbackImage = "../../assets/profile.jpg";
 const Profile = ({ navigation }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [uploading, setUploading] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -116,7 +117,6 @@ const Profile = ({ navigation }) => {
 
   const uploadProfileImage = async (imageUri) => {
     if (!imageUri) return null;
-
     const formData = new FormData();
     formData.append("file", {
       uri: imageUri,
@@ -148,6 +148,7 @@ const Profile = ({ navigation }) => {
   };
 
   const handleUpdateProfile = async () => {
+    setUploading(true);
     try {
       const userId = auth.currentUser.uid;
       const userRef = doc(firestore, "users", userId);
@@ -155,11 +156,6 @@ const Profile = ({ navigation }) => {
       let profileImageUrl = user.profileImage;
 
       if (profileImage && profileImage !== user.profileImage) {
-        const previousPublicId = user.profileImagePublicId;
-        if (previousPublicId) {
-          await deletePreviousImage(previousPublicId);
-        }
-
         const uploadedUrl = await uploadProfileImage(profileImage);
         if (uploadedUrl) {
           profileImageUrl = uploadedUrl;
@@ -194,6 +190,8 @@ const Profile = ({ navigation }) => {
     } catch (error) {
       console.error("Error updating profile: ", error);
       Alert.alert("Error", error.message);
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -339,8 +337,13 @@ const Profile = ({ navigation }) => {
             <TouchableOpacity
               style={styles.updateButton}
               onPress={handleUpdateProfile}
+              disabled={uploading}
             >
-              <Text style={styles.buttonText}>Save Changes</Text>
+              {uploading ? (
+                <ActivityIndicator color="white" />
+              ) : (
+                <Text style={styles.buttonText}>Save Changes</Text>
+              )}
             </TouchableOpacity>
 
             <TouchableOpacity

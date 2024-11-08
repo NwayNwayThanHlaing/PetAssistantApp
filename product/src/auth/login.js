@@ -10,6 +10,7 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
+  ActivityIndicator,
 } from "react-native";
 import { colors } from "../styles/Theme";
 import { auth } from "./firebaseConfig";
@@ -19,14 +20,18 @@ import AuthStyles from "../styles/AuthStyles";
 const Login = ({ navigation }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
+    setLoading(true);
     try {
       await signInWithEmailAndPassword(auth, email, password);
       Alert.alert("Success", "You have successfully logged in!");
       navigation.navigate("Dashboard");
     } catch (error) {
       Alert.alert("Login Failed", error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -71,8 +76,19 @@ const Login = ({ navigation }) => {
             />
 
             <TouchableOpacity style={AuthStyles.button} onPress={handleLogin}>
-              <Text style={AuthStyles.buttonText}>Log In</Text>
-              <MaterialIcons name="pets" size={24} color="white" />
+              {loading ? (
+                <ActivityIndicator size="small" color="white" />
+              ) : (
+                <View style={AuthStyles.buttonContent}>
+                  <Text style={AuthStyles.buttonText}>Log In</Text>
+                  <MaterialIcons
+                    name="pets"
+                    size={20}
+                    color="white"
+                    style={AuthStyles.icon}
+                  />
+                </View>
+              )}
             </TouchableOpacity>
 
             <TouchableOpacity onPress={() => navigation.navigate("SignUp")}>

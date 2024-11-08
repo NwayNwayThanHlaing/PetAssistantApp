@@ -9,6 +9,7 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
+  ActivityIndicator,
 } from "react-native";
 import { colors } from "../styles/Theme";
 import { useTheme } from "../contexts/ThemeContext";
@@ -22,14 +23,14 @@ const Signup = ({ navigation }) => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const { textColor } = useTheme();
+  const [loading, setLoading] = useState(false);
 
   const handleSignup = async () => {
     if (!email || !password || !name) {
       Alert.alert("Error", "Please fill in all fields.");
       return;
     }
-
+    setLoading(true);
     try {
       const userCredential = await createUserWithEmailAndPassword(
         auth,
@@ -50,6 +51,8 @@ const Signup = ({ navigation }) => {
       navigation.navigate("Login");
     } catch (error) {
       Alert.alert("Signup Error", error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -102,8 +105,19 @@ const Signup = ({ navigation }) => {
             />
 
             <TouchableOpacity style={AuthStyles.button} onPress={handleSignup}>
-              <Text style={AuthStyles.buttonText}>Sign Up</Text>
-              <MaterialIcons name="pets" size={24} color="white" />
+              {loading ? (
+                <ActivityIndicator size="small" color="white" />
+              ) : (
+                <View style={AuthStyles.buttonContent}>
+                  <Text style={AuthStyles.buttonText}>Sign up</Text>
+                  <MaterialIcons
+                    name="pets"
+                    size={20}
+                    color="white"
+                    style={AuthStyles.icon}
+                  />
+                </View>
+              )}
             </TouchableOpacity>
 
             <TouchableOpacity onPress={() => navigation.navigate("Login")}>
