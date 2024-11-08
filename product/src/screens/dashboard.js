@@ -5,7 +5,7 @@ import AppBar from "../components/AppBar"; // Import the AppBar component
 import BottomNavBar from "../components/BottomNavBar"; // Import the BottomNavBar component
 import Home from "./home"; // Import other screens
 import Calendar from "./calendar"; // Import the Calendar screen
-import Pets from "./pets"; // Import the Pets screen
+import Pets from "./pets/pets"; // Import the Pets screen
 import Vet from "./vet"; // Import the Vets screen
 import Profile from "./profile"; // Import the UserProfile screen
 
