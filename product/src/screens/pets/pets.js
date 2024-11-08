@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -6,33 +6,77 @@ import {
   FlatList,
   TouchableOpacity,
   StyleSheet,
+  ActivityIndicator,
 } from "react-native";
 import { colors } from "../../styles/Theme";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
-
-const petsData = [
-  { id: "1", name: "Ori", breed: "Burmese Cat" },
-  { id: "2", name: "Ori", breed: "Burmese Cat" },
-  { id: "3", name: "Ori", breed: "Burmese Cat" },
-  { id: "4", name: "Ori", breed: "Burmese Cat" },
-];
+import { firestore, auth } from "../../auth/firebaseConfig";
+import { collection, getDocs } from "firebase/firestore";
+import { useIsFocused } from "@react-navigation/native";
 
 const Pets = ({ navigation }) => {
+  const [pets, setPets] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const isFocused = useIsFocused();
+
+  useEffect(() => {
+    const fetchPets = async () => {
+      try {
+        const userId = auth.currentUser.uid;
+        const petsCollectionRef = collection(firestore, `users/${userId}/pets`);
+        const petsSnapshot = await getDocs(petsCollectionRef);
+
+        const petsData = petsSnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+
+        setPets(petsData);
+      } catch (error) {
+        console.error("Error fetching pets:", error);
+        Alert.alert("Error", "Failed to load pets. Please try again.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    if (isFocused) {
+      fetchPets(); // Refetch pets data when screen regains focus
+    }
+  }, [isFocused]);
+
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" color={colors.primary} />
+      </View>
+    );
+  }
+
   const renderPetItem = ({ item }) => (
     <View style={styles.petCard}>
-      <View style={styles.petInfo}>
-        <Image
-          source={require("../../../assets/dog.png")}
-          style={styles.avatar}
-        />
-        <View style={styles.petText}>
-          <Text style={styles.petName}>{item.name}</Text>
-          <Text style={styles.petBreed}>{item.breed}</Text>
-        </View>
-      </View>
       <TouchableOpacity
-        onPress={() => navigation.navigate("PetDetails", { petId: item.id })}
+        onPress={() => navigation.navigate("PetProfile", { petId: item.id })}
+        style={{
+          flexDirection: "row",
+          justifyContent: "space-between",
+          alignItems: "center",
+          width: "100%",
+        }}
       >
+        <View style={styles.petInfo}>
+          <Image
+            source={
+              item.imageUrl
+                ? { uri: item.imageUrl }
+                : require("../../../assets/dog.png")
+            }
+            style={styles.avatar}
+          />
+          <View style={styles.petText}>
+            <Text style={styles.petName}>{item.name}</Text>
+            <Text style={styles.petBreed}>{item.breed}</Text>
+          </View>
+        </View>
         <MaterialIcons
           name="chevron-right"
           size={24}
@@ -42,11 +86,19 @@ const Pets = ({ navigation }) => {
     </View>
   );
 
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={colors.primary} />
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       <Text style={styles.header}>My Pets</Text>
       <FlatList
-        data={petsData}
+        data={pets}
         renderItem={renderPetItem}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.listContainer}
@@ -65,6 +117,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingHorizontal: 20,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
   header: {
     fontSize: 20,
