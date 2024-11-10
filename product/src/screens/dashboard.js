@@ -6,7 +6,7 @@ import BottomNavBar from "../components/BottomNavBar"; // Import the BottomNavBa
 import Home from "./home"; // Import other screens
 import Calendar from "./calendar/calendar"; // Import the Calendar screen
 import Pets from "./pets/pets"; // Import the Pets screen
-import Vet from "./vet"; // Import the Vets screen
+import Vet from "./pets/vet"; // Import the Vets screen
 import Profile from "./profile"; // Import the UserProfile screen
 
 const Dashboard = ({ navigation }) => {
