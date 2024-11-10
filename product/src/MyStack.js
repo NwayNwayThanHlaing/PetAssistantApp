@@ -7,7 +7,7 @@ import Home from "./screens/home";
 import Dashboard from "./screens/dashboard";
 import Vet from "./screens/vet";
 import Profile from "./screens/profile";
-import CalendarPage from "./screens/calendar";
+import CalendarPage from "./screens/calendar/calendar";
 import Pets from "./screens/pets/pets";
 import AddPet from "./screens/pets/addPet";
 import PetProfile from "./screens/pets/profile";
