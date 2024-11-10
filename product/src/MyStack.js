@@ -5,12 +5,13 @@ import Login from "./auth/login";
 import Signup from "./auth/signup";
 import Home from "./screens/home";
 import Dashboard from "./screens/dashboard";
-import Vet from "./screens/vet";
+import Vet from "./screens/pets/vet";
 import Profile from "./screens/profile";
-import Calendar from "./screens/calendar";
+import CalendarPage from "./screens/calendar/calendar";
 import Pets from "./screens/pets/pets";
 import AddPet from "./screens/pets/addPet";
 import PetProfile from "./screens/pets/profile";
+import AllAppointments from "./screens/pets/allAppointments";
 
 const Stack = createNativeStackNavigator();
 
@@ -28,8 +29,9 @@ const MyStack = () => {
         <Stack.Screen name="Home" component={Home} />
         <Stack.Screen name="Dashboard" component={Dashboard} />
         <Stack.Screen name="Vet" component={Vet} />
+        <Stack.Screen name="AllAppointments" component={AllAppointments} />
         <Stack.Screen name="Profile" component={Profile} />
-        <Stack.Screen name="Calendar" component={Calendar} />
+        <Stack.Screen name="CalendarPage" component={CalendarPage} />
         <Stack.Screen name="Pets" component={Pets} />
         <Stack.Screen name="AddPet" component={AddPet} />
         <Stack.Screen name="PetProfile" component={PetProfile} />
