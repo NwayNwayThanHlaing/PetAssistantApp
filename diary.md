@@ -1,12 +1,17 @@
-## Week 8 (10 November 2024)
+## Week 8 (11 November 2024)
+
 Summary:
     
     
 ## Week 7 (4 November 2024)
+
 Summary:
     - Implemented Pet Profile including Multi profiles availability
     - Connected to Cloud image upload for user profiles and pet profiles photos
     - Designed Calendar with CRUD functionalities for Event
+    - Displayed proper UI for dates with events on Calendar for UX
+    - Implemeted event display on press for specific dates
+    - Developed CRUD for events on calendar
 Challenges:
     - As I implemented yearly calendar view, I found yearly calendar view not quite functional since user can also see the monthly view.
     - Decided to implement monthly view but user will be able to see all months by going left and right, which is better than implementing yearly view separately.
