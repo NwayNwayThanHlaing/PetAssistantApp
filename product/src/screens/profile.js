@@ -328,7 +328,7 @@ const Profile = ({ navigation }) => {
               style={styles.input}
               placeholder="Email"
               placeholderTextColor={colors.primaryLighter}
-              value={newEmail || email}
+              value={newEmail || user?.email}
               onChangeText={setNewEmail}
               keyboardType="email-address"
               autoCapitalize="none"
