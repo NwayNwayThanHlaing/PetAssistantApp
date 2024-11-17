@@ -69,15 +69,20 @@ const ReminderPage = () => {
 
         // Sort events by date and time
         updatedEventsData.sort((a, b) => {
+          // Utility function to combine date and time fields into a JavaScript Date object
           const getDateTime = (event) => {
-            if (event.date && event.time) {
+            if (event.date && typeof event.date === "string" && event.time) {
               const [year, month, day] = event.date.split("-").map(Number);
               const { hours, minutes } = event.time || { hours: 0, minutes: 0 };
               return new Date(year, month - 1, day, hours, minutes);
+            } else if (event.time instanceof Timestamp) {
+              return event.time.toDate();
             } else {
-              return new Date(); // Return current date if no valid date is available
+              console.warn("Invalid date field detected:", event.time);
+              return null;
             }
           };
+
           return getDateTime(a) - getDateTime(b);
         });
 
@@ -176,9 +181,9 @@ const ReminderPage = () => {
       ) : (
         <>
           <Text style={styles.subHeader}>Events</Text>
-          {events.map((item) => renderReminderItem(item))}
+          {events.slice(0, 3).map((item) => renderReminderItem(item))}
           <Text style={styles.subHeader}>Vet Appointments</Text>
-          {vetAppointments.map((item) => renderReminderItem(item))}
+          {vetAppointments.slice(0, 3).map((item) => renderReminderItem(item))}
         </>
       )}
     </ScrollView>
