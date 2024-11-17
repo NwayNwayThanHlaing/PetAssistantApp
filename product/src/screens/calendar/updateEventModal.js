@@ -42,11 +42,11 @@ const EventModal = ({
         setSelectedEvent((prevEvent) => ({
           ...prevEvent,
           dateTime: date,
-          pets: selectedEvent.pets || [],
+          relatedPets: selectedEvent.relatedPets || [],
         }));
       }
     }
-  }, [isVisible, selectedEvent]);
+  }, [isVisible]);
 
   const handleDateChange = (event, selectedDate) => {
     if (selectedDate) {
@@ -78,6 +78,15 @@ const EventModal = ({
       }));
     }
     setShowTimePicker(false);
+  };
+
+  const togglePetSelection = (petName) => {
+    setSelectedEvent((prevEvent) => ({
+      ...prevEvent,
+      relatedPets: prevEvent.relatedPets?.includes(petName)
+        ? prevEvent.relatedPets.filter((pet) => pet !== petName)
+        : [...(prevEvent.relatedPets || []), petName],
+    }));
   };
 
   return (
@@ -171,23 +180,17 @@ const EventModal = ({
                     key={item}
                     style={[
                       styles.petButton,
-                      selectedEvent?.pets?.includes(item) && styles.petSelected,
+                      selectedEvent?.relatedPets?.includes(item) &&
+                        styles.petSelected,
                     ]}
-                    onPress={() => {
-                      setSelectedEvent((prevEvent) => ({
-                        ...prevEvent,
-                        pets: prevEvent.pets?.includes(item)
-                          ? prevEvent.pets.filter((pet) => pet !== item)
-                          : [...(prevEvent.pets || []), item],
-                      }));
-                    }}
+                    onPress={() => togglePetSelection(item)}
                   >
                     <Text
-                      style={
-                        selectedEvent?.pets?.includes(item)
-                          ? [styles.petText, styles.petSelectedText]
-                          : styles.petText
-                      }
+                      style={[
+                        styles.petText,
+                        selectedEvent?.relatedPets?.includes(item) &&
+                          styles.petSelectedText,
+                      ]}
                     >
                       {item}
                     </Text>
