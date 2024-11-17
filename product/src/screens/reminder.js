@@ -162,15 +162,17 @@ const ReminderPage = () => {
           >
             <Text style={styles.subHeader}>Events</Text>
 
-            {events.length > 3 && (
-              <TouchableOpacity
-                onPress={() =>
-                  navigation.navigate("Dashboard", { screen: "CalendarPage" })
-                }
-              >
-                <Text style={styles.showAll}>Show All</Text>
-              </TouchableOpacity>
-            )}
+            {/* {events.length > 3 && ( */}
+            <TouchableOpacity
+              onPress={() =>
+                navigation.push("Dashboard", {
+                  initialScreen: "Calendar",
+                })
+              }
+            >
+              <Text style={styles.showAll}>Show All</Text>
+            </TouchableOpacity>
+            {/* )} */}
           </View>
           {events.slice(0, 3).map((item) => renderReminderItem(item))}
           <View
@@ -182,15 +184,17 @@ const ReminderPage = () => {
           >
             <Text style={styles.subHeader}>Vet Appointments</Text>
 
-            {vetAppointments.length > 3 && (
-              <TouchableOpacity
-                onPress={() =>
-                  navigation.navigate("Dashboard", { screen: "Vet" })
-                }
-              >
-                <Text style={styles.showAll}>Show All</Text>
-              </TouchableOpacity>
-            )}
+            {/* {vetAppointments.length > 3 && ( */}
+            <TouchableOpacity
+              onPress={() =>
+                navigation.push("Dashboard", {
+                  initialScreen: "Vet",
+                })
+              }
+            >
+              <Text style={styles.showAll}>Show All</Text>
+            </TouchableOpacity>
+            {/* )} */}
           </View>
           {vetAppointments.slice(0, 3).map((item) => renderReminderItem(item))}
         </>
