@@ -4,6 +4,7 @@ import {
   Text,
   StyleSheet,
   ScrollView,
+  TouchableOpacity,
   ActivityIndicator,
 } from "react-native";
 import { colors } from "../styles/Theme";
@@ -12,10 +13,12 @@ import {
   fetchUserVetAppointments,
 } from "../actions/userActions";
 import { getAuth } from "firebase/auth";
-import { Timestamp, doc, getDoc } from "firebase/firestore";
-import { firestore } from "../auth/firebaseConfig";
+import { Timestamp } from "firebase/firestore";
+import { useNavigation } from "@react-navigation/native";
 
 const ReminderPage = () => {
+  const navigation = useNavigation();
+
   const [events, setEvents] = useState([]);
   const [vetAppointments, setVetAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -32,58 +35,17 @@ const ReminderPage = () => {
         // Fetch Events
         const eventsData = await fetchUserEvents(userId);
 
-        // Fetch related pets for events
-        const updatedEventsData = await Promise.all(
-          eventsData.map(async (event) => {
-            if (event.relatedPets && event.relatedPets.length > 0) {
-              const petNames = await Promise.all(
-                event.relatedPets.map(async (petId) => {
-                  try {
-                    const petDocRef = doc(
-                      firestore,
-                      "users",
-                      userId,
-                      "pets",
-                      petId
-                    );
-                    const petDoc = await getDoc(petDocRef);
-                    if (petDoc.exists()) {
-                      return petDoc.data().name;
-                    } else {
-                      //   console.warn(`Pet with ID/Name "${petId}" not found.`);
-                      return petId;
-                    }
-                  } catch (error) {
-                    // console.error("Error fetching pet name: ", error);
-                    return "Unknown pet";
-                  }
-                })
-              );
-              event.relatedPetsNames = petNames;
-            } else {
-              event.relatedPetsNames = [];
-            }
-            return event;
-          })
-        );
+        // Since relatedPets already contains pet names, directly use it
+        const updatedEventsData = eventsData.map((event) => {
+          event.relatedPetsNames = event.relatedPets || [];
+          return event;
+        });
 
         // Sort events by date and time
         updatedEventsData.sort((a, b) => {
-          // Utility function to combine date and time fields into a JavaScript Date object
-          const getDateTime = (event) => {
-            if (event.date && typeof event.date === "string" && event.time) {
-              const [year, month, day] = event.date.split("-").map(Number);
-              const { hours, minutes } = event.time || { hours: 0, minutes: 0 };
-              return new Date(year, month - 1, day, hours, minutes);
-            } else if (event.time instanceof Timestamp) {
-              return event.time.toDate();
-            } else {
-              console.warn("Invalid date field detected:", event.time);
-              return null;
-            }
-          };
-
-          return getDateTime(a) - getDateTime(b);
+          const dateA = getDateTime(a);
+          const dateB = getDateTime(b);
+          return dateA - dateB;
         });
 
         setEvents(updatedEventsData);
@@ -93,8 +55,8 @@ const ReminderPage = () => {
 
         // Sort vet appointments by date and time
         vetData.sort((a, b) => {
-          const dateA = getDateFromFirestoreField(a.time);
-          const dateB = getDateFromFirestoreField(b.time);
+          const dateA = getDateTime(a);
+          const dateB = getDateTime(b);
           return dateA - dateB;
         });
 
@@ -108,42 +70,44 @@ const ReminderPage = () => {
     fetchData();
   }, [userId]);
 
-  // Utility function to parse Firestore date fields
-  const getDateFromFirestoreField = (timeField) => {
-    if (timeField instanceof Timestamp) {
-      return timeField.toDate(); // Convert Firestore Timestamp to JavaScript Date
-    } else if (typeof timeField === "string" || timeField instanceof Date) {
-      return new Date(timeField); // Handle string or Date type
-    } else {
-      console.warn("Invalid date field detected:", timeField);
-      return null; // Handle invalid or missing date field
-    }
-  };
-  const renderReminderItem = (item) => {
-    let eventTime = null;
-    if (item.time) {
-      eventTime = getDateFromFirestoreField(item.time);
+  // Utility function to get the JavaScript Date from different formats
+  const getDateTime = (event) => {
+    let date;
+    if (event.date instanceof Timestamp) {
+      date = event.date.toDate(); // Convert Firestore Timestamp to JS Date
+    } else if (typeof event.date === "string") {
+      const [year, month, day] = event.date.split("-").map(Number);
+      date = new Date(year, month - 1, day);
     }
 
+    if (event.time && event.time instanceof Timestamp) {
+      const time = event.time.toDate();
+      date.setHours(time.getHours(), time.getMinutes(), 0, 0);
+    } else if (
+      typeof event.time === "object" &&
+      event.time.hours !== undefined
+    ) {
+      const { hours, minutes } = event.time;
+      date.setHours(hours, minutes, 0, 0);
+    }
+
+    return date || new Date(); // Return the parsed date or the current date as a fallback
+  };
+
+  const renderReminderItem = (item) => {
+    const eventTime = getDateTime(item);
     const isValidDate = eventTime && !isNaN(eventTime.getTime());
 
-    const formattedDateAndTime =
-      item.date && typeof item.date === "string" && item.time
-        ? `${item.date.split("-").reverse().join("/")}, ${
-            item.time.hours % 12 || 12
-          }:${String(item.time.minutes).padStart(2, "0")} ${
-            item.time.hours >= 12 ? "PM" : "AM"
-          }`
-        : isValidDate
-        ? eventTime.toLocaleString([], {
-            year: "numeric",
-            month: "2-digit",
-            day: "2-digit",
-            hour: "2-digit",
-            minute: "2-digit",
-            hour12: true,
-          })
-        : "No Date Available";
+    const formattedDateAndTime = isValidDate
+      ? eventTime.toLocaleString([], {
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: true,
+        })
+      : "No Date Available";
 
     return (
       <View style={styles.reminderItem} key={item.id}>
@@ -173,6 +137,15 @@ const ReminderPage = () => {
     );
   };
 
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={colors.primary} />
+        <Text style={styles.loadingText}>Loading reminders...</Text>
+      </View>
+    );
+  }
+
   return (
     <ScrollView style={styles.container}>
       <Text style={styles.header}>Upcoming Reminders</Text>
@@ -180,9 +153,45 @@ const ReminderPage = () => {
         <Text style={styles.noRemindersText}>No upcoming reminders.</Text>
       ) : (
         <>
-          <Text style={styles.subHeader}>Events</Text>
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "baseline",
+              justifyContent: "space-between",
+            }}
+          >
+            <Text style={styles.subHeader}>Events</Text>
+
+            {events.length > 3 && (
+              <TouchableOpacity
+                onPress={() =>
+                  navigation.navigate("Dashboard", { screen: "CalendarPage" })
+                }
+              >
+                <Text style={styles.showAll}>Show All</Text>
+              </TouchableOpacity>
+            )}
+          </View>
           {events.slice(0, 3).map((item) => renderReminderItem(item))}
-          <Text style={styles.subHeader}>Vet Appointments</Text>
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "baseline",
+              justifyContent: "space-between",
+            }}
+          >
+            <Text style={styles.subHeader}>Vet Appointments</Text>
+
+            {vetAppointments.length > 3 && (
+              <TouchableOpacity
+                onPress={() =>
+                  navigation.navigate("Dashboard", { screen: "Vet" })
+                }
+              >
+                <Text style={styles.showAll}>Show All</Text>
+              </TouchableOpacity>
+            )}
+          </View>
           {vetAppointments.slice(0, 3).map((item) => renderReminderItem(item))}
         </>
       )}
@@ -225,9 +234,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginTop: 20,
   },
-  listContainer: {
-    paddingBottom: 30,
-  },
   reminderItem: {
     backgroundColor: colors.primaryLightest,
     padding: 15,
@@ -253,6 +259,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: colors.secondary,
     marginTop: 5,
+  },
+  showAll: {
+    color: colors.accent,
+    textDecorationLine: "underline",
+    fontSize: 16,
   },
 });
 

@@ -286,16 +286,33 @@ const CalendarPage = () => {
           </TouchableOpacity>
         </View>
         <ScrollView style={styles.container}>
-          <Calendar
-            current={currentDate}
-            onDayPress={(day) => setSelectedDate(day.dateString)}
-            markedDates={markedDates}
-            markingType={"multi-dot"}
-            theme={{
-              selectedDayBackgroundColor: colors.primary,
-              todayTextColor: colors.accent,
+          <View
+            style={{
+              shadowColor: "#000",
+              shadowOffset: {
+                width: 0,
+                height: 1,
+              },
+              shadowOpacity: 0.1,
+              shadowRadius: 10,
+              borderRadius: 10,
+              backgroundColor: "white",
+              margin: 15,
+              paddingHorizontal: 10,
+              paddingVertical: 20,
             }}
-          />
+          >
+            <Calendar
+              current={currentDate}
+              onDayPress={(day) => setSelectedDate(day.dateString)}
+              markedDates={markedDates}
+              markingType={"multi-dot"}
+              theme={{
+                selectedDayBackgroundColor: colors.primary,
+                todayTextColor: colors.accent,
+              }}
+            />
+          </View>
           <View style={styles.eventsContainer}>
             {selectedDate && (
               <>
@@ -364,7 +381,7 @@ const styles = StyleSheet.create({
   selectedDateText: {
     fontSize: 16,
     fontWeight: "bold",
-    color: colors.primary,
+    color: colors.accent,
     marginBottom: 10,
   },
   addEventButton: {

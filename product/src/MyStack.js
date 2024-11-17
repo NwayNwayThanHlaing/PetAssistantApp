@@ -4,6 +4,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import Login from "./auth/login";
 import Signup from "./auth/signup";
 import Home from "./screens/home";
+import ReminderPage from "./screens/reminder";
 import Dashboard from "./screens/dashboard";
 import Vet from "./screens/pets/vet";
 import Profile from "./screens/profile";
@@ -27,6 +28,7 @@ const MyStack = () => {
         <Stack.Screen name="Login" component={Login} />
         <Stack.Screen name="SignUp" component={Signup} />
         <Stack.Screen name="Home" component={Home} />
+        <Stack.Screen name="ReminderPage" component={ReminderPage} />
         <Stack.Screen name="Dashboard" component={Dashboard} />
         <Stack.Screen name="Vet" component={Vet} />
         <Stack.Screen name="AllAppointments" component={AllAppointments} />
