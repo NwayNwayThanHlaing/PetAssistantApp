@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -10,8 +10,8 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
 } from "react-native";
-import DateTimePicker from "@react-native-community/datetimepicker";
 import Modal from "react-native-modal";
+import DateTimePicker from "@react-native-community/datetimepicker";
 import { colors } from "../../styles/Theme";
 
 const EventModal = ({
@@ -25,22 +25,28 @@ const EventModal = ({
   updateLoading,
   deleteLoading,
 }) => {
-  const [showDatePicker, setShowDatePicker] = React.useState(false);
-  const [showTimePicker, setShowTimePicker] = React.useState(false);
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showTimePicker, setShowTimePicker] = useState(false);
 
-  // Fallback to ensure selectedEvent.dateTime is always valid
-  const ensureValidDateTime = () => {
-    if (!selectedEvent?.dateTime || !(selectedEvent.dateTime instanceof Date)) {
-      setSelectedEvent((prevEvent) => ({
-        ...prevEvent,
-        dateTime: new Date(), // Default to the current date and time if invalid
-      }));
+  useEffect(() => {
+    if (isVisible && selectedEvent) {
+      // Ensure dateTime is properly set when the modal is shown
+      if (!selectedEvent.dateTime) {
+        const date = selectedEvent.date
+          ? new Date(selectedEvent.date)
+          : new Date();
+        const hours = selectedEvent.time?.hours || 0;
+        const minutes = selectedEvent.time?.minutes || 0;
+        date.setHours(hours);
+        date.setMinutes(minutes);
+        setSelectedEvent((prevEvent) => ({
+          ...prevEvent,
+          dateTime: date,
+          pets: selectedEvent.pets || [],
+        }));
+      }
     }
-  };
-
-  React.useEffect(() => {
-    ensureValidDateTime(); // Ensure dateTime is set correctly when the modal is first shown
-  }, [isVisible]);
+  }, [isVisible, selectedEvent]);
 
   const handleDateChange = (event, selectedDate) => {
     if (selectedDate) {
@@ -111,7 +117,7 @@ const EventModal = ({
                 <Text style={styles.dateText}>
                   Date:{" "}
                   {selectedEvent?.dateTime
-                    ? new Date(selectedEvent.dateTime).toLocaleDateString([], {
+                    ? selectedEvent.dateTime.toLocaleDateString([], {
                         weekday: "long",
                         year: "numeric",
                         month: "long",
@@ -123,11 +129,7 @@ const EventModal = ({
 
               {showDatePicker && (
                 <DateTimePicker
-                  value={
-                    selectedEvent?.dateTime
-                      ? new Date(selectedEvent.dateTime)
-                      : new Date()
-                  }
+                  value={selectedEvent?.dateTime || new Date()}
                   mode="date"
                   display="default"
                   onChange={handleDateChange}
@@ -140,15 +142,12 @@ const EventModal = ({
                   Time:{" "}
                   {selectedEvent?.dateTime
                     ? `${
-                        ((new Date(selectedEvent.dateTime).getHours() + 11) %
-                          12) +
-                        1
-                      }:${String(
-                        new Date(selectedEvent.dateTime).getMinutes()
-                      ).padStart(2, "0")} ${
-                        new Date(selectedEvent.dateTime).getHours() >= 12
-                          ? "PM"
-                          : "AM"
+                        ((selectedEvent.dateTime.getHours() + 11) % 12) + 1
+                      }:${String(selectedEvent.dateTime.getMinutes()).padStart(
+                        2,
+                        "0"
+                      )} ${
+                        selectedEvent.dateTime.getHours() >= 12 ? "PM" : "AM"
                       }`
                     : "Select Time"}
                 </Text>
@@ -156,11 +155,7 @@ const EventModal = ({
 
               {showTimePicker && (
                 <DateTimePicker
-                  value={
-                    selectedEvent?.dateTime
-                      ? new Date(selectedEvent.dateTime)
-                      : new Date()
-                  }
+                  value={selectedEvent?.dateTime || new Date()}
                   mode="time"
                   display="default"
                   is24Hour={false}
@@ -171,13 +166,12 @@ const EventModal = ({
               {/* Pet Selection */}
               <Text style={styles.petsSelectionHeader}>Select Pets</Text>
               <View style={styles.petButtonsContainer}>
-                {petNames.map((item, index) => (
+                {petNames.map((item) => (
                   <TouchableOpacity
                     key={item}
                     style={[
                       styles.petButton,
-                      selectedEvent.pets?.includes(item) && styles.petSelected,
-                      index === petNames.length - 1 && styles.lastPetButton,
+                      selectedEvent?.pets?.includes(item) && styles.petSelected,
                     ]}
                     onPress={() => {
                       setSelectedEvent((prevEvent) => ({
@@ -189,11 +183,11 @@ const EventModal = ({
                     }}
                   >
                     <Text
-                      style={[
-                        styles.petText,
-                        selectedEvent.pets?.includes(item) &&
-                          styles.petSelectedText,
-                      ]}
+                      style={
+                        selectedEvent?.pets?.includes(item)
+                          ? [styles.petText, styles.petSelectedText]
+                          : styles.petText
+                      }
                     >
                       {item}
                     </Text>
@@ -310,7 +304,6 @@ const styles = StyleSheet.create({
   petSelectedText: {
     fontWeight: "bold",
     color: "white",
-    fontWeight: "bold",
   },
   buttonContainer: {
     flexDirection: "row",
