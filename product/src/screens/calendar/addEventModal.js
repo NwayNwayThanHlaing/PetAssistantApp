@@ -25,6 +25,16 @@ const AddEventModal = ({
   addEvent,
   loading,
 }) => {
+  // Function to reset newEvent to default values
+  const resetNewEvent = () => {
+    setNewEvent({
+      title: "",
+      time: new Date(new Date().setHours(0, 0, 0, 0)), // Default to 12:00 AM
+      notes: "",
+    });
+    setSelectedPets([]);
+  };
+
   const togglePetSelection = (petName) => {
     setSelectedPets((prevSelected) =>
       prevSelected.includes(petName)
@@ -33,12 +43,18 @@ const AddEventModal = ({
     );
   };
 
-  // Ensure newEvent.time is always a Date object
+  // Ensure newEvent.time is always set to 12:00 AM (midnight) initially
   const ensureValidTime = () => {
     if (!newEvent.time || !(newEvent.time instanceof Date)) {
+      // Set default time to 12:00 AM
+      const defaultTime = new Date();
+      defaultTime.setHours(0);
+      defaultTime.setMinutes(0);
+      defaultTime.setSeconds(0);
+      defaultTime.setMilliseconds(0);
       setNewEvent((prevEvent) => ({
         ...prevEvent,
-        time: new Date(), // Default to the current time if invalid
+        time: defaultTime,
       }));
     }
   };
@@ -46,6 +62,8 @@ const AddEventModal = ({
   React.useEffect(() => {
     if (isVisible) {
       ensureValidTime(); // Ensure time is set correctly when the modal is first shown
+    } else {
+      resetNewEvent(); // Reset event data when modal is closed
     }
   }, [isVisible]);
 
@@ -77,6 +95,7 @@ const AddEventModal = ({
                 onChange={(event, date) =>
                   setNewEvent({ ...newEvent, time: date || newEvent.time })
                 }
+                is24Hour={false} // Use AM/PM format
               />
             </View>
             <TextInput
@@ -147,7 +166,7 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     padding: 20,
     borderRadius: 10,
-    width: "100%", // Set modal width to fit better on the screen
+    width: "90%", // Set modal width to fit better on the screen
     maxHeight: "80%", // Limit modal height
     alignSelf: "center",
   },
