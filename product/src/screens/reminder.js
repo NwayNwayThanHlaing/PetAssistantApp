@@ -113,16 +113,30 @@ const ReminderPage = () => {
             {item.type === "vet" ? "Vet Appointment" : item.title}
           </Text>
           <Text style={styles.reminderTime}>
-            {isValidDate
-              ? eventTime.toLocaleString([], {
-                  year: "numeric",
-                  month: "2-digit",
-                  day: "2-digit",
-                  hour: "2-digit",
-                  minute: "2-digit",
-                  hour12: true,
-                })
-              : "No Date Available"}
+            {item.type === "vet" ? (
+              <Text style={styles.reminderTime}>
+                {isValidDate
+                  ? eventTime.toLocaleString([], {
+                      year: "numeric",
+                      month: "2-digit",
+                      day: "2-digit",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      hour12: true,
+                    })
+                  : "No Date Available"}
+              </Text>
+            ) : (
+              <Text style={styles.reminderTime}>
+                {item.date && item.time
+                  ? `${item.date.split("-").reverse().join("/")}, ${
+                      item.time.hours % 12 || 12
+                    }:${String(item.time.minutes).padStart(2, "0")} ${
+                      item.time.hours >= 12 ? "PM" : "AM"
+                    }`
+                  : "No Date Available"}
+              </Text>
+            )}
           </Text>
         </View>
         {item.type === "vet" && item.petName && (
