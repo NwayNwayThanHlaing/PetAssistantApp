@@ -72,6 +72,8 @@
 // };
 
 // export default BottomNavBar;
+
+
 import React from "react";
 import { View, TouchableOpacity, Text, Dimensions } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";

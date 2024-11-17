@@ -30,12 +30,16 @@ export const BottomNavBarStyles = StyleSheet.create({
     paddingTop: 2,
   },
   container: {
+    position: "absolute",
+    bottom: 0,
+    width: "100%",
+    backgroundColor: colors.primaryLightest,
     flexDirection: "row",
     justifyContent: "space-around",
     alignItems: "center",
-    backgroundColor: colors.primaryLightest,
     paddingVertical: 10,
     paddingBottom: 18,
+    zIndex: 10,
   },
   button: {
     flex: 1,

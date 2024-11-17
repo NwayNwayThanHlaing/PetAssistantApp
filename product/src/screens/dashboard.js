@@ -110,7 +110,6 @@ const Dashboard = ({ navigation, route }) => {
         onLogout={() => navigation.navigate("Login")}
       />
       <View style={styles.content}>{renderScreen()}</View>
-      {/* Pass activeScreen to BottomNavBar */}
       <BottomNavBar
         navigation={navigation}
         activeScreen={activeScreen}
