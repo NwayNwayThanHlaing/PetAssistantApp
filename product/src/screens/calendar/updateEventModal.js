@@ -79,7 +79,7 @@ const EventModal = ({
       isVisible={isVisible}
       onBackdropPress={() => setIsVisible(false)}
       style={styles.modalContainer}
-      backdropColor="rgba(0, 0, 0, 0.5)"
+      useNativeDriver={true}
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <View style={styles.centeredView}>
@@ -273,7 +273,7 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     padding: 20,
     borderRadius: 10,
-    width: "90%",
+    width: "100%",
     maxHeight: "90%",
   },
   scrollViewContent: {
@@ -305,10 +305,11 @@ const styles = StyleSheet.create({
     color: colors.primary,
   },
   petSelected: {
-    borderWidth: 1,
-    borderColor: colors.primaryLighter,
+    backgroundColor: colors.accent,
   },
   petSelectedText: {
+    fontWeight: "bold",
+    color: "white",
     fontWeight: "bold",
   },
   buttonContainer: {
