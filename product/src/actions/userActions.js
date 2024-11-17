@@ -64,7 +64,6 @@ export const fetchUserData = async (userId) => {
     if (docSnap.exists()) {
       return docSnap.data();
     } else {
-      console.log("No such document!");
       Alert.alert("Error", "No user data found.");
       return null;
     }

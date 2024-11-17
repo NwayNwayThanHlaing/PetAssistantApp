@@ -22,7 +22,6 @@ const ReminderPage = () => {
 
   const auth = getAuth();
   const userId = auth.currentUser ? auth.currentUser.uid : null;
-  console.log("Current User ID:", userId); // Debug Log
 
   // Fetch all events and vet appointments for a user
   useEffect(() => {
@@ -51,11 +50,11 @@ const ReminderPage = () => {
                     if (petDoc.exists()) {
                       return petDoc.data().name;
                     } else {
-                      console.warn(`Pet with ID/Name "${petId}" not found.`);
-                      return petId; // Display petId as fallback, assuming it could be the pet name.
+                      //   console.warn(`Pet with ID/Name "${petId}" not found.`);
+                      return petId;
                     }
                   } catch (error) {
-                    console.error("Error fetching pet name: ", error);
+                    // console.error("Error fetching pet name: ", error);
                     return "Unknown pet";
                   }
                 })
@@ -67,11 +66,33 @@ const ReminderPage = () => {
             return event;
           })
         );
+
+        // Sort events by date and time
+        updatedEventsData.sort((a, b) => {
+          const getDateTime = (event) => {
+            if (event.date && event.time) {
+              const [year, month, day] = event.date.split("-").map(Number);
+              const { hours, minutes } = event.time || { hours: 0, minutes: 0 };
+              return new Date(year, month - 1, day, hours, minutes);
+            } else {
+              return new Date(); // Return current date if no valid date is available
+            }
+          };
+          return getDateTime(a) - getDateTime(b);
+        });
+
         setEvents(updatedEventsData);
 
         // Fetch Vet Appointments
         const vetData = await fetchUserVetAppointments(userId);
-        console.log("Fetched Vet Data:", vetData); // Debug Log
+
+        // Sort vet appointments by date and time
+        vetData.sort((a, b) => {
+          const dateA = getDateFromFirestoreField(a.time);
+          const dateB = getDateFromFirestoreField(b.time);
+          return dateA - dateB;
+        });
+
         setVetAppointments(vetData);
       } catch (error) {
         console.error("Failed to fetch events or vet appointments:", error);
@@ -93,18 +114,31 @@ const ReminderPage = () => {
       return null; // Handle invalid or missing date field
     }
   };
-
-  // Combine and sort events and vet appointments
-  const combinedReminders = [...events, ...vetAppointments].sort((a, b) => {
-    const dateA = getDateFromFirestoreField(a.time);
-    const dateB = getDateFromFirestoreField(b.time);
-    return dateA - dateB;
-  });
-  console.log("Combined Reminders:", combinedReminders); // Debug Log
-
   const renderReminderItem = (item) => {
-    const eventTime = getDateFromFirestoreField(item.time);
+    let eventTime = null;
+    if (item.time) {
+      eventTime = getDateFromFirestoreField(item.time);
+    }
+
     const isValidDate = eventTime && !isNaN(eventTime.getTime());
+
+    const formattedDateAndTime =
+      item.date && typeof item.date === "string" && item.time
+        ? `${item.date.split("-").reverse().join("/")}, ${
+            item.time.hours % 12 || 12
+          }:${String(item.time.minutes).padStart(2, "0")} ${
+            item.time.hours >= 12 ? "PM" : "AM"
+          }`
+        : isValidDate
+        ? eventTime.toLocaleString([], {
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: true,
+          })
+        : "No Date Available";
 
     return (
       <View style={styles.reminderItem} key={item.id}>
@@ -112,32 +146,7 @@ const ReminderPage = () => {
           <Text style={styles.reminderTitle}>
             {item.type === "vet" ? "Vet Appointment" : item.title}
           </Text>
-          <Text style={styles.reminderTime}>
-            {item.type === "vet" ? (
-              <Text style={styles.reminderTime}>
-                {isValidDate
-                  ? eventTime.toLocaleString([], {
-                      year: "numeric",
-                      month: "2-digit",
-                      day: "2-digit",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                      hour12: true,
-                    })
-                  : "No Date Available"}
-              </Text>
-            ) : (
-              <Text style={styles.reminderTime}>
-                {item.date && item.time
-                  ? `${item.date.split("-").reverse().join("/")}, ${
-                      item.time.hours % 12 || 12
-                    }:${String(item.time.minutes).padStart(2, "0")} ${
-                      item.time.hours >= 12 ? "PM" : "AM"
-                    }`
-                  : "No Date Available"}
-              </Text>
-            )}
-          </Text>
+          <Text style={styles.reminderTime}>{formattedDateAndTime}</Text>
         </View>
         {item.type === "vet" && item.petName && (
           <>
@@ -159,22 +168,18 @@ const ReminderPage = () => {
     );
   };
 
-  if (loading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={colors.primary} />
-        <Text style={styles.loadingText}>Loading reminders...</Text>
-      </View>
-    );
-  }
-
   return (
     <ScrollView style={styles.container}>
       <Text style={styles.header}>Upcoming Reminders</Text>
-      {combinedReminders.length === 0 ? (
+      {events.length === 0 && vetAppointments.length === 0 ? (
         <Text style={styles.noRemindersText}>No upcoming reminders.</Text>
       ) : (
-        combinedReminders.map((item) => renderReminderItem(item))
+        <>
+          <Text style={styles.subHeader}>Events</Text>
+          {events.map((item) => renderReminderItem(item))}
+          <Text style={styles.subHeader}>Vet Appointments</Text>
+          {vetAppointments.map((item) => renderReminderItem(item))}
+        </>
       )}
     </ScrollView>
   );
@@ -191,6 +196,13 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: colors.primary,
     marginBottom: 15,
+  },
+  subHeader: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: colors.accent,
+    marginTop: 20,
+    marginBottom: 10,
   },
   loadingContainer: {
     flex: 1,

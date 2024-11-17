@@ -140,7 +140,6 @@ export const updateEvent = async (selectedEvent) => {
 
     // Ensure all fields are updated correctly
     await updateDoc(eventDocRef, updatedData);
-    console.log("Event successfully updated.");
   } catch (error) {
     console.error("Error updating event: ", error);
     throw error;
@@ -156,7 +155,6 @@ export const deleteEvent = async (eventId) => {
     }
     const eventDocRef = doc(firestore, "users", userId, "events", eventId);
     await deleteDoc(eventDocRef);
-    console.log("Event successfully deleted.");
   } catch (error) {
     console.error("Error deleting event: ", error);
     throw error;
