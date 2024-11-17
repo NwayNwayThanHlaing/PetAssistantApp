@@ -41,26 +41,40 @@ const ReminderPage = () => {
           return event;
         });
 
+        // Filter out past events based on the date (ignoring time)
+        const filteredEvents = updatedEventsData.filter((event) => {
+          const eventDate = getDateOnly(getDateTime(event));
+          const today = getDateOnly(new Date());
+          return eventDate >= today; // Keep events from today or in the future
+        });
+
         // Sort events by date and time
-        updatedEventsData.sort((a, b) => {
+        filteredEvents.sort((a, b) => {
           const dateA = getDateTime(a);
           const dateB = getDateTime(b);
           return dateA - dateB;
         });
 
-        setEvents(updatedEventsData);
+        setEvents(filteredEvents);
 
         // Fetch Vet Appointments
         const vetData = await fetchUserVetAppointments(userId);
 
+        // Filter out past vet appointments based on the date (ignoring time)
+        const filteredVetAppointments = vetData.filter((appointment) => {
+          const appointmentDate = getDateOnly(getDateTime(appointment));
+          const today = getDateOnly(new Date());
+          return appointmentDate >= today; // Keep vet appointments from today or in the future
+        });
+
         // Sort vet appointments by date and time
-        vetData.sort((a, b) => {
+        filteredVetAppointments.sort((a, b) => {
           const dateA = getDateTime(a);
           const dateB = getDateTime(b);
           return dateA - dateB;
         });
 
-        setVetAppointments(vetData);
+        setVetAppointments(filteredVetAppointments);
       } catch (error) {
         console.error("Failed to fetch events or vet appointments:", error);
       } finally {
@@ -92,6 +106,11 @@ const ReminderPage = () => {
     }
 
     return date || new Date(); // Return the parsed date or the current date as a fallback
+  };
+
+  // Utility function to get only the date portion of a JavaScript Date object
+  const getDateOnly = (date) => {
+    return new Date(date.getFullYear(), date.getMonth(), date.getDate());
   };
 
   const renderReminderItem = (item) => {
@@ -148,7 +167,6 @@ const ReminderPage = () => {
 
   return (
     <ScrollView style={styles.container}>
-      <Text style={styles.header}>Upcoming Reminders</Text>
       {events.length === 0 && vetAppointments.length === 0 ? (
         <Text style={styles.noRemindersText}>No upcoming reminders.</Text>
       ) : (
@@ -162,7 +180,6 @@ const ReminderPage = () => {
           >
             <Text style={styles.subHeader}>Events</Text>
 
-            {/* {events.length > 3 && ( */}
             <TouchableOpacity
               onPress={() =>
                 navigation.push("Dashboard", {
@@ -172,9 +189,8 @@ const ReminderPage = () => {
             >
               <Text style={styles.showAll}>Show All</Text>
             </TouchableOpacity>
-            {/* )} */}
           </View>
-          {events.slice(0, 3).map((item) => renderReminderItem(item))}
+          {events.slice(0, 2).map((item) => renderReminderItem(item))}
           <View
             style={{
               flexDirection: "row",
@@ -184,7 +200,6 @@ const ReminderPage = () => {
           >
             <Text style={styles.subHeader}>Vet Appointments</Text>
 
-            {/* {vetAppointments.length > 3 && ( */}
             <TouchableOpacity
               onPress={() =>
                 navigation.push("Dashboard", {
@@ -194,9 +209,8 @@ const ReminderPage = () => {
             >
               <Text style={styles.showAll}>Show All</Text>
             </TouchableOpacity>
-            {/* )} */}
           </View>
-          {vetAppointments.slice(0, 3).map((item) => renderReminderItem(item))}
+          {vetAppointments.slice(0, 2).map((item) => renderReminderItem(item))}
         </>
       )}
     </ScrollView>
@@ -207,20 +221,20 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "white",
-    padding: 15,
+    padding: 20,
+    paddingVertical: 10,
   },
   header: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: "bold",
     color: colors.primary,
-    marginBottom: 15,
   },
   subHeader: {
     fontSize: 18,
     fontWeight: "bold",
     color: colors.accent,
-    marginTop: 20,
-    marginBottom: 10,
+    marginTop: 25,
+    marginBottom: 15,
   },
   loadingContainer: {
     flex: 1,
@@ -239,10 +253,16 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   reminderItem: {
-    backgroundColor: colors.primaryLightest,
+    backgroundColor: colors.background,
+    shadowColor: colors.primary,
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.25,
     padding: 15,
     borderRadius: 10,
-    marginBottom: 10,
+    marginBottom: 15,
   },
   reminderTitle: {
     fontSize: 18,
