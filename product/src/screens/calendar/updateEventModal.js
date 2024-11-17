@@ -28,53 +28,50 @@ const EventModal = ({
   const [showDatePicker, setShowDatePicker] = React.useState(false);
   const [showTimePicker, setShowTimePicker] = React.useState(false);
 
+  // Fallback to ensure selectedEvent.dateTime is always valid
+  const ensureValidDateTime = () => {
+    if (!selectedEvent?.dateTime || !(selectedEvent.dateTime instanceof Date)) {
+      setSelectedEvent((prevEvent) => ({
+        ...prevEvent,
+        dateTime: new Date(), // Default to the current date and time if invalid
+      }));
+    }
+  };
+
+  React.useEffect(() => {
+    ensureValidDateTime(); // Ensure dateTime is set correctly when the modal is first shown
+  }, [isVisible]);
+
   const handleDateChange = (event, selectedDate) => {
     if (selectedDate) {
-      const updatedDate = new Date(selectedEvent.dateTime || new Date());
-      updatedDate.setFullYear(selectedDate.getFullYear());
-      updatedDate.setMonth(selectedDate.getMonth());
-      updatedDate.setDate(selectedDate.getDate());
-
-      setSelectedEvent({
-        ...selectedEvent,
-        dateTime: updatedDate,
-      });
+      setSelectedEvent((prevEvent) => ({
+        ...prevEvent,
+        dateTime: new Date(
+          selectedDate.getFullYear(),
+          selectedDate.getMonth(),
+          selectedDate.getDate(),
+          prevEvent.dateTime?.getHours() || 0,
+          prevEvent.dateTime?.getMinutes() || 0
+        ),
+      }));
     }
+    setShowDatePicker(false);
   };
 
   const handleTimeChange = (event, selectedTime) => {
     if (selectedTime) {
-      const updatedDate = new Date(selectedEvent.dateTime || new Date());
-      updatedDate.setHours(selectedTime.getHours());
-      updatedDate.setMinutes(selectedTime.getMinutes());
-
-      setSelectedEvent({
-        ...selectedEvent,
-        dateTime: updatedDate,
-      });
-      console.log(
-        "Selected Time: ",
-        updatedDate.getHours(),
-        updatedDate.getMinutes()
-      );
+      setSelectedEvent((prevEvent) => ({
+        ...prevEvent,
+        dateTime: new Date(
+          prevEvent.dateTime?.getFullYear() || 1970,
+          prevEvent.dateTime?.getMonth() || 0,
+          prevEvent.dateTime?.getDate() || 1,
+          selectedTime.getHours(),
+          selectedTime.getMinutes()
+        ),
+      }));
     }
-  };
-
-  // Handle update action
-  const handleUpdate = async () => {
-    // Ensure we have the latest state before proceeding
-    if (selectedEvent?.id) {
-      try {
-        console.log("Attempting to update event with data: ", selectedEvent);
-        await updateEvent(selectedEvent);
-        console.log("Event updated successfully.");
-        setIsVisible(false); // Close the modal if update is successful
-      } catch (error) {
-        console.error("Error updating event: ", error);
-      }
-    } else {
-      console.error("Cannot update: selectedEvent does not have a valid ID");
-    }
+    setShowTimePicker(false);
   };
 
   return (
@@ -133,9 +130,7 @@ const EventModal = ({
                   }
                   mode="date"
                   display="default"
-                  onChange={(event, selectedDate) =>
-                    handleDateChange(event, selectedDate || new Date())
-                  }
+                  onChange={handleDateChange}
                 />
               )}
 
@@ -169,9 +164,7 @@ const EventModal = ({
                   mode="time"
                   display="default"
                   is24Hour={false}
-                  onChange={(event, selectedTime) =>
-                    handleTimeChange(event, selectedTime || new Date())
-                  }
+                  onChange={handleTimeChange}
                 />
               )}
 
@@ -231,7 +224,7 @@ const EventModal = ({
 
                 <TouchableOpacity
                   style={[styles.modalButton, styles.saveButton]}
-                  onPress={handleUpdate}
+                  onPress={updateEvent}
                   disabled={updateLoading}
                 >
                   {updateLoading ? (
