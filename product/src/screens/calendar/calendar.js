@@ -58,19 +58,20 @@ const CalendarPage = () => {
   }, []);
 
   // Fetch events from Firestore
+  const fetchEventsData = async () => {
+    try {
+      setLoading(true);
+      const eventsData = await fetchEvents();
+      setEvents(eventsData);
+    } catch (error) {
+      console.error("Failed to fetch events:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        const eventsData = await fetchEvents();
-        setEvents(eventsData);
-      } catch (error) {
-        console.error("Failed to fetch events:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
+    fetchEventsData();
   }, []);
 
   // Set today's date by default
@@ -167,13 +168,34 @@ const CalendarPage = () => {
       // Update local state
       setEvents((prevEvents) => {
         const updatedEvents = { ...prevEvents };
-        if (updatedEvents[selectedDate]) {
-          updatedEvents[selectedDate] = updatedEvents[selectedDate].map(
-            (event) => (event.id === selectedEvent.id ? selectedEvent : event)
+
+        // Remove event from the original date
+        const originalDate = selectedEvent.date;
+        if (updatedEvents[originalDate]) {
+          updatedEvents[originalDate] = updatedEvents[originalDate].filter(
+            (event) => event.id !== selectedEvent.id
           );
+          if (updatedEvents[originalDate].length === 0) {
+            delete updatedEvents[originalDate];
+          }
         }
+
+        // Add event to the new date
+        const newDate = selectedEvent.dateTime
+          ? selectedEvent.dateTime.toISOString().split("T")[0]
+          : originalDate;
+
+        if (!updatedEvents[newDate]) {
+          updatedEvents[newDate] = [];
+        }
+        updatedEvents[newDate].push({
+          ...selectedEvent,
+          date: newDate,
+        });
+
         return updatedEvents;
       });
+
       setIsEventModalVisible(false);
     } catch (error) {
       console.error("Error updating event:", error);
