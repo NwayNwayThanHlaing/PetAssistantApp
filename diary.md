@@ -1,14 +1,23 @@
 ## Week 8 (11 November 2024)
 
 Summary:
-    
+    - fixed bugs from previously implemented pages, calendar, and event to align with the updated code
+    - Implemented Calendar events with detailed functionalities such as DatePicker and EventPicker Display, event CRUD modals design
+    - Managed to update event marks on calendar to change instantly when there is update on event
+    - Created Reminder page and displayed data collected from database
+Challenges:
+    - Everything worked well
+Next Step:
+    - To finish up with reminders and implement notification page.
+    - Test all the pages and final code. 
+    - Release a version for term 1
     
 ## Week 7 (4 November 2024)
 
 Summary:
     - Implemented Pet Profile including Multi profiles availability
     - Connected to Cloud image upload for user profiles and pet profiles photos
-    - Designed Calendar with CRUD functionalities for Event
+    - Designed Calendar with basic CRUD functionalities for Event
     - Displayed proper UI for dates with events on Calendar for UX
     - Implemeted event display on press for specific dates
     - Developed CRUD for events on calendar
