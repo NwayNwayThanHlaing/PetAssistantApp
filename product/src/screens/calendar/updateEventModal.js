@@ -27,6 +27,7 @@ const EventModal = ({
 }) => {
   useEffect(() => {
     if (isVisible && selectedEvent) {
+      // Ensure dateTime is properly set when the modal is shown
       if (!selectedEvent.dateTime) {
         const date = selectedEvent.date
           ? new Date(selectedEvent.date)
@@ -55,6 +56,7 @@ const EventModal = ({
           prevEvent.dateTime?.getHours() || 0,
           prevEvent.dateTime?.getMinutes() || 0
         ),
+        date: selectedDate.toISOString().split("T")[0],
       }));
     }
   };
@@ -114,42 +116,18 @@ const EventModal = ({
                 }
                 multiline
               />
+
               {/* Date Picker */}
-              <TouchableOpacity>
-                <Text style={styles.dateText}>
-                  Date:{" "}
-                  {selectedEvent?.dateTime
-                    ? selectedEvent.dateTime.toLocaleDateString([], {
-                        weekday: "long",
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric",
-                      })
-                    : "Select Date"}
-                </Text>
-              </TouchableOpacity>
+              <Text style={styles.dateText}>Date:</Text>
               <DateTimePicker
                 value={selectedEvent?.dateTime || new Date()}
                 mode="date"
                 display="default"
                 onChange={handleDateChange}
               />
+
               {/* Time Picker */}
-              <TouchableOpacity>
-                <Text style={styles.timeText}>
-                  Time:{" "}
-                  {selectedEvent?.dateTime
-                    ? `${
-                        ((selectedEvent.dateTime.getHours() + 11) % 12) + 1
-                      }:${String(selectedEvent.dateTime.getMinutes()).padStart(
-                        2,
-                        "0"
-                      )} ${
-                        selectedEvent.dateTime.getHours() >= 12 ? "PM" : "AM"
-                      }`
-                    : "Select Time"}
-                </Text>
-              </TouchableOpacity>
+              <Text style={styles.timeText}>Time:</Text>
               <DateTimePicker
                 value={selectedEvent?.dateTime || new Date()}
                 mode="time"
@@ -157,6 +135,7 @@ const EventModal = ({
                 is24Hour={false}
                 onChange={handleTimeChange}
               />
+
               {/* Pet Selection */}
               <Text style={styles.petsSelectionHeader}>Select Pets</Text>
               <View style={styles.petButtonsContainer}>
@@ -182,6 +161,7 @@ const EventModal = ({
                   </TouchableOpacity>
                 ))}
               </View>
+
               {/* Buttons for Update, Delete, and Cancel */}
               <View style={styles.buttonContainer}>
                 <TouchableOpacity

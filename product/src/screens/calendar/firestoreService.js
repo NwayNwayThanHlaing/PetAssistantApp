@@ -124,12 +124,18 @@ export const updateEvent = async (selectedEvent) => {
       minutes = 0;
     }
 
+    // Convert dateTime to a format suitable for Firestore
+    const updatedDate = selectedEvent.dateTime
+      ? selectedEvent.dateTime.toISOString().split("T")[0] // Get the 'YYYY-MM-DD' format for the date
+      : selectedEvent.date;
+
     const updatedData = {
       title: selectedEvent.title || "",
       notes: selectedEvent.notes || "",
-      relatedPets: selectedEvent.pets || [],
+      relatedPets: selectedEvent.relatedPets || [],
       updatedAt: Timestamp.now(),
       time: { hours, minutes },
+      date: updatedDate, // Update the date here to Firestore in 'YYYY-MM-DD' format
     };
 
     // Ensure all fields are updated correctly
