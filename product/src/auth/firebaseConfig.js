@@ -13,7 +13,7 @@ const firebaseConfig = {
   apiKey: "AIzaSyAqz90lvvGYfw_XRRzbfJ4fiitQzjjqTLk",
   authDomain: "fyp-purrnote.firebaseapp.com",
   projectId: "fyp-purrnote",
-  storageBucket: "fyp-purrnote.appspot.com", // Corrected storageBucket
+  storageBucket: "fyp-purrnote.appspot.com",
   messagingSenderId: "476410167113",
   appId: "1:476410167113:web:5065475f5bd458d124a498",
   measurementId: "G-3FC29QG1N3",
