@@ -8,7 +8,6 @@ import {
   doc,
   Timestamp,
 } from "firebase/firestore";
-import dayjs from "dayjs";
 
 // Utility function to get the current user ID
 const getUserId = () => {
@@ -42,16 +41,16 @@ export const fetchEvents = async () => {
     const eventsData = {};
     eventsSnapshot.forEach((doc) => {
       const data = doc.data();
-      const eventDate = dayjs(data.date).format("YYYY-MM-DD");
+      const eventDate = data.date; // This should be in 'YYYY-MM-DD' format
       if (!eventsData[eventDate]) {
         eventsData[eventDate] = [];
       }
 
       eventsData[eventDate].push({
         id: doc.id,
-        title: data.title,
-        time: data.time.toDate(),
-        notes: data.notes,
+        title: data.title || "",
+        time: data.time ? `${data.time.hours}:${data.time.minutes}` : "00:00",
+        notes: data.notes || "",
         pets: data.relatedPets || [],
       });
     });
@@ -68,15 +67,23 @@ export const addEvent = async (newEvent, selectedDate, selectedPets) => {
   try {
     const userId = getUserId();
     const eventRef = collection(firestore, "users", userId, "events");
+
+    // Use default time values if not provided
+    const dateTime = newEvent.dateTime || new Date();
+
+    const hours = dateTime.getHours();
+    const minutes = dateTime.getMinutes();
+
     const docRef = await addDoc(eventRef, {
-      title: newEvent.title,
-      time: Timestamp.fromDate(newEvent.time),
-      notes: newEvent.notes,
-      relatedPets: selectedPets,
-      date: selectedDate,
+      title: newEvent.title || "Untitled Event",
+      time: { hours, minutes },
+      notes: newEvent.notes || "",
+      relatedPets: selectedPets || [],
+      date: selectedDate, // Make sure selectedDate is in 'YYYY-MM-DD' format
       createdAt: Timestamp.now(),
       updatedAt: Timestamp.now(),
     });
+
     return docRef.id; // Return the document ID for further use
   } catch (error) {
     console.error("Error adding event to Firestore: ", error);
@@ -88,6 +95,11 @@ export const addEvent = async (newEvent, selectedDate, selectedPets) => {
 export const updateEvent = async (selectedEvent) => {
   try {
     const userId = getUserId();
+
+    if (!selectedEvent.id) {
+      throw new Error("No event ID provided for update");
+    }
+
     const eventDocRef = doc(
       firestore,
       "users",
@@ -95,13 +107,40 @@ export const updateEvent = async (selectedEvent) => {
       "events",
       selectedEvent.id
     );
-    await updateDoc(eventDocRef, {
-      title: selectedEvent.title,
-      time: Timestamp.fromDate(selectedEvent.time),
-      notes: selectedEvent.notes,
-      relatedPets: selectedEvent.pets || [],
+
+    let hours, minutes;
+
+    if (selectedEvent.dateTime instanceof Date) {
+      // Extract hours and minutes if dateTime is a valid Date object
+      hours = selectedEvent.dateTime.getHours();
+      minutes = selectedEvent.dateTime.getMinutes();
+    } else if (selectedEvent.time) {
+      // If time is provided as an object, use those values
+      hours = selectedEvent.time.hours || 0;
+      minutes = selectedEvent.time.minutes || 0;
+    } else {
+      // Default values
+      hours = 0;
+      minutes = 0;
+    }
+
+    // Convert dateTime to a format suitable for Firestore
+    const updatedDate = selectedEvent.dateTime
+      ? selectedEvent.dateTime.toISOString().split("T")[0] // Get the 'YYYY-MM-DD' format for the date
+      : selectedEvent.date;
+
+    const updatedData = {
+      title: selectedEvent.title || "",
+      notes: selectedEvent.notes || "",
+      relatedPets: selectedEvent.relatedPets || [],
       updatedAt: Timestamp.now(),
-    });
+      time: { hours, minutes },
+      date: updatedDate, // Update the date here to Firestore in 'YYYY-MM-DD' format
+    };
+
+    // Ensure all fields are updated correctly
+    await updateDoc(eventDocRef, updatedData);
+    console.log("Event successfully updated.");
   } catch (error) {
     console.error("Error updating event: ", error);
     throw error;
@@ -112,8 +151,12 @@ export const updateEvent = async (selectedEvent) => {
 export const deleteEvent = async (eventId) => {
   try {
     const userId = getUserId();
+    if (!eventId) {
+      throw new Error("No event ID provided for deletion");
+    }
     const eventDocRef = doc(firestore, "users", userId, "events", eventId);
     await deleteDoc(eventDocRef);
+    console.log("Event successfully deleted.");
   } catch (error) {
     console.error("Error deleting event: ", error);
     throw error;

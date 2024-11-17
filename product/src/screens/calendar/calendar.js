@@ -1,3 +1,4 @@
+// CalendarPage Component
 import React, { useState, useEffect } from "react";
 import {
   View,
@@ -19,17 +20,18 @@ import {
   deleteEvent,
 } from "./firestoreService";
 import EventList from "./eventList";
-import EventModal from "./eventModal";
+import EventModal from "./updateEventModal";
 import AddEventModal from "./addEventModal";
 
 const CalendarPage = () => {
   const [selectedDate, setSelectedDate] = useState("");
   const [events, setEvents] = useState({});
+  const [markedDates, setMarkedDates] = useState({});
   const [isAddingEvent, setIsAddingEvent] = useState(false);
   const [isEventModalVisible, setIsEventModalVisible] = useState(false);
   const [newEvent, setNewEvent] = useState({
     title: "",
-    time: new Date(),
+    time: { hours: 0, minutes: 0 },
     notes: "",
     pets: [],
   });
@@ -60,14 +62,22 @@ const CalendarPage = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        setLoading(true);
         const eventsData = await fetchEvents();
         setEvents(eventsData);
       } catch (error) {
         console.error("Failed to fetch events:", error);
+      } finally {
+        setLoading(false);
       }
     };
     fetchData();
   }, []);
+
+  // Update markedDates whenever events or selectedDate changes
+  useEffect(() => {
+    setMarkedDates(prepareMarkedDates());
+  }, [events, selectedDate, selectedEvent]);
 
   // Set today's date by default
   useEffect(() => {
@@ -80,24 +90,6 @@ const CalendarPage = () => {
     const today = new Date().toISOString().split("T")[0];
     setSelectedDate(today);
     setCurrentDate(today);
-  };
-
-  // Prepare marked dates for the calendar
-  const prepareMarkedDates = () => {
-    const markedDates = {};
-    Object.keys(events).forEach((date) => {
-      if (events[date]) {
-        markedDates[date] = {
-          marked: true,
-          dots: Array(Math.min(events[date].length, 3)).fill({
-            color: colors.accent,
-          }),
-          selected: date === selectedDate,
-          selectedColor: colors.primary,
-        };
-      }
-    });
-    return markedDates;
   };
 
   // Add new event
@@ -130,8 +122,38 @@ const CalendarPage = () => {
     }
     setLoading(false);
     setIsAddingEvent(false);
-    setNewEvent({ title: "", time: new Date(), notes: "", pets: [] });
+    setNewEvent({
+      title: "",
+      time: { hours: 0, minutes: 0 },
+      notes: "",
+      pets: [],
+    });
     setSelectedPets([]);
+  };
+  // Prepare marked dates for the calendar
+  const prepareMarkedDates = () => {
+    const newMarkedDates = {};
+
+    // Iterate over all event dates
+    Object.keys(events).forEach((date) => {
+      if (events[date] && events[date].length > 0) {
+        newMarkedDates[date] = {
+          marked: true,
+          dots: [{ color: colors.accent }], // Ensure only one dot is displayed
+        };
+      }
+    });
+
+    // Ensure the selected date is highlighted, even if it has no events
+    if (selectedDate) {
+      newMarkedDates[selectedDate] = {
+        ...newMarkedDates[selectedDate], // Retain existing dots if any
+        selected: true,
+        selectedColor: colors.primary,
+      };
+    }
+
+    return newMarkedDates;
   };
 
   // Update Event
@@ -148,13 +170,42 @@ const CalendarPage = () => {
       // Update local state
       setEvents((prevEvents) => {
         const updatedEvents = { ...prevEvents };
-        if (updatedEvents[selectedDate]) {
-          updatedEvents[selectedDate] = updatedEvents[selectedDate].map(
-            (event) => (event.id === selectedEvent.id ? selectedEvent : event)
-          );
+        const previousDate = selectedEvent.previousDate || selectedDate;
+
+        // Remove the event from the previous date if the date changed
+        if (previousDate !== selectedEvent.date) {
+          if (updatedEvents[previousDate]) {
+            updatedEvents[previousDate] = updatedEvents[previousDate].filter(
+              (event) => event.id !== selectedEvent.id
+            );
+            if (updatedEvents[previousDate].length === 0) {
+              delete updatedEvents[previousDate];
+            }
+          }
         }
+
+        // Add the event to the new date
+        if (selectedEvent.date) {
+          if (!updatedEvents[selectedEvent.date]) {
+            updatedEvents[selectedEvent.date] = [];
+          }
+
+          const eventIndex = updatedEvents[selectedEvent.date].findIndex(
+            (event) => event.id === selectedEvent.id
+          );
+
+          if (eventIndex > -1) {
+            updatedEvents[selectedEvent.date][eventIndex] = selectedEvent;
+          } else {
+            updatedEvents[selectedEvent.date].push(selectedEvent);
+          }
+        }
+
         return updatedEvents;
       });
+
+      // Update marked dates after updating events
+      setMarkedDates(prepareMarkedDates());
       setIsEventModalVisible(false);
     } catch (error) {
       console.error("Error updating event:", error);
@@ -194,6 +245,9 @@ const CalendarPage = () => {
               }
               return updatedEvents;
             });
+
+            // Update marked dates after deleting events
+            setMarkedDates(prepareMarkedDates());
             setSelectedEvent(null);
             setIsEventModalVisible(false);
           } catch (error) {
@@ -235,7 +289,7 @@ const CalendarPage = () => {
           <Calendar
             current={currentDate}
             onDayPress={(day) => setSelectedDate(day.dateString)}
-            markedDates={prepareMarkedDates()}
+            markedDates={markedDates}
             markingType={"multi-dot"}
             theme={{
               selectedDayBackgroundColor: colors.primary,
@@ -249,7 +303,7 @@ const CalendarPage = () => {
                   Events on {selectedDate}
                 </Text>
                 <EventList
-                  todayEvents={events[selectedDate] || []}
+                  selectedDate={selectedDate}
                   onEventPress={(event) => {
                     setSelectedEvent(event);
                     setIsEventModalVisible(true);

@@ -4,7 +4,9 @@ import {
   Text,
   TouchableOpacity,
   TextInput,
-  FlatList,
+  ScrollView,
+  TouchableWithoutFeedback,
+  Keyboard,
   ActivityIndicator,
   StyleSheet,
 } from "react-native";
@@ -23,6 +25,16 @@ const AddEventModal = ({
   addEvent,
   loading,
 }) => {
+  // Function to reset newEvent to default values
+  const resetNewEvent = () => {
+    setNewEvent({
+      title: "",
+      time: new Date(new Date().setHours(0, 0, 0, 0)), // Default to 12:00 AM
+      notes: "",
+    });
+    setSelectedPets([]);
+  };
+
   const togglePetSelection = (petName) => {
     setSelectedPets((prevSelected) =>
       prevSelected.includes(petName)
@@ -31,91 +43,136 @@ const AddEventModal = ({
     );
   };
 
+  // Ensure newEvent.time is always set to 12:00 AM (midnight) initially
+  const ensureValidTime = () => {
+    if (!newEvent.time || !(newEvent.time instanceof Date)) {
+      // Set default time to 12:00 AM
+      const defaultTime = new Date();
+      defaultTime.setHours(0);
+      defaultTime.setMinutes(0);
+      defaultTime.setSeconds(0);
+      defaultTime.setMilliseconds(0);
+      setNewEvent((prevEvent) => ({
+        ...prevEvent,
+        time: defaultTime,
+      }));
+    }
+  };
+
+  React.useEffect(() => {
+    if (isVisible) {
+      ensureValidTime(); // Ensure time is set correctly when the modal is first shown
+    } else {
+      resetNewEvent(); // Reset event data when modal is closed
+    }
+  }, [isVisible]);
+
   return (
-    <Modal isVisible={isVisible} onBackdropPress={() => setIsVisible(false)}>
-      <View style={styles.modalContent}>
-        <Text style={styles.modalHeader}>Add New Event</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Event Title"
-          placeholderTextColor={colors.primaryLighter}
-          value={newEvent.title}
-          onChangeText={(text) => setNewEvent({ ...newEvent, title: text })}
-        />
-        <View style={styles.datePickerContainer}>
-          <Text style={{ color: colors.primaryLighter }}>Event Time</Text>
-          <DateTimePicker
-            mode="time"
-            value={newEvent.time}
-            onChange={(event, date) =>
-              setNewEvent({ ...newEvent, time: date || newEvent.time })
-            }
-          />
-        </View>
-        <TextInput
-          style={[styles.input, styles.notesInput]}
-          placeholder="Notes"
-          placeholderTextColor={colors.primaryLighter}
-          value={newEvent.notes}
-          onChangeText={(text) => setNewEvent({ ...newEvent, notes: text })}
-          multiline
-        />
-        <Text style={styles.petsSelectionHeader}>Select Pets</Text>
-        <FlatList
-          data={petNames}
-          keyExtractor={(item) => item}
-          renderItem={({ item }) => (
-            <TouchableOpacity
-              style={
-                selectedPets.includes(item)
-                  ? [styles.petButton, styles.petSelected]
-                  : styles.petButton
-              }
-              onPress={() => togglePetSelection(item)}
-            >
-              <Text
-                style={
-                  selectedPets.includes(item)
-                    ? [styles.petText, styles.petSelectedText]
-                    : styles.petText
+    <Modal
+      isVisible={isVisible}
+      onBackdropPress={() => setIsVisible(false)}
+      style={styles.modalContainer}
+      useNativeDriver={true}
+    >
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <View style={styles.modalContent}>
+          <ScrollView contentContainerStyle={styles.scrollViewContent}>
+            <Text style={styles.modalHeader}>Add New Event</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Event Title"
+              placeholderTextColor={colors.primaryLighter}
+              value={newEvent.title}
+              onChangeText={(text) => setNewEvent({ ...newEvent, title: text })}
+            />
+            <View style={styles.datePickerContainer}>
+              <Text style={{ color: colors.primaryLighter }}>Event Time</Text>
+              <DateTimePicker
+                mode="time"
+                value={
+                  newEvent.time instanceof Date ? newEvent.time : new Date()
                 }
+                onChange={(event, date) =>
+                  setNewEvent({ ...newEvent, time: date || newEvent.time })
+                }
+                is24Hour={false} // Use AM/PM format
+              />
+            </View>
+            <TextInput
+              style={[styles.input, styles.notesInput]}
+              placeholder="Notes"
+              placeholderTextColor={colors.primaryLighter}
+              value={newEvent.notes}
+              onChangeText={(text) => setNewEvent({ ...newEvent, notes: text })}
+              multiline
+            />
+            <Text style={styles.petsSelectionHeader}>Select Pets</Text>
+            <View style={styles.petButtonsContainer}>
+              {petNames.map((item, index) => (
+                <TouchableOpacity
+                  key={item}
+                  style={[
+                    styles.petButton,
+                    selectedPets.includes(item) && styles.petSelected,
+                    index === petNames.length - 1 && styles.lastPetButton,
+                  ]}
+                  onPress={() => togglePetSelection(item)}
+                >
+                  <Text
+                    style={[
+                      styles.petText,
+                      selectedPets.includes(item) && styles.petSelectedText,
+                    ]}
+                  >
+                    {item}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            <View style={styles.buttonContainer}>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.cancelButton]}
+                onPress={() => setIsVisible(false)}
               >
-                {item}
-              </Text>
-            </TouchableOpacity>
-          )}
-          contentContainerStyle={styles.flatListContainer}
-        />
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity
-            style={[styles.modalButton, styles.cancelButton]}
-            onPress={() => setIsVisible(false)}
-          >
-            <Text style={styles.buttonText}>Cancel</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.modalButton, styles.saveButton]}
-            onPress={addEvent}
-            disabled={loading}
-          >
-            {loading ? (
-              <ActivityIndicator size="small" color="white" />
-            ) : (
-              <Text style={styles.buttonText}>Save</Text>
-            )}
-          </TouchableOpacity>
+                <Text style={styles.buttonText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.saveButton]}
+                onPress={addEvent}
+                disabled={loading}
+              >
+                {loading ? (
+                  <ActivityIndicator size="small" color="white" />
+                ) : (
+                  <Text style={styles.buttonText}>Save</Text>
+                )}
+              </TouchableOpacity>
+            </View>
+          </ScrollView>
         </View>
-      </View>
+      </TouchableWithoutFeedback>
     </Modal>
   );
 };
 
 const styles = StyleSheet.create({
+  modalContainer: {
+    justifyContent: "center",
+    alignItems: "center",
+    margin: 0,
+  },
   modalContent: {
     backgroundColor: "white",
     padding: 20,
     borderRadius: 10,
-    paddingBottom: 30,
+    width: "90%", // Set modal width to fit better on the screen
+    maxHeight: "80%", // Limit modal height
+    alignSelf: "center",
+  },
+  scrollViewContent: {
+    flexGrow: 1,
+    justifyContent: "flex-start",
   },
   modalHeader: {
     fontSize: 18,
@@ -167,6 +224,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
   },
+  petButtonsContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    marginTop: 10,
+  },
   petButton: {
     marginTop: 10,
     paddingVertical: 10,
@@ -193,10 +255,6 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: colors.primary,
     marginTop: 20,
-  },
-  flatListContainer: {
-    flexDirection: "row",
-    justifyContent: "flex-start",
   },
 });
 

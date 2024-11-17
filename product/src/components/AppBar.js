@@ -19,7 +19,9 @@ const AppBar = ({ title, onLogout }) => {
             source={require("../../assets/logo.png")}
             style={{ width: 70, height: 70 }}
           />
-          <Text style={AppBarStyles.title}>{title}</Text>
+          <Text style={AppBarStyles.title}>
+            {title == "Home" ? "Purrnote" : title}
+          </Text>
         </View>
         <TouchableOpacity style={AppBarStyles.logoutButton} onPress={onLogout}>
           <MaterialIcons
