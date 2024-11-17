@@ -19,7 +19,7 @@ const AllAppointments = () => {
   const navigation = useNavigation();
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [pets, setPets] = useState({}); // Using an object to store pet data by id for easy lookup
+  const [pets, setPets] = useState({});
 
   useEffect(() => {
     const fetchPetsAndAppointments = async () => {
@@ -47,8 +47,8 @@ const AllAppointments = () => {
             id: doc.id,
             ...doc.data(),
           }))
-          .filter((appointment) => dayjs(appointment.date).isAfter(dayjs())) // Filter to include only upcoming appointments
-          .sort((a, b) => dayjs(a.date).unix() - dayjs(b.date).unix()); // Sort by date in ascending order
+          .filter((appointment) => dayjs(appointment.date).isAfter(dayjs()))
+          .sort((a, b) => dayjs(a.date).unix() - dayjs(b.date).unix());
 
         setAppointments(fetchedAppointments);
       } catch (error) {

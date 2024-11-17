@@ -49,7 +49,6 @@ const Vet = () => {
   // Fetch pets from Firestore
   useEffect(() => {
     const fetchPets = async () => {
-      setLoading(true);
       try {
         const userId = auth.currentUser.uid;
         const petsCollectionRef = collection(firestore, `users/${userId}/pets`);
@@ -62,8 +61,6 @@ const Vet = () => {
         if (fetchedPets.length > 0) setSelectedPetId(fetchedPets[0].id);
       } catch (error) {
         console.error("Error fetching pets:", error);
-      } finally {
-        setLoading(false);
       }
     };
     fetchPets();
@@ -470,6 +467,7 @@ const styles = StyleSheet.create({
   },
   loadingContainer: {
     flex: 1,
+    marginVertical: 250,
     justifyContent: "center",
     alignItems: "center",
   },

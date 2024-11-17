@@ -1,3 +1,4 @@
+// CalendarPage Component
 import React, { useState, useEffect } from "react";
 import {
   View,
@@ -19,7 +20,7 @@ import {
   deleteEvent,
 } from "./firestoreService";
 import EventList from "./eventList";
-import EventModal from "./eventModal";
+import EventModal from "./updateEventModal";
 import AddEventModal from "./addEventModal";
 
 const CalendarPage = () => {
@@ -29,7 +30,7 @@ const CalendarPage = () => {
   const [isEventModalVisible, setIsEventModalVisible] = useState(false);
   const [newEvent, setNewEvent] = useState({
     title: "",
-    time: new Date(),
+    time: { hours: 0, minutes: 0 },
     notes: "",
     pets: [],
   });
@@ -60,10 +61,13 @@ const CalendarPage = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        setLoading(true);
         const eventsData = await fetchEvents();
         setEvents(eventsData);
       } catch (error) {
         console.error("Failed to fetch events:", error);
+      } finally {
+        setLoading(false);
       }
     };
     fetchData();
@@ -85,6 +89,8 @@ const CalendarPage = () => {
   // Prepare marked dates for the calendar
   const prepareMarkedDates = () => {
     const markedDates = {};
+
+    // Mark dates that have events
     Object.keys(events).forEach((date) => {
       if (events[date]) {
         markedDates[date] = {
@@ -92,11 +98,19 @@ const CalendarPage = () => {
           dots: Array(Math.min(events[date].length, 3)).fill({
             color: colors.accent,
           }),
-          selected: date === selectedDate,
-          selectedColor: colors.primary,
         };
       }
     });
+
+    // Ensure the selected date is highlighted, even if it has no events
+    if (selectedDate) {
+      markedDates[selectedDate] = {
+        ...markedDates[selectedDate], // Retain existing dots if any
+        selected: true,
+        selectedColor: colors.primary,
+      };
+    }
+
     return markedDates;
   };
 
@@ -130,7 +144,12 @@ const CalendarPage = () => {
     }
     setLoading(false);
     setIsAddingEvent(false);
-    setNewEvent({ title: "", time: new Date(), notes: "", pets: [] });
+    setNewEvent({
+      title: "",
+      time: { hours: 0, minutes: 0 },
+      notes: "",
+      pets: [],
+    });
     setSelectedPets([]);
   };
 
@@ -249,7 +268,7 @@ const CalendarPage = () => {
                   Events on {selectedDate}
                 </Text>
                 <EventList
-                  todayEvents={events[selectedDate] || []}
+                  selectedDate={selectedDate}
                   onEventPress={(event) => {
                     setSelectedEvent(event);
                     setIsEventModalVisible(true);

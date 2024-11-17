@@ -42,7 +42,7 @@ export const fetchEvents = async () => {
     const eventsData = {};
     eventsSnapshot.forEach((doc) => {
       const data = doc.data();
-      const eventDate = dayjs(data.date).format("YYYY-MM-DD");
+      const eventDate = data.date;
       if (!eventsData[eventDate]) {
         eventsData[eventDate] = [];
       }
@@ -50,7 +50,7 @@ export const fetchEvents = async () => {
       eventsData[eventDate].push({
         id: doc.id,
         title: data.title,
-        time: data.time.toDate(),
+        time: data.time ? `${data.time.hours}:${data.time.minutes}` : "", // Format time as a string
         notes: data.notes,
         pets: data.relatedPets || [],
       });
@@ -68,9 +68,14 @@ export const addEvent = async (newEvent, selectedDate, selectedPets) => {
   try {
     const userId = getUserId();
     const eventRef = collection(firestore, "users", userId, "events");
+
+    // Extract only the hours and minutes from the provided time
+    const hours = newEvent.time.getHours();
+    const minutes = newEvent.time.getMinutes();
+
     const docRef = await addDoc(eventRef, {
       title: newEvent.title,
-      time: Timestamp.fromDate(newEvent.time),
+      time: { hours, minutes },
       notes: newEvent.notes,
       relatedPets: selectedPets,
       date: selectedDate,
@@ -95,9 +100,14 @@ export const updateEvent = async (selectedEvent) => {
       "events",
       selectedEvent.id
     );
+
+    // Extract only the hours and minutes from the provided time
+    const hours = selectedEvent.time.getHours();
+    const minutes = selectedEvent.time.getMinutes();
+
     await updateDoc(eventDocRef, {
       title: selectedEvent.title,
-      time: Timestamp.fromDate(selectedEvent.time),
+      time: { hours, minutes },
       notes: selectedEvent.notes,
       relatedPets: selectedEvent.pets || [],
       updatedAt: Timestamp.now(),
