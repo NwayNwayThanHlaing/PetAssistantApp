@@ -26,6 +26,7 @@ import AddEventModal from "./addEventModal";
 const CalendarPage = () => {
   const [selectedDate, setSelectedDate] = useState("");
   const [events, setEvents] = useState({});
+  const [markedDates, setMarkedDates] = useState({});
   const [isAddingEvent, setIsAddingEvent] = useState(false);
   const [isEventModalVisible, setIsEventModalVisible] = useState(false);
   const [newEvent, setNewEvent] = useState({
@@ -58,21 +59,25 @@ const CalendarPage = () => {
   }, []);
 
   // Fetch events from Firestore
-  const fetchEventsData = async () => {
-    try {
-      setLoading(true);
-      const eventsData = await fetchEvents();
-      setEvents(eventsData);
-    } catch (error) {
-      console.error("Failed to fetch events:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
-    fetchEventsData();
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const eventsData = await fetchEvents();
+        setEvents(eventsData);
+      } catch (error) {
+        console.error("Failed to fetch events:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
   }, []);
+
+  // Update markedDates whenever events or selectedDate changes
+  useEffect(() => {
+    setMarkedDates(prepareMarkedDates());
+  }, [events, selectedDate, selectedEvent]);
 
   // Set today's date by default
   useEffect(() => {
@@ -85,34 +90,6 @@ const CalendarPage = () => {
     const today = new Date().toISOString().split("T")[0];
     setSelectedDate(today);
     setCurrentDate(today);
-  };
-
-  // Prepare marked dates for the calendar
-  const prepareMarkedDates = () => {
-    const markedDates = {};
-
-    // Mark dates that have events
-    Object.keys(events).forEach((date) => {
-      if (events[date]) {
-        markedDates[date] = {
-          marked: true,
-          dots: Array(Math.min(events[date].length, 3)).fill({
-            color: colors.accent,
-          }),
-        };
-      }
-    });
-
-    // Ensure the selected date is highlighted, even if it has no events
-    if (selectedDate) {
-      markedDates[selectedDate] = {
-        ...markedDates[selectedDate], // Retain existing dots if any
-        selected: true,
-        selectedColor: colors.primary,
-      };
-    }
-
-    return markedDates;
   };
 
   // Add new event
@@ -153,6 +130,31 @@ const CalendarPage = () => {
     });
     setSelectedPets([]);
   };
+  // Prepare marked dates for the calendar
+  const prepareMarkedDates = () => {
+    const newMarkedDates = {};
+
+    // Iterate over all event dates
+    Object.keys(events).forEach((date) => {
+      if (events[date] && events[date].length > 0) {
+        newMarkedDates[date] = {
+          marked: true,
+          dots: [{ color: colors.accent }], // Ensure only one dot is displayed
+        };
+      }
+    });
+
+    // Ensure the selected date is highlighted, even if it has no events
+    if (selectedDate) {
+      newMarkedDates[selectedDate] = {
+        ...newMarkedDates[selectedDate], // Retain existing dots if any
+        selected: true,
+        selectedColor: colors.primary,
+      };
+    }
+
+    return newMarkedDates;
+  };
 
   // Update Event
   const handleUpdateEvent = async () => {
@@ -168,34 +170,42 @@ const CalendarPage = () => {
       // Update local state
       setEvents((prevEvents) => {
         const updatedEvents = { ...prevEvents };
+        const previousDate = selectedEvent.previousDate || selectedDate;
 
-        // Remove event from the original date
-        const originalDate = selectedEvent.date;
-        if (updatedEvents[originalDate]) {
-          updatedEvents[originalDate] = updatedEvents[originalDate].filter(
-            (event) => event.id !== selectedEvent.id
-          );
-          if (updatedEvents[originalDate].length === 0) {
-            delete updatedEvents[originalDate];
+        // Remove the event from the previous date if the date changed
+        if (previousDate !== selectedEvent.date) {
+          if (updatedEvents[previousDate]) {
+            updatedEvents[previousDate] = updatedEvents[previousDate].filter(
+              (event) => event.id !== selectedEvent.id
+            );
+            if (updatedEvents[previousDate].length === 0) {
+              delete updatedEvents[previousDate];
+            }
           }
         }
 
-        // Add event to the new date
-        const newDate = selectedEvent.dateTime
-          ? selectedEvent.dateTime.toISOString().split("T")[0]
-          : originalDate;
+        // Add the event to the new date
+        if (selectedEvent.date) {
+          if (!updatedEvents[selectedEvent.date]) {
+            updatedEvents[selectedEvent.date] = [];
+          }
 
-        if (!updatedEvents[newDate]) {
-          updatedEvents[newDate] = [];
+          const eventIndex = updatedEvents[selectedEvent.date].findIndex(
+            (event) => event.id === selectedEvent.id
+          );
+
+          if (eventIndex > -1) {
+            updatedEvents[selectedEvent.date][eventIndex] = selectedEvent;
+          } else {
+            updatedEvents[selectedEvent.date].push(selectedEvent);
+          }
         }
-        updatedEvents[newDate].push({
-          ...selectedEvent,
-          date: newDate,
-        });
 
         return updatedEvents;
       });
 
+      // Update marked dates after updating events
+      setMarkedDates(prepareMarkedDates());
       setIsEventModalVisible(false);
     } catch (error) {
       console.error("Error updating event:", error);
@@ -235,6 +245,9 @@ const CalendarPage = () => {
               }
               return updatedEvents;
             });
+
+            // Update marked dates after deleting events
+            setMarkedDates(prepareMarkedDates());
             setSelectedEvent(null);
             setIsEventModalVisible(false);
           } catch (error) {
@@ -276,7 +289,7 @@ const CalendarPage = () => {
           <Calendar
             current={currentDate}
             onDayPress={(day) => setSelectedDate(day.dateString)}
-            markedDates={prepareMarkedDates()}
+            markedDates={markedDates}
             markingType={"multi-dot"}
             theme={{
               selectedDayBackgroundColor: colors.primary,
