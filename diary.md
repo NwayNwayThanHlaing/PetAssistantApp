@@ -1,3 +1,15 @@
+## Week 9 (18 November 2024)
+
+Summary:
+    - implemented reminder page
+    - fixed layout and did UI touch up for all pages 
+    - researched on notification system
+Challenges:
+    - No challenges so far
+Next Step:
+    - To do testing
+    - Start working on interim report 
+
 ## Week 8 (11 November 2024)
 
 Summary:
