@@ -89,7 +89,12 @@ const Vet = () => {
           time: data.time || { hours: 12, minutes: 0 },
         };
       });
-      setAppointments(fetchedAppointments);
+      // Sort appointments by date
+      const sortedAppointments = fetchedAppointments.sort(
+        (a, b) => a.date - b.date
+      );
+
+      setAppointments(sortedAppointments);
     } catch (error) {
       console.error("Error fetching appointments:", error);
     }
@@ -280,54 +285,53 @@ const Vet = () => {
         </View>
       ) : (
         <>
-          <View style={styles.petListWrapper}>
-            <FlatList
-              data={pets}
-              renderItem={({ item }) => renderPetProfile(item)}
-              keyExtractor={(item) => item.id}
-              horizontal
-              contentContainerStyle={styles.petListContent}
-              showsHorizontalScrollIndicator={false}
-            />
+          <FlatList
+            data={pets}
+            renderItem={({ item }) => renderPetProfile(item)}
+            keyExtractor={(item) => item.id}
+            horizontal
+            contentContainerStyle={styles.petListContent}
+            showsHorizontalScrollIndicator={false}
+          />
+          <View style={styles.actionsWrapper}>
+            <TouchableOpacity
+              style={styles.addAppointmentButton}
+              onPress={() => navigation.navigate("AllAppointments")}
+            >
+              <Text style={styles.addAppointmentButtonText}>View All</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.addAppointmentButton}
+              onPress={() => {
+                setCurrentAppointment({
+                  vetName: "",
+                  date: new Date(),
+                  time: { hours: 12, minutes: 0 },
+                  location: "",
+                  notes: "",
+                  selectedPets: [],
+                });
+                setIsModalVisible(true);
+              }}
+            >
+              <Text style={styles.addAppointmentButtonText}>+ Add New</Text>
+            </TouchableOpacity>
           </View>
+
           {appointments.length === 0 ? (
             <Text
               style={{
                 fontSize: 18,
                 color: colors.secondary,
                 textAlign: "center",
-                marginTop: 10,
+                marginTop: 30,
               }}
             >
               No appointments found.
             </Text>
           ) : (
-            <View style={styles.actionsWrapper}>
-              <TouchableOpacity
-                style={styles.addAppointmentButton}
-                onPress={() => navigation.navigate("AllAppointments")}
-              >
-                <Text style={styles.addAppointmentButtonText}>View All</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.addAppointmentButton}
-                onPress={() => {
-                  setCurrentAppointment({
-                    vetName: "",
-                    date: new Date(),
-                    time: { hours: 12, minutes: 0 },
-                    location: "",
-                    notes: "",
-                    selectedPets: [],
-                  });
-                  setIsModalVisible(true);
-                }}
-              >
-                <Text style={styles.addAppointmentButtonText}>+ Add New</Text>
-              </TouchableOpacity>
-            </View>
+            appointments.map(renderAppointment)
           )}
-          {appointments.map(renderAppointment)}
         </>
       )}
 
@@ -346,8 +350,8 @@ const Vet = () => {
 
 const styles = StyleSheet.create({
   scrollContainer: {
-    flexGrow: 1,
     padding: 10,
+    paddingBottom: 80,
     backgroundColor: colors.background,
   },
   addAppointmentButton: {
@@ -391,9 +395,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: colors.primary,
   },
-  petListWrapper: {
-    marginBottom: 10,
-  },
   petListContent: {
     paddingRight: 10,
   },
@@ -403,21 +404,18 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: colors.primaryLightest,
     paddingTop: 10,
-    marginBottom: 10,
   },
   editButton: {
     backgroundColor: colors.primary,
     paddingVertical: 5,
     paddingHorizontal: 10,
     borderRadius: 8,
-    marginRight: 10,
     marginBottom: 5,
   },
   deleteButton: {
     backgroundColor: "red",
     paddingVertical: 5,
     paddingHorizontal: 10,
-    marginRight: 10,
     borderRadius: 8,
   },
   buttonText: {
