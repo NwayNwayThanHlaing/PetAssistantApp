@@ -4,15 +4,12 @@ import {
   Text,
   Image,
   TouchableOpacity,
-  FlatList,
+  ScrollView,
   StyleSheet,
+  FlatList,
   ActivityIndicator,
-  Modal,
-  TextInput,
-  Button,
   Alert,
 } from "react-native";
-import DateTimePicker from "@react-native-community/datetimepicker";
 import { firestore, auth } from "../../auth/firebaseConfig";
 import { useNavigation } from "@react-navigation/native";
 import {
@@ -27,24 +24,23 @@ import {
   Timestamp,
 } from "firebase/firestore";
 import { colors } from "../../styles/Theme";
+import NewAppointmentModal from "./newAppointmentModal"; // Importing the NewAppointmentModal
 
 const Vet = () => {
   const navigation = useNavigation();
   const [pets, setPets] = useState([]);
   const [selectedPetId, setSelectedPetId] = useState(null);
   const [appointments, setAppointments] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [currentAppointment, setCurrentAppointment] = useState({
     vetName: "",
     date: new Date(),
-    time: new Date(),
+    time: { hours: 12, minutes: 0 },
     location: "",
     notes: "",
+    selectedPets: [], // Including selectedPets to work with NewAppointmentModal
   });
-
-  const [showDatePicker, setShowDatePicker] = useState(false);
-  const [showTimePicker, setShowTimePicker] = useState(false);
 
   // Fetch pets from Firestore
   useEffect(() => {
@@ -68,7 +64,6 @@ const Vet = () => {
 
   // Fetch appointments for selected pet
   const fetchAppointments = async (petId) => {
-    setLoading(true);
     try {
       const appointmentsRef = collection(
         firestore,
@@ -78,24 +73,30 @@ const Vet = () => {
       const appointmentDocs = await getDocs(q);
       const fetchedAppointments = appointmentDocs.docs.map((doc) => {
         const data = doc.data();
+        // Handle both string date or Timestamp
+        let date = data.date;
+        if (data.date instanceof Timestamp) {
+          date = data.date.toDate();
+        } else if (typeof data.date === "string") {
+          const [year, month, day] = data.date.split("-").map(Number);
+          date = new Date(year, month - 1, day);
+        }
+
         return {
           id: doc.id,
           ...data,
-          date:
-            data.date && data.date.seconds
-              ? new Date(data.date.seconds * 1000)
-              : new Date(),
-          time:
-            data.time && data.time.seconds
-              ? new Date(data.time.seconds * 1000)
-              : new Date(),
+          date: date, // Correctly assign the Date object
+          time: data.time || { hours: 12, minutes: 0 },
         };
       });
-      setAppointments(fetchedAppointments);
+      // Sort appointments by date
+      const sortedAppointments = fetchedAppointments.sort(
+        (a, b) => a.date - b.date
+      );
+
+      setAppointments(sortedAppointments);
     } catch (error) {
       console.error("Error fetching appointments:", error);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -129,6 +130,7 @@ const Vet = () => {
         );
         await updateDoc(appointmentDocRef, {
           ...currentAppointment,
+          time: currentAppointment.time,
           petId: selectedPetId,
           updatedAt: Timestamp.now(),
         });
@@ -136,6 +138,7 @@ const Vet = () => {
         // Add new appointment
         await addDoc(appointmentsRef, {
           ...currentAppointment,
+          time: currentAppointment.time,
           petId: selectedPetId,
           createdAt: Timestamp.now(),
           updatedAt: Timestamp.now(),
@@ -145,9 +148,10 @@ const Vet = () => {
       setCurrentAppointment({
         vetName: "",
         date: new Date(),
-        time: new Date(),
+        time: { hours: 12, minutes: 0 },
         location: "",
         notes: "",
+        selectedPets: [],
       });
 
       // Fetch updated appointments list
@@ -159,7 +163,7 @@ const Vet = () => {
     }
   };
 
-  // Handle Delete Appointment
+  // Updated handleDeleteAppointment function
   const handleDeleteAppointment = async (appointmentId) => {
     Alert.alert(
       "Delete Appointment",
@@ -186,8 +190,9 @@ const Vet = () => {
                 prev.filter((item) => item.id !== appointmentId)
               );
 
-              // Fetch updated appointments list
-              fetchAppointments(selectedPetId);
+              console.log(
+                `Appointment with id: ${appointmentId} deleted successfully.`
+              );
             } catch (error) {
               console.error("Error deleting appointment:", error);
             } finally {
@@ -200,8 +205,9 @@ const Vet = () => {
   };
 
   // Render Pet Profile
-  const renderPetProfile = ({ item }) => (
+  const renderPetProfile = (item) => (
     <TouchableOpacity
+      key={item.id}
       onPress={() => setSelectedPetId(item.id)}
       style={styles.petProfileContainer}
     >
@@ -217,8 +223,8 @@ const Vet = () => {
   );
 
   // Render Appointment
-  const renderAppointment = ({ item }) => (
-    <View style={styles.appointmentContainer}>
+  const renderAppointment = (item) => (
+    <View key={item.id} style={styles.appointmentContainer}>
       <View>
         <Text style={styles.appointmentTitle}>
           Appointment with {item.vetName}
@@ -231,14 +237,20 @@ const Vet = () => {
         </Text>
         <Text style={styles.appointmentDetails}>
           Time:{" "}
-          {item.time instanceof Date
-            ? item.time.toLocaleTimeString()
+          {item.time
+            ? `${item.time.hours}:${item.time.minutes
+                .toString()
+                .padStart(2, "0")}`
             : "Invalid Time"}
         </Text>
-        <Text style={styles.appointmentDetails}>Location: {item.location}</Text>
-        <Text style={styles.appointmentDetails}>
-          Notes: {item.notes || "None"}
-        </Text>
+        {item.location && (
+          <Text style={styles.appointmentDetails}>
+            Location: {item.location}
+          </Text>
+        )}
+        {item.notes && (
+          <Text style={styles.appointmentDetails}>Notes: {item.notes}</Text>
+        )}
       </View>
       <View style={styles.appointmentActions}>
         <TouchableOpacity
@@ -247,7 +259,8 @@ const Vet = () => {
             setCurrentAppointment({
               ...item,
               date: item.date instanceof Date ? item.date : new Date(),
-              time: item.time instanceof Date ? item.time : new Date(),
+              time: item.time || { hours: 12, minutes: 0 },
+              selectedPets: item.selectedPets || [],
             });
             setIsModalVisible(true);
           }}
@@ -264,192 +277,83 @@ const Vet = () => {
     </View>
   );
 
-  // Render Modal for Adding or Editing Appointments
-  const renderModal = () => (
-    <Modal
-      visible={isModalVisible}
-      animationType="slide"
-      onRequestClose={() => setIsModalVisible(false)}
-      transparent={true}
-    >
-      <View style={styles.modalContainer}>
-        <View style={styles.modalContent}>
-          <Text style={styles.modalTitle}>
-            {currentAppointment.id ? "Edit Appointment" : "New Appointment"}
-          </Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Vet Name"
-            value={currentAppointment.vetName}
-            onChangeText={(text) =>
-              setCurrentAppointment((prev) => ({
-                ...prev,
-                vetName: text,
-              }))
-            }
-          />
-          <TouchableOpacity
-            onPress={() => setShowDatePicker(true)}
-            style={styles.input}
-          >
-            <Text>
-              Date:{" "}
-              {currentAppointment.date instanceof Date
-                ? currentAppointment.date.toLocaleDateString()
-                : ""}
-            </Text>
-          </TouchableOpacity>
-          {showDatePicker && (
-            <DateTimePicker
-              value={
-                currentAppointment.date instanceof Date
-                  ? currentAppointment.date
-                  : new Date()
-              }
-              mode="date"
-              display="default"
-              onChange={(event, selectedDate) => {
-                setShowDatePicker(false);
-                if (selectedDate) {
-                  setCurrentAppointment((prev) => ({
-                    ...prev,
-                    date: selectedDate,
-                  }));
-                }
-              }}
-            />
-          )}
-          <TouchableOpacity
-            onPress={() => setShowTimePicker(true)}
-            style={styles.input}
-          >
-            <Text>
-              Time:{" "}
-              {currentAppointment.time instanceof Date
-                ? currentAppointment.time.toLocaleTimeString()
-                : ""}
-            </Text>
-          </TouchableOpacity>
-          {showTimePicker && (
-            <DateTimePicker
-              value={
-                currentAppointment.time instanceof Date
-                  ? currentAppointment.time
-                  : new Date()
-              }
-              mode="time"
-              display="default"
-              onChange={(event, selectedTime) => {
-                setShowTimePicker(false);
-                if (selectedTime) {
-                  setCurrentAppointment((prev) => ({
-                    ...prev,
-                    time: selectedTime,
-                  }));
-                }
-              }}
-            />
-          )}
-          <TextInput
-            style={styles.input}
-            placeholder="Location"
-            value={currentAppointment.location}
-            onChangeText={(text) =>
-              setCurrentAppointment((prev) => ({
-                ...prev,
-                location: text,
-              }))
-            }
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Notes"
-            value={currentAppointment.notes}
-            onChangeText={(text) =>
-              setCurrentAppointment((prev) => ({
-                ...prev,
-                notes: text,
-              }))
-            }
-          />
-          <Button title="Save" onPress={handleSaveAppointment} />
-          <Button
-            title="Cancel"
-            color="red"
-            onPress={() => setIsModalVisible(false)}
-          />
-        </View>
-      </View>
-    </Modal>
-  );
-
   return (
-    <View
-      style={{
-        padding: 10,
-      }}
-    >
+    <ScrollView contentContainerStyle={styles.scrollContainer}>
       {loading ? (
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={colors.primary} />
         </View>
       ) : (
-        <FlatList
-          data={appointments}
-          renderItem={renderAppointment}
-          keyExtractor={(item) => item.id}
-          ListHeaderComponent={() => (
-            <>
-              <FlatList
-                data={pets}
-                renderItem={renderPetProfile}
-                keyExtractor={(item) => item.id}
-                horizontal
-                style={styles.petList}
-                contentContainerStyle={styles.petListContent}
-              />
-              <View
-                style={{
-                  flexDirection: "row",
-                  justifyContent: "space-between",
-                  borderTopWidth: 1,
-                  borderTopColor: colors.primaryLightest,
-                  paddingTop: 10,
-                  marginBottom: 10,
-                }}
-              >
-                <TouchableOpacity
-                  style={styles.addAppointmentButton}
-                  onPress={() => navigation.navigate("AllAppointments")}
-                >
-                  <Text style={styles.addAppointmentButtonText}>View All</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.addAppointmentButton}
-                  onPress={() => {
-                    setCurrentAppointment({
-                      vetName: "",
-                      date: new Date(),
-                      time: new Date(),
-                      location: "",
-                      notes: "",
-                    });
-                    setIsModalVisible(true);
-                  }}
-                >
-                  <Text style={styles.addAppointmentButtonText}>+ Add New</Text>
-                </TouchableOpacity>
-              </View>
-            </>
+        <>
+          <FlatList
+            data={pets}
+            renderItem={({ item }) => renderPetProfile(item)}
+            keyExtractor={(item) => item.id}
+            horizontal
+            contentContainerStyle={styles.petListContent}
+            showsHorizontalScrollIndicator={false}
+          />
+          <View style={styles.actionsWrapper}>
+            <TouchableOpacity
+              style={styles.addAppointmentButton}
+              onPress={() => navigation.navigate("AllAppointments")}
+            >
+              <Text style={styles.addAppointmentButtonText}>View All</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.addAppointmentButton}
+              onPress={() => {
+                setCurrentAppointment({
+                  vetName: "",
+                  date: new Date(),
+                  time: { hours: 12, minutes: 0 },
+                  location: "",
+                  notes: "",
+                  selectedPets: [],
+                });
+                setIsModalVisible(true);
+              }}
+            >
+              <Text style={styles.addAppointmentButtonText}>+ Add New</Text>
+            </TouchableOpacity>
+          </View>
+
+          {appointments.length === 0 ? (
+            <Text
+              style={{
+                fontSize: 18,
+                color: colors.secondary,
+                textAlign: "center",
+                marginTop: 30,
+              }}
+            >
+              No appointments found.
+            </Text>
+          ) : (
+            appointments.map(renderAppointment)
           )}
-        />
+        </>
       )}
-      {renderModal()}
-    </View>
+
+      <NewAppointmentModal
+        isVisible={isModalVisible}
+        setIsVisible={setIsModalVisible}
+        currentAppointment={currentAppointment}
+        setCurrentAppointment={setCurrentAppointment}
+        handleSaveAppointment={handleSaveAppointment}
+        pets={pets}
+        loading={loading}
+      />
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
+  scrollContainer: {
+    padding: 10,
+    paddingBottom: 80,
+    backgroundColor: colors.background,
+  },
   addAppointmentButton: {
     backgroundColor: colors.accent,
     paddingVertical: 10,
@@ -458,7 +362,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 15,
     justifyContent: "center",
-    alignSelf: "flex-start",
     flexDirection: "row",
   },
   addAppointmentButtonText: {
@@ -467,7 +370,6 @@ const styles = StyleSheet.create({
   },
   loadingContainer: {
     flex: 1,
-    marginVertical: 250,
     justifyContent: "center",
     alignItems: "center",
   },
@@ -493,22 +395,27 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: colors.primary,
   },
-  petList: {
-    maxHeight: 100,
+  petListContent: {
+    paddingRight: 10,
+  },
+  actionsWrapper: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    borderTopWidth: 1,
+    borderTopColor: colors.primaryLightest,
+    paddingTop: 10,
   },
   editButton: {
     backgroundColor: colors.primary,
     paddingVertical: 5,
     paddingHorizontal: 10,
     borderRadius: 8,
-    marginRight: 10,
     marginBottom: 5,
   },
   deleteButton: {
     backgroundColor: "red",
     paddingVertical: 5,
     paddingHorizontal: 10,
-    marginRight: 10,
     borderRadius: 8,
   },
   buttonText: {
@@ -563,12 +470,6 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     paddingVertical: 5,
     paddingHorizontal: 10,
-  },
-  pickerContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
 });
 

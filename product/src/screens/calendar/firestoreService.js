@@ -62,24 +62,30 @@ export const fetchEvents = async () => {
   }
 };
 
-// Function to add a new event
 export const addEvent = async (newEvent, selectedDate, selectedPets) => {
   try {
+    // Get the user ID
     const userId = getUserId();
     const eventRef = collection(firestore, "users", userId, "events");
 
-    // Use default time values if not provided
-    const dateTime = newEvent.dateTime || new Date();
+    // Ensure date and time values are properly provided
+    const dateTime = newEvent.time instanceof Date ? newEvent.time : new Date();
 
     const hours = dateTime.getHours();
     const minutes = dateTime.getMinutes();
 
+    // Validate the selectedDate format (ensure it's 'YYYY-MM-DD')
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(selectedDate)) {
+      throw new Error("Invalid date format. Expected 'YYYY-MM-DD'.");
+    }
+
+    // Add the new event to Firestore
     const docRef = await addDoc(eventRef, {
-      title: newEvent.title || "Untitled Event",
-      time: { hours, minutes },
-      notes: newEvent.notes || "",
-      relatedPets: selectedPets || [],
-      date: selectedDate, // Make sure selectedDate is in 'YYYY-MM-DD' format
+      title: newEvent.title?.trim() || "Untitled Event", // Use title if provided, otherwise use default
+      time: { hours, minutes }, // Store time as hours and minutes
+      notes: newEvent.notes?.trim() || "", // Use notes if provided, otherwise use empty string
+      relatedPets: Array.isArray(selectedPets) ? selectedPets : [], // Ensure relatedPets is an array
+      date: selectedDate, // Must be in 'YYYY-MM-DD' format
       createdAt: Timestamp.now(),
       updatedAt: Timestamp.now(),
     });
@@ -140,7 +146,6 @@ export const updateEvent = async (selectedEvent) => {
 
     // Ensure all fields are updated correctly
     await updateDoc(eventDocRef, updatedData);
-    console.log("Event successfully updated.");
   } catch (error) {
     console.error("Error updating event: ", error);
     throw error;
@@ -156,7 +161,6 @@ export const deleteEvent = async (eventId) => {
     }
     const eventDocRef = doc(firestore, "users", userId, "events", eventId);
     await deleteDoc(eventDocRef);
-    console.log("Event successfully deleted.");
   } catch (error) {
     console.error("Error deleting event: ", error);
     throw error;

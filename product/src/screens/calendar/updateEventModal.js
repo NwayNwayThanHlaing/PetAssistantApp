@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import {
   View,
   Text,
@@ -207,7 +207,7 @@ const styles = StyleSheet.create({
   modalContainer: {
     justifyContent: "center",
     alignItems: "center",
-    margin: 0,
+    margin: 25,
   },
   centeredView: {
     flex: 1,
@@ -238,7 +238,7 @@ const styles = StyleSheet.create({
     maxHeight: "90%",
   },
   scrollViewContent: {
-    paddingBottom: 30,
+    paddingBottom: 10,
   },
   petsSelectionHeader: {
     fontSize: 18,

@@ -4,6 +4,7 @@ import {
   Text,
   StyleSheet,
   ScrollView,
+  TouchableOpacity,
   ActivityIndicator,
 } from "react-native";
 import { colors } from "../styles/Theme";
@@ -12,136 +13,139 @@ import {
   fetchUserVetAppointments,
 } from "../actions/userActions";
 import { getAuth } from "firebase/auth";
-import { Timestamp, doc, getDoc } from "firebase/firestore";
-import { firestore } from "../auth/firebaseConfig";
+import { Timestamp } from "firebase/firestore";
+import { useNavigation } from "@react-navigation/native";
 
 const ReminderPage = () => {
+  const navigation = useNavigation();
+
   const [events, setEvents] = useState([]);
   const [vetAppointments, setVetAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const auth = getAuth();
   const userId = auth.currentUser ? auth.currentUser.uid : null;
-  console.log("Current User ID:", userId); // Debug Log
 
   // Fetch all events and vet appointments for a user
   useEffect(() => {
     if (!userId) return;
+
     const fetchData = async () => {
       setLoading(true);
       try {
         // Fetch Events
         const eventsData = await fetchUserEvents(userId);
 
-        // Fetch related pets for events
-        const updatedEventsData = await Promise.all(
-          eventsData.map(async (event) => {
-            if (event.relatedPets && event.relatedPets.length > 0) {
-              const petNames = await Promise.all(
-                event.relatedPets.map(async (petId) => {
-                  try {
-                    const petDocRef = doc(
-                      firestore,
-                      "users",
-                      userId,
-                      "pets",
-                      petId
-                    );
-                    const petDoc = await getDoc(petDocRef);
-                    if (petDoc.exists()) {
-                      return petDoc.data().name;
-                    } else {
-                      console.warn(`Pet with ID/Name "${petId}" not found.`);
-                      return petId; // Display petId as fallback, assuming it could be the pet name.
-                    }
-                  } catch (error) {
-                    console.error("Error fetching pet name: ", error);
-                    return "Unknown pet";
-                  }
-                })
-              );
-              event.relatedPetsNames = petNames;
-            } else {
-              event.relatedPetsNames = [];
-            }
-            return event;
-          })
-        );
-        setEvents(updatedEventsData);
+        // Since relatedPets already contains pet names, directly use it
+        const updatedEventsData = eventsData.map((event) => {
+          event.relatedPetsNames = event.relatedPets || [];
+          return event;
+        });
+
+        // Filter out past events based on the date (ignoring time)
+        const filteredEvents = updatedEventsData.filter((event) => {
+          const eventDate = getDateOnly(getDateTime(event));
+          const today = getDateOnly(new Date());
+          return eventDate >= today; // Keep events from today or in the future
+        });
+
+        // Sort events by date and time
+        filteredEvents.sort((a, b) => {
+          const dateA = getDateTime(a);
+          const dateB = getDateTime(b);
+          return dateA - dateB;
+        });
+
+        setEvents(filteredEvents);
 
         // Fetch Vet Appointments
         const vetData = await fetchUserVetAppointments(userId);
-        console.log("Fetched Vet Data:", vetData); // Debug Log
-        setVetAppointments(vetData);
+
+        // Filter out past vet appointments based on the date (ignoring time)
+        const filteredVetAppointments = vetData.filter((appointment) => {
+          const appointmentDate = getDateOnly(getDateTime(appointment));
+          const today = getDateOnly(new Date());
+          return appointmentDate >= today; // Keep vet appointments from today or in the future
+        });
+
+        // Sort vet appointments by date and time
+        filteredVetAppointments.sort((a, b) => {
+          const dateA = getDateTime(a);
+          const dateB = getDateTime(b);
+          return dateA - dateB;
+        });
+
+        setVetAppointments(filteredVetAppointments);
       } catch (error) {
         console.error("Failed to fetch events or vet appointments:", error);
       } finally {
         setLoading(false);
       }
     };
+
     fetchData();
   }, [userId]);
 
-  // Utility function to parse Firestore date fields
-  const getDateFromFirestoreField = (timeField) => {
-    if (timeField instanceof Timestamp) {
-      return timeField.toDate(); // Convert Firestore Timestamp to JavaScript Date
-    } else if (typeof timeField === "string" || timeField instanceof Date) {
-      return new Date(timeField); // Handle string or Date type
-    } else {
-      console.warn("Invalid date field detected:", timeField);
-      return null; // Handle invalid or missing date field
+  // Utility function to get the JavaScript Date from different formats
+  const getDateTime = (event) => {
+    let date;
+    if (event.date instanceof Timestamp) {
+      date = event.date.toDate(); // Convert Firestore Timestamp to JS Date
+    } else if (typeof event.date === "string") {
+      const [year, month, day] = event.date.split("-").map(Number);
+      date = new Date(year, month - 1, day);
     }
+
+    if (event.time && event.time instanceof Timestamp) {
+      const time = event.time.toDate();
+      date.setHours(time.getHours(), time.getMinutes(), 0, 0);
+    } else if (
+      typeof event.time === "object" &&
+      event.time.hours !== undefined
+    ) {
+      const { hours, minutes } = event.time;
+      date.setHours(hours, minutes, 0, 0);
+    }
+
+    return date || new Date(); // Return the parsed date or the current date as a fallback
   };
 
-  // Combine and sort events and vet appointments
-  const combinedReminders = [...events, ...vetAppointments].sort((a, b) => {
-    const dateA = getDateFromFirestoreField(a.time);
-    const dateB = getDateFromFirestoreField(b.time);
-    return dateA - dateB;
-  });
-  console.log("Combined Reminders:", combinedReminders); // Debug Log
+  // Utility function to get only the date portion of a JavaScript Date object
+  const getDateOnly = (date) => {
+    return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  };
 
   const renderReminderItem = (item) => {
-    const eventTime = getDateFromFirestoreField(item.time);
+    const eventTime = getDateTime(item);
     const isValidDate = eventTime && !isNaN(eventTime.getTime());
+
+    const formattedDateAndTime = isValidDate
+      ? eventTime.toLocaleString([], {
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: true,
+        })
+      : "No Date Available";
 
     return (
       <View style={styles.reminderItem} key={item.id}>
-        <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
           <Text style={styles.reminderTitle}>
-            {item.type === "vet" ? "Vet Appointment" : item.title}
+            {item.type === "vet" ? `Vet: ${item.vetName}` : item.title}
           </Text>
-          <Text style={styles.reminderTime}>
-            {item.type === "vet" ? (
-              <Text style={styles.reminderTime}>
-                {isValidDate
-                  ? eventTime.toLocaleString([], {
-                      year: "numeric",
-                      month: "2-digit",
-                      day: "2-digit",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                      hour12: true,
-                    })
-                  : "No Date Available"}
-              </Text>
-            ) : (
-              <Text style={styles.reminderTime}>
-                {item.date && item.time
-                  ? `${item.date.split("-").reverse().join("/")}, ${
-                      item.time.hours % 12 || 12
-                    }:${String(item.time.minutes).padStart(2, "0")} ${
-                      item.time.hours >= 12 ? "PM" : "AM"
-                    }`
-                  : "No Date Available"}
-              </Text>
-            )}
-          </Text>
+          <Text style={styles.reminderTime}>{formattedDateAndTime}</Text>
         </View>
         {item.type === "vet" && item.petName && (
           <>
-            <Text style={styles.reminderType}>Vet: {item.vetName}</Text>
             <Text style={styles.reminderNotes}>Pet: {item.petName}</Text>
           </>
         )}
@@ -169,12 +173,54 @@ const ReminderPage = () => {
   }
 
   return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.header}>Upcoming Reminders</Text>
-      {combinedReminders.length === 0 ? (
+    <ScrollView
+      contentContainerStyle={[styles.container, { paddingBottom: 80 }]}
+    >
+      {events.length === 0 && vetAppointments.length === 0 ? (
         <Text style={styles.noRemindersText}>No upcoming reminders.</Text>
       ) : (
-        combinedReminders.map((item) => renderReminderItem(item))
+        <>
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "baseline",
+              justifyContent: "space-between",
+            }}
+          >
+            <Text style={styles.subHeader}>Events</Text>
+
+            <TouchableOpacity
+              onPress={() =>
+                navigation.push("Dashboard", {
+                  initialScreen: "Calendar",
+                })
+              }
+            >
+              <Text style={styles.showAll}>Show All</Text>
+            </TouchableOpacity>
+          </View>
+          {events.slice(0, 3).map((item) => renderReminderItem(item))}
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "baseline",
+              justifyContent: "space-between",
+            }}
+          >
+            <Text style={styles.subHeader}>Vet Appointments</Text>
+
+            <TouchableOpacity
+              onPress={() =>
+                navigation.push("Dashboard", {
+                  initialScreen: "Vet",
+                })
+              }
+            >
+              <Text style={styles.showAll}>Show All</Text>
+            </TouchableOpacity>
+          </View>
+          {vetAppointments.slice(0, 3).map((item) => renderReminderItem(item))}
+        </>
       )}
     </ScrollView>
   );
@@ -182,14 +228,19 @@ const ReminderPage = () => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     backgroundColor: "white",
-    padding: 15,
+    paddingHorizontal: 15,
   },
   header: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: "bold",
     color: colors.primary,
+  },
+  subHeader: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: colors.accent,
+    marginTop: 15,
     marginBottom: 15,
   },
   loadingContainer: {
@@ -208,17 +259,16 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginTop: 20,
   },
-  listContainer: {
-    paddingBottom: 30,
-  },
   reminderItem: {
-    backgroundColor: colors.primaryLightest,
-    padding: 15,
+    backgroundColor: colors.background,
+    borderWidth: 1,
+    borderColor: colors.primaryLightest,
+    padding: 10,
     borderRadius: 10,
     marginBottom: 10,
   },
   reminderTitle: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: "bold",
     color: colors.primary,
   },
@@ -236,6 +286,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: colors.secondary,
     marginTop: 5,
+  },
+  showAll: {
+    color: colors.accent,
+    textDecorationLine: "underline",
+    fontSize: 16,
   },
 });
 

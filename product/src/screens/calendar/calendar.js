@@ -265,37 +265,58 @@ const CalendarPage = () => {
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
       <View style={{ flex: 1 }}>
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "space-between",
-            paddingHorizontal: 15,
-            paddingVertical: 10,
-            backgroundColor: "white",
-          }}
-        >
-          <TouchableOpacity style={styles.addEventButton} onPress={goToToday}>
-            <Text style={styles.addEventButtonText}>Today</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.addEventButton}
-            onPress={() => setIsAddingEvent(true)}
-          >
-            <Text style={styles.addEventButtonText}>+ Add</Text>
-          </TouchableOpacity>
-        </View>
         <ScrollView style={styles.container}>
-          <Calendar
-            current={currentDate}
-            onDayPress={(day) => setSelectedDate(day.dateString)}
-            markedDates={markedDates}
-            markingType={"multi-dot"}
-            theme={{
-              selectedDayBackgroundColor: colors.primary,
-              todayTextColor: colors.accent,
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "space-between",
+              paddingHorizontal: 15,
+              paddingVertical: 10,
+              backgroundColor: "white",
             }}
-          />
+          >
+            <TouchableOpacity style={styles.addEventButton} onPress={goToToday}>
+              <Text style={styles.addEventButtonText}>Today</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.addEventButton}
+              onPress={() => setIsAddingEvent(true)}
+            >
+              <Text style={styles.addEventButtonText}>+ Add</Text>
+            </TouchableOpacity>
+          </View>
+          <View
+            style={{
+              shadowColor: "#000",
+              shadowOffset: {
+                width: 0,
+                height: 2,
+              },
+              shadowOpacity: 0.5,
+              shadowRadius: 3.84,
+              borderRadius: 10,
+              backgroundColor: "white",
+              margin: 15,
+              padding: 10,
+            }}
+          >
+            <Calendar
+              current={currentDate}
+              onDayPress={(day) => setSelectedDate(day.dateString)}
+              markedDates={markedDates}
+              markingType={"multi-dot"}
+              theme={{
+                selectedDayBackgroundColor: colors.primary,
+                todayTextColor: colors.accent,
+                arrowColor: colors.accent,
+                textMonthFontWeight: "bold",
+                textMonthFontSize: 18,
+                textSectionTitleColor: colors.primary,
+                textDayHeaderFontWeight: "bold",
+              }}
+            />
+          </View>
           <View style={styles.eventsContainer}>
             {selectedDate && (
               <>
@@ -360,11 +381,12 @@ const styles = StyleSheet.create({
     padding: 15,
     paddingTop: 20,
     backgroundColor: "white",
+    paddingBottom: 80,
   },
   selectedDateText: {
     fontSize: 16,
     fontWeight: "bold",
-    color: colors.primary,
+    color: colors.accent,
     marginBottom: 10,
   },
   addEventButton: {

@@ -78,7 +78,6 @@ const PetProfile = ({ route, navigation }) => {
     if (!result.canceled) {
       const selectedImageUri = result.assets[0].uri;
       handleFieldChange("imageUrl", selectedImageUri);
-      console.log("Selected Image URI:", selectedImageUri);
     }
   };
 
@@ -180,6 +179,12 @@ const PetProfile = ({ route, navigation }) => {
     >
       <ScrollView contentContainerStyle={styles.container}>
         <TouchableOpacity
+          style={styles.back}
+          onPress={() => navigation.goBack()}
+        >
+          <MaterialIcons name="arrow-back" size={24} color="black" />
+        </TouchableOpacity>
+        <TouchableOpacity
           onPress={isEditing ? pickImage : null}
           style={styles.image}
         >
@@ -273,13 +278,14 @@ const PetProfile = ({ route, navigation }) => {
 
 const styles = StyleSheet.create({
   container: {
-    padding: 10,
+    paddingTop: 60,
+    paddingBottom: 50,
     alignItems: "center",
     backgroundColor: colors.background,
   },
   image: {
     alignItems: "center",
-    marginTop: 80,
+    marginTop: 20,
   },
   petImage: {
     width: 130,
@@ -362,6 +368,14 @@ const styles = StyleSheet.create({
   errorText: {
     fontSize: 18,
     color: "red",
+  },
+  back: {
+    borderRadius: 8,
+    marginTop: 10,
+    marginLeft: 10,
+    color: colors.accent,
+    width: 100,
+    alignSelf: "flex-start",
   },
 });
 

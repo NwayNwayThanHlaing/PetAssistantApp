@@ -25,53 +25,67 @@ import { doc, updateDoc } from "firebase/firestore";
 import { updateEmail } from "firebase/auth";
 import * as ImagePicker from "expo-image-picker";
 
-const fallbackImage = "../../assets/profile.jpg";
 const Profile = ({ navigation }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
+  const [editModalVisible, setEditModalVisible] = useState(false);
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
-  const [editModalVisible, setEditModalVisible] = useState(false);
   const [name, setName] = useState("");
   const [newEmail, setNewEmail] = useState("");
-  const [profileImage, setProfileImage] = useState(user?.profileImage || null);
-
-  useEffect(() => {
-    fetchUserData(setUser, setLoading, navigation);
-  }, [navigation]);
-
-  useEffect(() => {
-    if (user) {
-      setName(user.name || "");
-      setNewEmail(user.email || "");
-      setProfileImage(user.profileImage || null);
-    }
-  }, [user]);
-
-  useEffect(() => {
-    const getPermission = async () => {
-      const { status } =
-        await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (status !== "granted") {
-        Alert.alert(
-          "Permission required",
-          "We need permission to access your photo library to upload profile images."
-        );
-      }
-    };
-
-    getPermission();
-  }, []);
+  const [profileImage, setProfileImage] = useState(null);
+  const defaultProfileImage = require("../../assets/profile.jpg");
 
   const settingsOptions = [
     { id: "1", title: "Change Password", icon: "lock" },
     { id: "2", title: "Update Profile", icon: "image" },
-    { id: "3", title: "Notifications", icon: "notifications" },
-    { id: "4", title: "Log Out", icon: "logout" },
-    { id: "5", title: "Delete Account", icon: "delete" },
+    { id: "3", title: "Log Out", icon: "logout" },
+    { id: "4", title: "Delete Account", icon: "delete" },
   ];
+
+  const getProfileImageSource = (imageUri) => {
+    return imageUri && imageUri !== "default"
+      ? { uri: imageUri }
+      : defaultProfileImage;
+  };
+
+  // Load user data on component mount
+  useEffect(() => {
+    const loadUserData = async () => {
+      setLoading(true);
+      try {
+        const userId = auth.currentUser?.uid;
+        if (!userId) {
+          console.warn("User is not logged in. Redirecting to login...");
+          setLoading(false);
+          navigation.navigate("Login");
+          return;
+        }
+
+        const fetchedUserData = await fetchUserData(userId);
+        if (fetchedUserData) {
+          setUser(fetchedUserData);
+          setName(fetchedUserData.name || "");
+          setNewEmail(fetchedUserData.email || "");
+          setProfileImage(fetchedUserData.profileImage || "default");
+        } else {
+          Alert.alert(
+            "Error",
+            "User data could not be loaded. Please try again."
+          );
+        }
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+        Alert.alert("Error", error.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadUserData();
+  }, [navigation]);
 
   const handleSettingPress = (title) => {
     if (title === "Log Out") {
@@ -89,6 +103,7 @@ const Profile = ({ navigation }) => {
     try {
       const permissionResult =
         await ImagePicker.requestMediaLibraryPermissionsAsync();
+
       if (permissionResult.status !== "granted") {
         Alert.alert(
           "Permission Denied",
@@ -102,12 +117,11 @@ const Profile = ({ navigation }) => {
         quality: 1,
       });
 
-      if (!result.canceled) {
+      if (!result.canceled && result.assets?.length > 0) {
         const uri = result.assets[0].uri;
-        console.log("Selected image URI: ", uri);
         setProfileImage(uri);
       } else {
-        console.log("Image selection canceled");
+        console.log("Image selection canceled or invalid structure");
       }
     } catch (error) {
       console.error("Error selecting image: ", error);
@@ -117,6 +131,7 @@ const Profile = ({ navigation }) => {
 
   const uploadProfileImage = async (imageUri) => {
     if (!imageUri) return null;
+
     const formData = new FormData();
     formData.append("file", {
       uri: imageUri,
@@ -148,30 +163,30 @@ const Profile = ({ navigation }) => {
   };
 
   const handleUpdateProfile = async () => {
-    setUploading(true);
     try {
       const userId = auth.currentUser.uid;
       const userRef = doc(firestore, "users", userId);
 
       let profileImageUrl = user.profileImage;
+      setUploading(true);
 
-      if (profileImage && profileImage !== user.profileImage) {
+      // Upload if a new image is selected
+      if (
+        profileImage &&
+        typeof profileImage === "string" &&
+        profileImage.startsWith("file://")
+      ) {
         const uploadedUrl = await uploadProfileImage(profileImage);
         if (uploadedUrl) {
           profileImageUrl = uploadedUrl;
-          const newPublicId = uploadedUrl.split("/").pop().split(".")[0];
-          await updateDoc(userRef, { profileImagePublicId: newPublicId });
         }
       }
 
       const updateData = {
         name: name,
         email: newEmail || user.email,
+        profileImage: profileImageUrl || "default", // Use "default" if no image
       };
-
-      if (profileImageUrl) {
-        updateData.profileImage = profileImageUrl;
-      }
 
       await updateDoc(userRef, updateData);
 
@@ -207,6 +222,7 @@ const Profile = ({ navigation }) => {
     return (
       <View style={styles.errorContainer}>
         <Text>Error loading user data</Text>
+        <Button title="Retry" onPress={() => navigation.navigate("Profile")} />
       </View>
     );
   }
@@ -214,7 +230,7 @@ const Profile = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <Image
-        source={profileImage ? { uri: profileImage } : require(fallbackImage)}
+        source={getProfileImageSource(profileImage)}
         style={styles.profilePicture}
       />
       <Text style={styles.name}>{user.name}</Text>
@@ -262,7 +278,6 @@ const Profile = ({ navigation }) => {
               value={newPassword}
               onChangeText={setNewPassword}
             />
-
             <TouchableOpacity
               style={styles.updateButton}
               onPress={() =>
@@ -275,7 +290,6 @@ const Profile = ({ navigation }) => {
             >
               <Text style={styles.buttonText}>Update Password</Text>
             </TouchableOpacity>
-
             <TouchableOpacity
               style={styles.cancelButton}
               onPress={() => setModalVisible(false)}
@@ -299,9 +313,7 @@ const Profile = ({ navigation }) => {
 
             <TouchableOpacity onPress={pickImage} style={styles.imagePicker}>
               <Image
-                source={
-                  profileImage ? { uri: profileImage } : require(fallbackImage)
-                }
+                source={getProfileImageSource(profileImage)}
                 style={styles.profilePicture}
               />
               <Text
@@ -328,7 +340,7 @@ const Profile = ({ navigation }) => {
               style={styles.input}
               placeholder="Email"
               placeholderTextColor={colors.primaryLighter}
-              value={newEmail || user?.email}
+              value={newEmail || email}
               onChangeText={setNewEmail}
               keyboardType="email-address"
               autoCapitalize="none"
@@ -340,7 +352,7 @@ const Profile = ({ navigation }) => {
               disabled={uploading}
             >
               {uploading ? (
-                <ActivityIndicator color="white" />
+                <ActivityIndicator size="small" color="white" />
               ) : (
                 <Text style={styles.buttonText}>Save Changes</Text>
               )}

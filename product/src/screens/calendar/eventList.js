@@ -39,8 +39,6 @@ const EventList = ({ onEventPress, selectedDate }) => {
         // Ensure the selected date is in the correct format: 'YYYY-MM-DD'
         const selectedDateString = selectedDate;
 
-        console.log("Selected Date for Query: ", selectedDateString);
-
         // Query Firestore to get events where the date matches the selected date
         const eventsQuery = query(
           eventsRef,
@@ -50,16 +48,11 @@ const EventList = ({ onEventPress, selectedDate }) => {
         // Set up real-time listener
         unsubscribe = onSnapshot(eventsQuery, (snapshot) => {
           if (snapshot.empty) {
-            console.log(
-              "No events found for the selected date: ",
-              selectedDateString
-            );
             setTodayEvents([]);
           } else {
             // Extract events data from Firestore snapshot
             const eventsData = snapshot.docs.map((doc) => {
               const eventData = doc.data();
-              console.log("Fetched Event: ", eventData); // Log each event fetched
               return { id: doc.id, ...eventData };
             });
             setTodayEvents(eventsData);
