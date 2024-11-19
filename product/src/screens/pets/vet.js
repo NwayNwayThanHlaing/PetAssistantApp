@@ -11,6 +11,7 @@ import {
   Modal,
   TextInput,
   Button,
+  Alert,
 } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { firestore, auth } from "../../auth/firebaseConfig";
@@ -77,13 +78,19 @@ const Vet = () => {
       const appointmentDocs = await getDocs(q);
       const fetchedAppointments = appointmentDocs.docs.map((doc) => {
         const data = doc.data();
+        // Handle both string date or Timestamp
+        let date = data.date;
+        if (data.date instanceof Timestamp) {
+          date = data.date.toDate();
+        } else if (typeof data.date === "string") {
+          const [year, month, day] = data.date.split("-").map(Number);
+          date = new Date(year, month - 1, day);
+        }
+
         return {
           id: doc.id,
           ...data,
-          date:
-            data.date && data.date.seconds
-              ? new Date(data.date.seconds * 1000)
-              : new Date(),
+          date: date, // Correctly assign the Date object
           time: data.time || { hours: 12, minutes: 0 },
         };
       });
@@ -153,6 +160,47 @@ const Vet = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Updated handleDeleteAppointment function
+  const handleDeleteAppointment = async (appointmentId) => {
+    Alert.alert(
+      "Delete Appointment",
+      "Are you sure you want to delete this appointment?",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            setLoading(true);
+            try {
+              const userId = auth.currentUser.uid;
+              const appointmentDocRef = doc(
+                firestore,
+                `users/${userId}/appointments`,
+                appointmentId
+              );
+              await deleteDoc(appointmentDocRef);
+              setAppointments((prev) =>
+                prev.filter((item) => item.id !== appointmentId)
+              );
+
+              console.log(
+                `Appointment with id: ${appointmentId} deleted successfully.`
+              );
+            } catch (error) {
+              console.error("Error deleting appointment:", error);
+            } finally {
+              setLoading(false);
+            }
+          },
+        },
+      ]
+    );
   };
 
   // Render Pet Profile
