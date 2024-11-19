@@ -18,13 +18,13 @@ import { SafeAreaView } from "react-native-safe-area-context";
 const AllAppointments = () => {
   const navigation = useNavigation();
   const [appointments, setAppointments] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [pets, setPets] = useState({});
 
   useEffect(() => {
     const fetchPetsAndAppointments = async () => {
-      setLoading(true);
       try {
+        setLoading(true);
         const userId = auth.currentUser.uid;
         const petsCollectionRef = collection(firestore, `users/${userId}/pets`);
         const appointmentsCollectionRef = collection(
@@ -42,15 +42,41 @@ const AllAppointments = () => {
 
         // Fetch appointments
         const appointmentDocs = await getDocs(appointmentsCollectionRef);
-        const fetchedAppointments = appointmentDocs.docs
-          .map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-          }))
-          .filter((appointment) => dayjs(appointment.date).isAfter(dayjs()))
-          .sort((a, b) => dayjs(a.date).unix() - dayjs(b.date).unix());
+        const fetchedAppointments = appointmentDocs.docs.map((doc) => {
+          const data = doc.data();
 
-        setAppointments(fetchedAppointments);
+          // Date is directly from Firestore as a string in "YYYY-MM-DD" format
+          const date = data.date;
+
+          // Extract `hours` and `minutes` from `time` and create a formatted time string
+          const time =
+            data.time &&
+            typeof data.time.hours === "number" &&
+            typeof data.time.minutes === "number"
+              ? `${data.time.hours
+                  .toString()
+                  .padStart(2, "0")}:${data.time.minutes
+                  .toString()
+                  .padStart(2, "0")}`
+              : "00:00";
+
+          return {
+            id: doc.id,
+            ...data,
+            date: date, // Use the string directly
+            time: time, // Use the formatted time string
+          };
+        });
+
+        // Today's date in "YYYY-MM-DD" format for comparison
+        const today = dayjs().format("YYYY-MM-DD");
+
+        // Filter and sort appointments to only include future appointments or today
+        const upcomingAppointments = fetchedAppointments
+          .filter((appointment) => appointment.date >= today)
+          .sort((a, b) => (a.date > b.date ? 1 : -1));
+
+        setAppointments(upcomingAppointments);
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
@@ -69,14 +95,18 @@ const AllAppointments = () => {
         </Text>
         <Text style={styles.appointmentDetails}>Date: {appointment.date}</Text>
         <Text style={styles.appointmentDetails}>Time: {appointment.time}</Text>
+        {appointment.location && (
+          <Text style={styles.appointmentDetails}>
+            Location: {appointment.location}
+          </Text>
+        )}
+        {appointment.notes && (
+          <Text style={styles.appointmentDetails}>
+            Notes: {appointment.notes}
+          </Text>
+        )}
         <Text style={styles.appointmentDetails}>
-          Location: {appointment.location}
-        </Text>
-        <Text style={styles.appointmentDetails}>
-          Notes: {appointment.notes || "None"}
-        </Text>
-        <Text style={styles.appointmentDetails}>
-          Pet: {pets[appointment.petId]?.name || "Unknown"}
+          Pet: {pets[appointment.petId]?.name || "No pets selected"}
         </Text>
       </View>
     );
@@ -84,7 +114,7 @@ const AllAppointments = () => {
 
   const groupAppointmentsByDate = (appointments) => {
     return appointments.reduce((groups, appointment) => {
-      const date = dayjs(appointment.date).format("YYYY-MM-DD");
+      const date = appointment.date; // Already formatted as `YYYY-MM-DD`
       if (!groups[date]) {
         groups[date] = [];
       }
@@ -135,14 +165,15 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
-    padding: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
   },
   header: {
     fontSize: 16,
     fontWeight: "bold",
     color: colors.primary,
     textAlign: "center",
-    marginBottom: 15,
+    padding: 10,
     textDecorationLine: "underline",
     alignSelf: "center",
   },

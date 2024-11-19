@@ -29,6 +29,7 @@ const ReminderPage = () => {
   // Fetch all events and vet appointments for a user
   useEffect(() => {
     if (!userId) return;
+
     const fetchData = async () => {
       setLoading(true);
       try {
@@ -81,6 +82,7 @@ const ReminderPage = () => {
         setLoading(false);
       }
     };
+
     fetchData();
   }, [userId]);
 

@@ -38,7 +38,7 @@ const Vet = () => {
   const [currentAppointment, setCurrentAppointment] = useState({
     vetName: "",
     date: new Date(),
-    time: new Date(),
+    time: { hours: 12, minutes: 0 },
     location: "",
     notes: "",
   });
@@ -84,10 +84,7 @@ const Vet = () => {
             data.date && data.date.seconds
               ? new Date(data.date.seconds * 1000)
               : new Date(),
-          time:
-            data.time && data.time.seconds
-              ? new Date(data.time.seconds * 1000)
-              : new Date(),
+          time: data.time || { hours: 12, minutes: 0 },
         };
       });
       setAppointments(fetchedAppointments);
@@ -126,6 +123,7 @@ const Vet = () => {
         );
         await updateDoc(appointmentDocRef, {
           ...currentAppointment,
+          time: currentAppointment.time,
           petId: selectedPetId,
           updatedAt: Timestamp.now(),
         });
@@ -133,6 +131,7 @@ const Vet = () => {
         // Add new appointment
         await addDoc(appointmentsRef, {
           ...currentAppointment,
+          time: currentAppointment.time,
           petId: selectedPetId,
           createdAt: Timestamp.now(),
           updatedAt: Timestamp.now(),
@@ -142,7 +141,7 @@ const Vet = () => {
       setCurrentAppointment({
         vetName: "",
         date: new Date(),
-        time: new Date(),
+        time: { hours: 12, minutes: 0 },
         location: "",
         notes: "",
       });
@@ -189,8 +188,10 @@ const Vet = () => {
         </Text>
         <Text style={styles.appointmentDetails}>
           Time:{" "}
-          {item.time instanceof Date
-            ? item.time.toLocaleTimeString()
+          {item.time
+            ? `${item.time.hours}:${item.time.minutes
+                .toString()
+                .padStart(2, "0")}`
             : "Invalid Time"}
         </Text>
         {item.location && (
@@ -209,7 +210,7 @@ const Vet = () => {
             setCurrentAppointment({
               ...item,
               date: item.date instanceof Date ? item.date : new Date(),
-              time: item.time instanceof Date ? item.time : new Date(),
+              time: item.time || { hours: 12, minutes: 0 },
             });
             setIsModalVisible(true);
           }}
@@ -287,16 +288,20 @@ const Vet = () => {
           >
             <Text>
               Time:{" "}
-              {currentAppointment.time instanceof Date
-                ? currentAppointment.time.toLocaleTimeString()
+              {currentAppointment.time
+                ? `${
+                    currentAppointment.time.hours
+                  }:${currentAppointment.time.minutes
+                    .toString()
+                    .padStart(2, "0")}`
                 : ""}
             </Text>
           </TouchableOpacity>
           {showTimePicker && (
             <DateTimePicker
               value={
-                currentAppointment.time instanceof Date
-                  ? currentAppointment.time
+                currentAppointment.date instanceof Date
+                  ? currentAppointment.date
                   : new Date()
               }
               mode="time"
@@ -306,7 +311,10 @@ const Vet = () => {
                 if (selectedTime) {
                   setCurrentAppointment((prev) => ({
                     ...prev,
-                    time: selectedTime,
+                    time: {
+                      hours: selectedTime.getHours(),
+                      minutes: selectedTime.getMinutes(),
+                    },
                   }));
                 }
               }}
@@ -388,7 +396,7 @@ const Vet = () => {
                   setCurrentAppointment({
                     vetName: "",
                     date: new Date(),
-                    time: new Date(),
+                    time: { hours: 12, minutes: 0 },
                     location: "",
                     notes: "",
                   });
