@@ -12,7 +12,6 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { colors } from "../styles/Theme";
-import { useTheme } from "../contexts/ThemeContext";
 import { auth, firestore } from "./firebaseConfig";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
@@ -43,7 +42,7 @@ const Signup = ({ navigation }) => {
         uid: user.uid,
         name: name,
         email: email,
-        profileImage: null,
+        profileImage: "default",
       };
 
       await setDoc(doc(firestore, "users", user.uid), userData);

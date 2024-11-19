@@ -33,7 +33,7 @@ const Vet = () => {
   const [pets, setPets] = useState([]);
   const [selectedPetId, setSelectedPetId] = useState(null);
   const [appointments, setAppointments] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [currentAppointment, setCurrentAppointment] = useState({
     vetName: "",
@@ -68,7 +68,6 @@ const Vet = () => {
 
   // Fetch appointments for selected pet
   const fetchAppointments = async (petId) => {
-    setLoading(true);
     try {
       const appointmentsRef = collection(
         firestore,
@@ -94,8 +93,6 @@ const Vet = () => {
       setAppointments(fetchedAppointments);
     } catch (error) {
       console.error("Error fetching appointments:", error);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -366,29 +363,42 @@ const Vet = () => {
               showsHorizontalScrollIndicator={false}
             />
           </View>
-          <View style={styles.actionsWrapper}>
-            <TouchableOpacity
-              style={styles.addAppointmentButton}
-              onPress={() => navigation.navigate("AllAppointments")}
-            >
-              <Text style={styles.addAppointmentButtonText}>View All</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.addAppointmentButton}
-              onPress={() => {
-                setCurrentAppointment({
-                  vetName: "",
-                  date: new Date(),
-                  time: new Date(),
-                  location: "",
-                  notes: "",
-                });
-                setIsModalVisible(true);
+          {appointments.length === 0 ? (
+            <Text
+              style={{
+                fontSize: 18,
+                color: colors.secondary,
+                textAlign: "center",
+                marginTop: 10,
               }}
             >
-              <Text style={styles.addAppointmentButtonText}>+ Add New</Text>
-            </TouchableOpacity>
-          </View>
+              No appointments found.
+            </Text>
+          ) : (
+            <View style={styles.actionsWrapper}>
+              <TouchableOpacity
+                style={styles.addAppointmentButton}
+                onPress={() => navigation.navigate("AllAppointments")}
+              >
+                <Text style={styles.addAppointmentButtonText}>View All</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.addAppointmentButton}
+                onPress={() => {
+                  setCurrentAppointment({
+                    vetName: "",
+                    date: new Date(),
+                    time: new Date(),
+                    location: "",
+                    notes: "",
+                  });
+                  setIsModalVisible(true);
+                }}
+              >
+                <Text style={styles.addAppointmentButtonText}>+ Add New</Text>
+              </TouchableOpacity>
+            </View>
+          )}
           {appointments.map(renderAppointment)}
         </>
       )}

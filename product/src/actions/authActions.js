@@ -8,6 +8,11 @@ import {
 } from "firebase/auth";
 import { auth } from "../auth/firebaseConfig";
 import { deleteDoc, doc } from "firebase/firestore";
+import { firestore } from "../auth/firebaseConfig";
+const reauthenticateUser = async (email, password) => {
+  const credential = EmailAuthProvider.credential(email, password);
+  await reauthenticateWithCredential(auth.currentUser, credential);
+};
 
 // Sign Out Function
 export const handleSignOut = async (navigation) => {
@@ -62,37 +67,52 @@ export const handleChangePassword = async (
 // Delete Account Function
 export const handleDeleteAccount = async (navigation) => {
   const user = auth.currentUser;
+
   if (user) {
     const userId = user.uid;
-    try {
-      Alert.alert(
-        "Delete Account",
-        "Are you sure you want to delete your account? This action cannot be undone.",
-        [
-          { text: "Cancel", style: "cancel" },
-          {
-            text: "Delete",
-            style: "destructive",
-            onPress: async () => {
-              await deleteDoc(doc(firestore, "users", userId));
-              await user.delete();
-              Alert.alert("Account Deleted", "Your account has been deleted.");
-              navigation.navigate("SignUp");
-            },
-          },
-        ]
-      );
-    } catch (error) {
-      console.error("Error deleting account: ", error);
-      if (error.code === "auth/requires-recent-login") {
-        Alert.alert(
-          "Session Expired",
-          "Please sign in again to delete your account."
-        );
-      } else {
-        Alert.alert("Error", error.message);
+
+    const deleteAccount = async () => {
+      try {
+        await deleteDoc(doc(firestore, "users", userId));
+        await user.delete();
+        Alert.alert("Account Deleted", "Your account has been deleted.");
+        navigation.navigate("SignUp");
+      } catch (error) {
+        console.error("Error deleting account: ", error);
+
+        if (error.code === "auth/requires-recent-login") {
+          Alert.alert(
+            "Session Expired",
+            "Please re-enter your credentials to delete your account.",
+            [
+              {
+                text: "Reauthenticate",
+                onPress: async () => {
+                  try {
+                    const password = prompt("Enter your password:");
+                    await reauthenticateUser(user.email, password);
+                    deleteAccount(); // Retry account deletion after reauthentication
+                  } catch (reauthError) {
+                    Alert.alert("Error", reauthError.message);
+                  }
+                },
+              },
+            ]
+          );
+        } else {
+          Alert.alert("Error", error.message);
+        }
       }
-    }
+    };
+
+    Alert.alert(
+      "Delete Account",
+      "Are you sure you want to delete your account? This action cannot be undone.",
+      [
+        { text: "Cancel", style: "cancel" },
+        { text: "Delete", style: "destructive", onPress: deleteAccount },
+      ]
+    );
   } else {
     Alert.alert("Error", "No user is currently signed in.");
   }

@@ -9,7 +9,6 @@ export const fetchUserEvents = async (userId) => {
     const eventsSnapshot = await getDocs(eventsCollection);
 
     if (eventsSnapshot.empty) {
-      console.warn("No events found for user");
       return [];
     }
 

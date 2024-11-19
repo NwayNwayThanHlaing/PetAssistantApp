@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   View,
   Text,
@@ -25,11 +25,10 @@ const AddEventModal = ({
   addEvent,
   loading,
 }) => {
-  // Function to reset newEvent to default values
   const resetNewEvent = () => {
     setNewEvent({
       title: "",
-      time: new Date(new Date().setHours(0, 0, 0, 0)), // Default to 12:00 AM
+      time: new Date(new Date().setHours(0, 0, 0, 0)),
       notes: "",
     });
     setSelectedPets([]);
@@ -43,27 +42,9 @@ const AddEventModal = ({
     );
   };
 
-  // Ensure newEvent.time is always set to 12:00 AM (midnight) initially
-  const ensureValidTime = () => {
-    if (!newEvent.time || !(newEvent.time instanceof Date)) {
-      // Set default time to 12:00 AM
-      const defaultTime = new Date();
-      defaultTime.setHours(0);
-      defaultTime.setMinutes(0);
-      defaultTime.setSeconds(0);
-      defaultTime.setMilliseconds(0);
-      setNewEvent((prevEvent) => ({
-        ...prevEvent,
-        time: defaultTime,
-      }));
-    }
-  };
-
-  React.useEffect(() => {
+  useEffect(() => {
     if (isVisible) {
-      ensureValidTime(); // Ensure time is set correctly when the modal is first shown
-    } else {
-      resetNewEvent(); // Reset event data when modal is closed
+      resetNewEvent();
     }
   }, [isVisible]);
 
@@ -90,11 +71,18 @@ const AddEventModal = ({
               <DateTimePicker
                 mode="time"
                 value={
-                  newEvent.time instanceof Date ? newEvent.time : new Date()
+                  newEvent.time && newEvent.time instanceof Date
+                    ? newEvent.time
+                    : new Date()
                 }
-                onChange={(event, date) =>
-                  setNewEvent({ ...newEvent, time: date || newEvent.time })
-                }
+                onChange={(event, selectedTime) => {
+                  if (selectedTime) {
+                    setNewEvent((prevEvent) => ({
+                      ...prevEvent,
+                      time: selectedTime,
+                    }));
+                  }
+                }}
                 is24Hour={false} // Use AM/PM format
               />
             </View>
@@ -108,13 +96,12 @@ const AddEventModal = ({
             />
             <Text style={styles.petsSelectionHeader}>Select Pets</Text>
             <View style={styles.petButtonsContainer}>
-              {petNames.map((item, index) => (
+              {petNames.map((item) => (
                 <TouchableOpacity
                   key={item}
                   style={[
                     styles.petButton,
                     selectedPets.includes(item) && styles.petSelected,
-                    index === petNames.length - 1 && styles.lastPetButton,
                   ]}
                   onPress={() => togglePetSelection(item)}
                 >
@@ -139,7 +126,9 @@ const AddEventModal = ({
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.modalButton, styles.saveButton]}
-                onPress={addEvent}
+                onPress={() => {
+                  addEvent();
+                }}
                 disabled={loading}
               >
                 {loading ? (
@@ -160,14 +149,14 @@ const styles = StyleSheet.create({
   modalContainer: {
     justifyContent: "center",
     alignItems: "center",
-    margin: 0,
+    margin: 10,
   },
   modalContent: {
     backgroundColor: "white",
     padding: 20,
     borderRadius: 10,
-    width: "90%", // Set modal width to fit better on the screen
-    maxHeight: "80%", // Limit modal height
+    width: "90%",
+    maxHeight: "80%",
     alignSelf: "center",
   },
   scrollViewContent: {

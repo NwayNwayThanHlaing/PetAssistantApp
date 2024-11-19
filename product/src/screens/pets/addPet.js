@@ -48,10 +48,7 @@ const AddPet = ({ navigation }) => {
     });
 
     if (!result.canceled) {
-      console.log("ImagePicker result:", result);
       setImageUri(result.assets[0].uri);
-    } else {
-      console.log("Image selection canceled");
     }
   };
 
@@ -76,7 +73,6 @@ const AddPet = ({ navigation }) => {
       });
 
       const result = await response.json();
-      console.log("Cloudinary upload result:", result);
 
       if (result.secure_url) {
         return result.secure_url;

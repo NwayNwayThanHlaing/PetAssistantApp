@@ -7,6 +7,7 @@ import {
   StyleSheet,
   FlatList,
   ActivityIndicator,
+  Button,
   Alert,
   Modal,
   TextInput,
@@ -24,8 +25,6 @@ import { doc, updateDoc } from "firebase/firestore";
 import { updateEmail } from "firebase/auth";
 import * as ImagePicker from "expo-image-picker";
 
-const fallbackImage = "../../assets/profile.jpg";
-
 const Profile = ({ navigation }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -37,6 +36,20 @@ const Profile = ({ navigation }) => {
   const [name, setName] = useState("");
   const [newEmail, setNewEmail] = useState("");
   const [profileImage, setProfileImage] = useState(null);
+  const defaultProfileImage = require("../../assets/profile.jpg");
+
+  const settingsOptions = [
+    { id: "1", title: "Change Password", icon: "lock" },
+    { id: "2", title: "Update Profile", icon: "image" },
+    { id: "3", title: "Log Out", icon: "logout" },
+    { id: "4", title: "Delete Account", icon: "delete" },
+  ];
+
+  const getProfileImageSource = (imageUri) => {
+    return imageUri && imageUri !== "default"
+      ? { uri: imageUri }
+      : defaultProfileImage;
+  };
 
   // Load user data on component mount
   useEffect(() => {
@@ -56,7 +69,7 @@ const Profile = ({ navigation }) => {
           setUser(fetchedUserData);
           setName(fetchedUserData.name || "");
           setNewEmail(fetchedUserData.email || "");
-          setProfileImage(fetchedUserData.profileImage || null);
+          setProfileImage(fetchedUserData.profileImage || "default");
         } else {
           Alert.alert(
             "Error",
@@ -90,6 +103,7 @@ const Profile = ({ navigation }) => {
     try {
       const permissionResult =
         await ImagePicker.requestMediaLibraryPermissionsAsync();
+
       if (permissionResult.status !== "granted") {
         Alert.alert(
           "Permission Denied",
@@ -103,9 +117,8 @@ const Profile = ({ navigation }) => {
         quality: 1,
       });
 
-      if (!result.canceled && result.assets && result.assets.length > 0) {
+      if (!result.canceled && result.assets?.length > 0) {
         const uri = result.assets[0].uri;
-        console.log("Selected image URI: ", uri);
         setProfileImage(uri);
       } else {
         console.log("Image selection canceled or invalid structure");
@@ -116,15 +129,53 @@ const Profile = ({ navigation }) => {
     }
   };
 
+  const uploadProfileImage = async (imageUri) => {
+    if (!imageUri) return null;
+
+    const formData = new FormData();
+    formData.append("file", {
+      uri: imageUri,
+      type: "image/jpeg",
+      name: "profile_image.jpg",
+    });
+    formData.append("upload_preset", "purr_note");
+
+    try {
+      const response = await fetch(
+        "https://api.cloudinary.com/v1_1/dunbwugns/image/upload",
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+      const data = await response.json();
+
+      if (data.secure_url) {
+        return data.secure_url;
+      } else {
+        console.error("Upload failed, no secure_url returned:", data);
+        return null;
+      }
+    } catch (error) {
+      console.error("Image upload failed:", error);
+      return null;
+    }
+  };
+
   const handleUpdateProfile = async () => {
-    setUploading(true);
     try {
       const userId = auth.currentUser.uid;
       const userRef = doc(firestore, "users", userId);
 
       let profileImageUrl = user.profileImage;
+      setUploading(true);
 
-      if (profileImage && profileImage !== user.profileImage) {
+      // Upload if a new image is selected
+      if (
+        profileImage &&
+        typeof profileImage === "string" &&
+        profileImage.startsWith("file://")
+      ) {
         const uploadedUrl = await uploadProfileImage(profileImage);
         if (uploadedUrl) {
           profileImageUrl = uploadedUrl;
@@ -134,11 +185,8 @@ const Profile = ({ navigation }) => {
       const updateData = {
         name: name,
         email: newEmail || user.email,
+        profileImage: profileImageUrl || "default", // Use "default" if no image
       };
-
-      if (profileImageUrl) {
-        updateData.profileImage = profileImageUrl;
-      }
 
       await updateDoc(userRef, updateData);
 
@@ -182,19 +230,14 @@ const Profile = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <Image
-        source={profileImage ? { uri: profileImage } : require(fallbackImage)}
+        source={getProfileImageSource(profileImage)}
         style={styles.profilePicture}
       />
       <Text style={styles.name}>{user.name}</Text>
       <Text style={styles.email}>{user.email}</Text>
 
       <FlatList
-        data={[
-          { id: "1", title: "Change Password", icon: "lock" },
-          { id: "2", title: "Update Profile", icon: "image" },
-          { id: "4", title: "Log Out", icon: "logout" },
-          { id: "5", title: "Delete Account", icon: "delete" },
-        ]}
+        data={settingsOptions}
         renderItem={({ item }) => (
           <TouchableOpacity
             style={styles.settingItem}
@@ -206,10 +249,128 @@ const Profile = ({ navigation }) => {
         )}
         keyExtractor={(item) => item.id}
         style={styles.settingsList}
+        scrollEnabled={false}
       />
+
+      {/* Change Password Modal */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Change Password</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Current Password"
+              placeholderTextColor={colors.primaryLighter}
+              secureTextEntry
+              value={currentPassword}
+              onChangeText={setCurrentPassword}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="New Password"
+              placeholderTextColor={colors.primaryLighter}
+              secureTextEntry
+              value={newPassword}
+              onChangeText={setNewPassword}
+            />
+            <TouchableOpacity
+              style={styles.updateButton}
+              onPress={() =>
+                handleChangePassword(
+                  currentPassword,
+                  newPassword,
+                  setModalVisible
+                )
+              }
+            >
+              <Text style={styles.buttonText}>Update Password</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.cancelButton}
+              onPress={() => setModalVisible(false)}
+            >
+              <Text style={styles.buttonText}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Update Profile Modal */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={editModalVisible}
+        onRequestClose={() => setEditModalVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Edit Profile</Text>
+
+            <TouchableOpacity onPress={pickImage} style={styles.imagePicker}>
+              <Image
+                source={getProfileImageSource(profileImage)}
+                style={styles.profilePicture}
+              />
+              <Text
+                style={{
+                  color: colors.primary,
+                  marginBottom: 10,
+                  textAlign: "center",
+                  textDecorationLine: "underline",
+                }}
+              >
+                Upload Image
+              </Text>
+            </TouchableOpacity>
+
+            <TextInput
+              style={styles.input}
+              placeholder="Name"
+              placeholderTextColor={colors.primaryLighter}
+              value={name}
+              onChangeText={setName}
+            />
+
+            <TextInput
+              style={styles.input}
+              placeholder="Email"
+              placeholderTextColor={colors.primaryLighter}
+              value={newEmail || email}
+              onChangeText={setNewEmail}
+              keyboardType="email-address"
+              autoCapitalize="none"
+            />
+
+            <TouchableOpacity
+              style={styles.updateButton}
+              onPress={handleUpdateProfile}
+              disabled={uploading}
+            >
+              {uploading ? (
+                <ActivityIndicator size="small" color="white" />
+              ) : (
+                <Text style={styles.buttonText}>Save Changes</Text>
+              )}
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.cancelButton}
+              onPress={() => setEditModalVisible(false)}
+            >
+              <Text style={styles.buttonText}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,

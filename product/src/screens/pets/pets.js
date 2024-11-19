@@ -40,7 +40,7 @@ const Pets = ({ navigation }) => {
       }
     };
     if (isFocused) {
-      fetchPets(); // Refetch pets data when screen regains focus
+      fetchPets();
     }
   }, [isFocused]);
 
@@ -96,7 +96,20 @@ const Pets = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>My Pets</Text>
+      {pets.length === 0 ? (
+        <Text
+          style={{
+            fontSize: 18,
+            color: colors.secondary,
+            textAlign: "center",
+            marginTop: 20,
+          }}
+        >
+          No pets found
+        </Text>
+      ) : (
+        <Text style={styles.header}>My Pets</Text>
+      )}
       <FlatList
         data={pets}
         renderItem={renderPetItem}
@@ -111,6 +124,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingHorizontal: 20,
+    paddingVertical: 10,
   },
   loadingContainer: {
     flex: 1,

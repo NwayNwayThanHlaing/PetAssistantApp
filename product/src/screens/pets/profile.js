@@ -78,7 +78,6 @@ const PetProfile = ({ route, navigation }) => {
     if (!result.canceled) {
       const selectedImageUri = result.assets[0].uri;
       handleFieldChange("imageUrl", selectedImageUri);
-      console.log("Selected Image URI:", selectedImageUri);
     }
   };
 
