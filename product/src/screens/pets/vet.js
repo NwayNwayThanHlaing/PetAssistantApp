@@ -8,12 +8,8 @@ import {
   StyleSheet,
   FlatList,
   ActivityIndicator,
-  Modal,
-  TextInput,
-  Button,
   Alert,
 } from "react-native";
-import DateTimePicker from "@react-native-community/datetimepicker";
 import { firestore, auth } from "../../auth/firebaseConfig";
 import { useNavigation } from "@react-navigation/native";
 import {
@@ -28,6 +24,7 @@ import {
   Timestamp,
 } from "firebase/firestore";
 import { colors } from "../../styles/Theme";
+import NewAppointmentModal from "./newAppointmentModal"; // Importing the NewAppointmentModal
 
 const Vet = () => {
   const navigation = useNavigation();
@@ -42,10 +39,8 @@ const Vet = () => {
     time: { hours: 12, minutes: 0 },
     location: "",
     notes: "",
+    selectedPets: [], // Including selectedPets to work with NewAppointmentModal
   });
-
-  const [showDatePicker, setShowDatePicker] = useState(false);
-  const [showTimePicker, setShowTimePicker] = useState(false);
 
   // Fetch pets from Firestore
   useEffect(() => {
@@ -151,6 +146,7 @@ const Vet = () => {
         time: { hours: 12, minutes: 0 },
         location: "",
         notes: "",
+        selectedPets: [],
       });
 
       // Fetch updated appointments list
@@ -259,6 +255,7 @@ const Vet = () => {
               ...item,
               date: item.date instanceof Date ? item.date : new Date(),
               time: item.time || { hours: 12, minutes: 0 },
+              selectedPets: item.selectedPets || [],
             });
             setIsModalVisible(true);
           }}
@@ -273,132 +270,6 @@ const Vet = () => {
         </TouchableOpacity>
       </View>
     </View>
-  );
-
-  // Render Modal for Adding or Editing Appointments
-  const renderModal = () => (
-    <Modal
-      visible={isModalVisible}
-      animationType="slide"
-      onRequestClose={() => setIsModalVisible(false)}
-      transparent={true}
-    >
-      <View style={styles.modalContainer}>
-        <View style={styles.modalContent}>
-          <Text style={styles.modalTitle}>
-            {currentAppointment.id ? "Edit Appointment" : "New Appointment"}
-          </Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Vet Name"
-            value={currentAppointment.vetName}
-            onChangeText={(text) =>
-              setCurrentAppointment((prev) => ({
-                ...prev,
-                vetName: text,
-              }))
-            }
-          />
-          <TouchableOpacity
-            onPress={() => setShowDatePicker(true)}
-            style={styles.input}
-          >
-            <Text>
-              Date:{" "}
-              {currentAppointment.date instanceof Date
-                ? currentAppointment.date.toLocaleDateString()
-                : ""}
-            </Text>
-          </TouchableOpacity>
-          {showDatePicker && (
-            <DateTimePicker
-              value={
-                currentAppointment.date instanceof Date
-                  ? currentAppointment.date
-                  : new Date()
-              }
-              mode="date"
-              display="default"
-              onChange={(event, selectedDate) => {
-                setShowDatePicker(false);
-                if (selectedDate) {
-                  setCurrentAppointment((prev) => ({
-                    ...prev,
-                    date: selectedDate,
-                  }));
-                }
-              }}
-            />
-          )}
-          <TouchableOpacity
-            onPress={() => setShowTimePicker(true)}
-            style={styles.input}
-          >
-            <Text>
-              Time:{" "}
-              {currentAppointment.time
-                ? `${
-                    currentAppointment.time.hours
-                  }:${currentAppointment.time.minutes
-                    .toString()
-                    .padStart(2, "0")}`
-                : ""}
-            </Text>
-          </TouchableOpacity>
-          {showTimePicker && (
-            <DateTimePicker
-              value={
-                currentAppointment.date instanceof Date
-                  ? currentAppointment.date
-                  : new Date()
-              }
-              mode="time"
-              display="default"
-              onChange={(event, selectedTime) => {
-                setShowTimePicker(false);
-                if (selectedTime) {
-                  setCurrentAppointment((prev) => ({
-                    ...prev,
-                    time: {
-                      hours: selectedTime.getHours(),
-                      minutes: selectedTime.getMinutes(),
-                    },
-                  }));
-                }
-              }}
-            />
-          )}
-          <TextInput
-            style={styles.input}
-            placeholder="Location"
-            value={currentAppointment.location}
-            onChangeText={(text) =>
-              setCurrentAppointment((prev) => ({
-                ...prev,
-                location: text,
-              }))
-            }
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Notes"
-            value={currentAppointment.notes}
-            onChangeText={(text) =>
-              setCurrentAppointment((prev) => ({
-                ...prev,
-                notes: text,
-              }))
-            }
-          />
-          <Button title="Save" onPress={handleSaveAppointment} />
-          <Button
-            title="Cancel"
-            color="red"
-            onPress={() => setIsModalVisible(false)}
-          />
-        </View>
-      </View>
-    </Modal>
   );
 
   return (
@@ -447,6 +318,7 @@ const Vet = () => {
                     time: { hours: 12, minutes: 0 },
                     location: "",
                     notes: "",
+                    selectedPets: [],
                   });
                   setIsModalVisible(true);
                 }}
@@ -458,7 +330,16 @@ const Vet = () => {
           {appointments.map(renderAppointment)}
         </>
       )}
-      {renderModal()}
+
+      <NewAppointmentModal
+        isVisible={isModalVisible}
+        setIsVisible={setIsModalVisible}
+        currentAppointment={currentAppointment}
+        setCurrentAppointment={setCurrentAppointment}
+        handleSaveAppointment={handleSaveAppointment}
+        pets={pets}
+        loading={loading}
+      />
     </ScrollView>
   );
 };

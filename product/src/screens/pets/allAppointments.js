@@ -166,7 +166,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.background,
     paddingVertical: 10,
-    paddingHorizontal: 20,
   },
   header: {
     fontSize: 16,
@@ -175,6 +174,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     padding: 10,
     textDecorationLine: "underline",
+    width: "100%",
     alignSelf: "center",
   },
   loadingContainer: {
@@ -202,6 +202,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     marginTop: 20,
+    marginHorizontal: 20,
   },
   noAppointmentsText: {
     fontSize: 16,
@@ -209,6 +210,7 @@ const styles = StyleSheet.create({
   },
   dateSection: {
     marginBottom: 15,
+    marginHorizontal: 10,
   },
   dateHeader: {
     fontSize: 16,
