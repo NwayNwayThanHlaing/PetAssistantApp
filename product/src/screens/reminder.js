@@ -132,15 +132,20 @@ const ReminderPage = () => {
 
     return (
       <View style={styles.reminderItem} key={item.id}>
-        <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
           <Text style={styles.reminderTitle}>
-            {item.type === "vet" ? "Vet Appointment" : item.title}
+            {item.type === "vet" ? `Vet: ${item.vetName}` : item.title}
           </Text>
           <Text style={styles.reminderTime}>{formattedDateAndTime}</Text>
         </View>
         {item.type === "vet" && item.petName && (
           <>
-            <Text style={styles.reminderType}>Vet: {item.vetName}</Text>
             <Text style={styles.reminderNotes}>Pet: {item.petName}</Text>
           </>
         )}
@@ -168,7 +173,9 @@ const ReminderPage = () => {
   }
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView
+      contentContainerStyle={[styles.container, { paddingBottom: 80 }]}
+    >
       {events.length === 0 && vetAppointments.length === 0 ? (
         <Text style={styles.noRemindersText}>No upcoming reminders.</Text>
       ) : (
@@ -192,7 +199,7 @@ const ReminderPage = () => {
               <Text style={styles.showAll}>Show All</Text>
             </TouchableOpacity>
           </View>
-          {events.slice(0, 2).map((item) => renderReminderItem(item))}
+          {events.slice(0, 3).map((item) => renderReminderItem(item))}
           <View
             style={{
               flexDirection: "row",
@@ -212,7 +219,7 @@ const ReminderPage = () => {
               <Text style={styles.showAll}>Show All</Text>
             </TouchableOpacity>
           </View>
-          {vetAppointments.slice(0, 2).map((item) => renderReminderItem(item))}
+          {vetAppointments.slice(0, 3).map((item) => renderReminderItem(item))}
         </>
       )}
     </ScrollView>
@@ -221,10 +228,8 @@ const ReminderPage = () => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     backgroundColor: "white",
-    padding: 20,
-    paddingVertical: 10,
+    paddingHorizontal: 15,
   },
   header: {
     fontSize: 18,
@@ -235,7 +240,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
     color: colors.accent,
-    marginTop: 25,
+    marginTop: 15,
     marginBottom: 15,
   },
   loadingContainer: {
@@ -256,18 +261,14 @@ const styles = StyleSheet.create({
   },
   reminderItem: {
     backgroundColor: colors.background,
-    shadowColor: colors.primary,
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.25,
-    padding: 15,
+    borderWidth: 1,
+    borderColor: colors.primaryLightest,
+    padding: 10,
     borderRadius: 10,
-    marginBottom: 15,
+    marginBottom: 10,
   },
   reminderTitle: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: "bold",
     color: colors.primary,
   },
