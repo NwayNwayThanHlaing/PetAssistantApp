@@ -24,6 +24,7 @@ import { firestore, auth } from "../auth/firebaseConfig";
 import { doc, updateDoc } from "firebase/firestore";
 import { updateEmail } from "firebase/auth";
 import * as ImagePicker from "expo-image-picker";
+import profile from "../../assets/profile.jpg";
 
 const Profile = ({ navigation }) => {
   const [user, setUser] = useState(null);
@@ -36,7 +37,7 @@ const Profile = ({ navigation }) => {
   const [name, setName] = useState("");
   const [newEmail, setNewEmail] = useState("");
   const [profileImage, setProfileImage] = useState(null);
-  const defaultProfileImage = require("../../assets/profile.jpg");
+  const defaultProfileImage = profile;
 
   const settingsOptions = [
     { id: "1", title: "Change Password", icon: "lock" },

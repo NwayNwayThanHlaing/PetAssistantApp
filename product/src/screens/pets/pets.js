@@ -13,6 +13,7 @@ import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import { firestore, auth } from "../../auth/firebaseConfig";
 import { collection, getDocs } from "firebase/firestore";
 import { useIsFocused } from "@react-navigation/native";
+import dog from "../../../assets/dog.png";
 
 const Pets = ({ navigation }) => {
   const [pets, setPets] = useState([]);
@@ -65,11 +66,7 @@ const Pets = ({ navigation }) => {
       >
         <View style={styles.petInfo}>
           <Image
-            source={
-              item.imageUrl
-                ? { uri: item.imageUrl }
-                : require("../../../assets/dog.png")
-            }
+            source={item.imageUrl ? { uri: item.imageUrl } : dog}
             style={styles.avatar}
           />
           <View style={styles.petText}>

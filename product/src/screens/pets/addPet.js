@@ -16,6 +16,7 @@ import * as ImagePicker from "expo-image-picker";
 import { firestore, auth } from "../../auth/firebaseConfig";
 import { collection, addDoc } from "firebase/firestore";
 import { isLoading } from "expo-font";
+import dog from "../../../assets/dog.png";
 
 const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/dunbwugns/image/upload";
 const UPLOAD_PRESET = "purr_note";
@@ -131,11 +132,7 @@ const AddPet = ({ navigation }) => {
 
           <TouchableOpacity onPress={pickImage} style={styles.image}>
             <Image
-              source={
-                imageUri
-                  ? { uri: imageUri }
-                  : require("../../../assets/dog.png")
-              }
+              source={imageUri ? { uri: imageUri } : dog}
               style={styles.petImage}
             />
             <Text

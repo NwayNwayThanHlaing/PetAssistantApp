@@ -17,6 +17,7 @@ import * as ImagePicker from "expo-image-picker";
 import { firestore, auth } from "../../auth/firebaseConfig";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { colors } from "../../styles/Theme";
+import dog from "../../../assets/dog.png";
 
 const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/dunbwugns/image/upload";
 const UPLOAD_PRESET = "purr_note";
@@ -189,11 +190,7 @@ const PetProfile = ({ route, navigation }) => {
           style={styles.image}
         >
           <Image
-            source={
-              formData.imageUrl
-                ? { uri: formData.imageUrl }
-                : require("../../../assets/dog.png")
-            }
+            source={formData.imageUrl ? { uri: formData.imageUrl } : dog}
             style={styles.petImage}
           />
           {isEditing && (

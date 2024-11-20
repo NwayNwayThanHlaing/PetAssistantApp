@@ -15,6 +15,7 @@ import {
 import { colors } from "../styles/Theme";
 import { auth } from "./firebaseConfig";
 import { signInWithEmailAndPassword } from "firebase/auth";
+import logo from "../../assets/logo.png";
 import AuthStyles from "../styles/AuthStyles";
 
 const Login = ({ navigation }) => {
@@ -43,10 +44,7 @@ const Login = ({ navigation }) => {
       <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
         <View style={AuthStyles.container}>
           <View style={AuthStyles.logoContainer}>
-            <Image
-              source={require("../../assets/logo.png")}
-              style={AuthStyles.logo}
-            />
+            <Image source={logo} style={AuthStyles.logo} />
             <Text style={[AuthStyles.title]}>PURRNOTE</Text>
           </View>
 
