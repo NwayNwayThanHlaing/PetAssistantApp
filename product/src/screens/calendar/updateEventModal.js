@@ -27,7 +27,6 @@ const EventModal = ({
 }) => {
   useEffect(() => {
     if (isVisible && selectedEvent) {
-      // Ensure dateTime is properly set when the modal is shown
       if (!selectedEvent.dateTime) {
         const date = selectedEvent.date
           ? new Date(selectedEvent.date)

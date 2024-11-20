@@ -1,4 +1,3 @@
-import React, { useState } from "react";
 import {
   View,
   Text,
@@ -22,12 +21,6 @@ const NewAppointmentModal = ({
   handleSaveAppointment,
   loading,
 }) => {
-  const formatDate = (date) => {
-    const year = date.getFullYear();
-    const month = (date.getMonth() + 1).toString().padStart(2, "0");
-    const day = date.getDate().toString().padStart(2, "0");
-    return `${year}-${month}-${day}`;
-  };
   return (
     <Modal
       isVisible={isVisible}
@@ -67,17 +60,21 @@ const NewAppointmentModal = ({
               <DateTimePicker
                 value={
                   currentAppointment.date
-                    ? new Date(currentAppointment.date)
-                    : new Date()
+                    ? new Date(currentAppointment.date) // Assuming the date is in "yyyy-mm-dd" format
+                    : new Date() // Default to today if no date is set
                 }
                 mode="date"
                 display="default"
                 style={{ marginBottom: 10 }}
                 onChange={(event, selectedDate) => {
                   if (selectedDate) {
+                    // Update date in "yyyy-mm-dd" format directly
+                    const formattedDate = selectedDate
+                      .toISOString()
+                      .split("T")[0];
                     setCurrentAppointment((prev) => ({
                       ...prev,
-                      date: formatDate(selectedDate),
+                      date: formattedDate,
                     }));
                   }
                 }}
@@ -106,7 +103,7 @@ const NewAppointmentModal = ({
                         currentAppointment.time.hours,
                         currentAppointment.time.minutes
                       )
-                    : new Date()
+                    : new Date(0, 0, 0, 0, 0)
                 }
                 mode="time"
                 display="default"

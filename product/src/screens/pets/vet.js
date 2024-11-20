@@ -35,13 +35,12 @@ const Vet = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [currentAppointment, setCurrentAppointment] = useState({
     vetName: "",
-    date: new Date(),
-    time: { hours: 12, minutes: 0 },
+    date: new Date().toISOString().split("T")[0], // Set default date to today in 'yyyy-mm-dd' format
+    time: { hours: 0, minutes: 0 }, // Set default time to midnight (12:00 AM)
     location: "",
     notes: "",
-    selectedPets: [], // Including selectedPets to work with NewAppointmentModal
+    selectedPets: [],
   });
-
   // Fetch pets from Firestore
   useEffect(() => {
     const fetchPets = async () => {
@@ -89,11 +88,32 @@ const Vet = () => {
           time: data.time || { hours: 12, minutes: 0 },
         };
       });
-      // Sort appointments by date
-      const sortedAppointments = fetchedAppointments.sort(
-        (a, b) => a.date - b.date
-      );
+      // Sort appointments by both date and time
+      const sortedAppointments = fetchedAppointments.sort((a, b) => {
+        // Handle potential null values for date to prevent crashes
+        if (!a.date || !b.date) {
+          return !a.date ? 1 : -1;
+        }
 
+        // Create Date objects that combine date and time for each appointment
+        const aDateTime = new Date(
+          a.date.getFullYear(),
+          a.date.getMonth(),
+          a.date.getDate(),
+          a.time.hours,
+          a.time.minutes
+        );
+        const bDateTime = new Date(
+          b.date.getFullYear(),
+          b.date.getMonth(),
+          b.date.getDate(),
+          b.time.hours,
+          b.time.minutes
+        );
+
+        // Sort in ascending order by date and time
+        return aDateTime - bDateTime;
+      });
       setAppointments(sortedAppointments);
     } catch (error) {
       console.error("Error fetching appointments:", error);
@@ -115,11 +135,37 @@ const Vet = () => {
 
     setLoading(true);
     try {
-      const userId = auth.currentUser.uid;
+      const userId = auth.currentUser?.uid;
+
+      if (!userId) {
+        throw new Error("No user ID found");
+      }
+
       const appointmentsRef = collection(
         firestore,
         `users/${userId}/appointments`
       );
+
+      // Ensure the `date` is always in 'yyyy-mm-dd' format
+      const updatedDate =
+        typeof currentAppointment.date === "string"
+          ? currentAppointment.date
+          : currentAppointment.date.toISOString().split("T")[0];
+
+      // Extract hours and minutes from `currentAppointment.time`
+      const { hours, minutes } = currentAppointment.time;
+
+      // Prepare the appointment data
+      const appointmentData = {
+        vetName: currentAppointment.vetName || "",
+        location: currentAppointment.location || "",
+        notes: currentAppointment.notes || "",
+        petId: selectedPetId,
+        relatedPets: currentAppointment.selectedPets || [],
+        updatedAt: Timestamp.now(),
+        time: { hours, minutes }, // Keep time as an object
+        date: updatedDate, // Always store the date in 'yyyy-mm-dd' format
+      };
 
       if (currentAppointment.id) {
         // Update existing appointment
@@ -128,31 +174,26 @@ const Vet = () => {
           `users/${userId}/appointments`,
           currentAppointment.id
         );
-        await updateDoc(appointmentDocRef, {
-          ...currentAppointment,
-          time: currentAppointment.time,
-          petId: selectedPetId,
-          updatedAt: Timestamp.now(),
-        });
+        await updateDoc(appointmentDocRef, appointmentData);
       } else {
         // Add new appointment
         await addDoc(appointmentsRef, {
-          ...currentAppointment,
-          time: currentAppointment.time,
-          petId: selectedPetId,
+          ...appointmentData,
           createdAt: Timestamp.now(),
-          updatedAt: Timestamp.now(),
         });
       }
+
+      // Close the modal and reset the appointment form
       setIsModalVisible(false);
       setCurrentAppointment({
         vetName: "",
-        date: new Date(),
-        time: { hours: 12, minutes: 0 },
+        date: new Date().toISOString().split("T")[0], // Reset date to today in 'yyyy-mm-dd' format
+        time: { hours: 0, minutes: 0 },
         location: "",
         notes: "",
         selectedPets: [],
       });
+      // Initialize currentAppointment state
 
       // Fetch updated appointments list
       fetchAppointments(selectedPetId);
@@ -233,14 +274,16 @@ const Vet = () => {
           Date:{" "}
           {item.date instanceof Date
             ? item.date.toLocaleDateString()
-            : "Invalid Date"}
+            : item.date}
         </Text>
         <Text style={styles.appointmentDetails}>
           Time:{" "}
           {item.time
-            ? `${item.time.hours}:${item.time.minutes
-                .toString()
-                .padStart(2, "0")}`
+            ? `${
+                item.time.hours % 12 === 0 ? 12 : item.time.hours % 12
+              }:${item.time.minutes.toString().padStart(2, "0")} ${
+                item.time.hours >= 12 ? "PM" : "AM"
+              }`
             : "Invalid Time"}
         </Text>
         {item.location && (
@@ -258,8 +301,11 @@ const Vet = () => {
           onPress={() => {
             setCurrentAppointment({
               ...item,
-              date: item.date instanceof Date ? item.date : new Date(),
-              time: item.time || { hours: 12, minutes: 0 },
+              date:
+                item.date instanceof Date
+                  ? item.date.toISOString().split("T")[0] // Ensure date is in "yyyy-mm-dd" format
+                  : item.date,
+              time: item.time || { hours: 0, minutes: 0 },
               selectedPets: item.selectedPets || [],
             });
             setIsModalVisible(true);
@@ -306,7 +352,7 @@ const Vet = () => {
                 setCurrentAppointment({
                   vetName: "",
                   date: new Date(),
-                  time: { hours: 12, minutes: 0 },
+                  time: { hours: 0, minutes: 0 },
                   location: "",
                   notes: "",
                   selectedPets: [],

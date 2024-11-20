@@ -55,7 +55,20 @@ const EventList = ({ onEventPress, selectedDate }) => {
               const eventData = doc.data();
               return { id: doc.id, ...eventData };
             });
-            setTodayEvents(eventsData);
+            // Sort events by time (hours and minutes)
+            const sortedEvents = eventsData.sort((a, b) => {
+              // Handle events without time set
+              if (!a.time || !b.time) {
+                return !a.time ? 1 : -1;
+              }
+
+              const aTotalMinutes = a.time.hours * 60 + a.time.minutes;
+              const bTotalMinutes = b.time.hours * 60 + b.time.minutes;
+
+              return aTotalMinutes - bTotalMinutes; // Sort in ascending order by total minutes
+            });
+
+            setTodayEvents(sortedEvents);
           }
           setLoading(false);
         });

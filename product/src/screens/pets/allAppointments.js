@@ -53,12 +53,12 @@ const AllAppointments = () => {
             data.time &&
             typeof data.time.hours === "number" &&
             typeof data.time.minutes === "number"
-              ? `${data.time.hours
-                  .toString()
-                  .padStart(2, "0")}:${data.time.minutes
-                  .toString()
-                  .padStart(2, "0")}`
-              : "00:00";
+              ? `${
+                  data.time.hours % 12 === 0 ? 12 : data.time.hours % 12
+                }:${data.time.minutes.toString().padStart(2, "0")} ${
+                  data.time.hours >= 12 ? "PM" : "AM"
+                }`
+              : "12:00 AM";
 
           return {
             id: doc.id,
@@ -71,10 +71,30 @@ const AllAppointments = () => {
         // Today's date in "YYYY-MM-DD" format for comparison
         const today = dayjs().format("YYYY-MM-DD");
 
-        // Filter and sort appointments to only include future appointments or today
+        // Filter and sort appointments to include future appointments or today
         const upcomingAppointments = fetchedAppointments
           .filter((appointment) => appointment.date >= today)
-          .sort((a, b) => (a.date > b.date ? 1 : -1));
+          .sort((a, b) => {
+            if (a.date === b.date) {
+              // If dates are the same, sort by time
+              const [aHours, aMinutes] = a.time.split(/[:\s]/);
+              const [bHours, bMinutes] = b.time.split(/[:\s]/);
+              const aAmPm = a.time.includes("AM") ? "AM" : "PM";
+              const bAmPm = b.time.includes("AM") ? "AM" : "PM";
+
+              const aTotalMinutes =
+                (parseInt(aHours) % 12) * 60 +
+                parseInt(aMinutes) +
+                (aAmPm === "PM" ? 720 : 0);
+              const bTotalMinutes =
+                (parseInt(bHours) % 12) * 60 +
+                parseInt(bMinutes) +
+                (bAmPm === "PM" ? 720 : 0);
+
+              return aTotalMinutes - bTotalMinutes;
+            }
+            return a.date > b.date ? 1 : -1;
+          });
 
         setAppointments(upcomingAppointments);
       } catch (error) {
