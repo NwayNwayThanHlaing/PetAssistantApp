@@ -8,6 +8,7 @@ import {
   FlatList,
   ActivityIndicator,
   Button,
+  ScrollView,
   Alert,
   Modal,
   TextInput,
@@ -229,7 +230,7 @@ const Profile = ({ navigation }) => {
   }
 
   return (
-    <View style={styles.container}>
+    <ScrollView contentContainerStyle={styles.scrollContainer}>
       <Image
         source={getProfileImageSource(profileImage)}
         style={styles.profilePicture}
@@ -368,13 +369,13 @@ const Profile = ({ navigation }) => {
           </View>
         </View>
       </Modal>
-    </View>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
+  scrollContainer: {
+    flexGrow: 1,
     padding: 20,
   },
   loadingContainer: {
