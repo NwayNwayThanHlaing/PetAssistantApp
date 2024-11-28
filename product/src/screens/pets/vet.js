@@ -88,8 +88,18 @@ const Vet = () => {
           time: data.time || { hours: 12, minutes: 0 },
         };
       });
+
+      // Get today's date without the time part
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      // Filter appointments to only include today and future dates
+      const futureAppointments = fetchedAppointments.filter(
+        (appointment) => appointment.date >= today
+      );
+
       // Sort appointments by both date and time
-      const sortedAppointments = fetchedAppointments.sort((a, b) => {
+      const sortedAppointments = futureAppointments.sort((a, b) => {
         // Handle potential null values for date to prevent crashes
         if (!a.date || !b.date) {
           return !a.date ? 1 : -1;
@@ -114,6 +124,7 @@ const Vet = () => {
         // Sort in ascending order by date and time
         return aDateTime - bDateTime;
       });
+
       setAppointments(sortedAppointments);
     } catch (error) {
       console.error("Error fetching appointments:", error);
