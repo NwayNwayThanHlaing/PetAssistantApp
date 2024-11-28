@@ -15,7 +15,7 @@ import {
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import * as ImagePicker from "expo-image-picker";
 import { firestore, auth } from "../../auth/firebaseConfig";
-import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { doc, getDoc, updateDoc, deleteDoc } from "firebase/firestore";
 import { colors } from "../../styles/Theme";
 import dog from "../../../assets/dog.png";
 
@@ -38,6 +38,7 @@ const PetProfile = ({ route, navigation }) => {
     description: "",
     imageUrl: null,
   });
+  const [errors, setErrors] = useState({}); // Error state for inputs
 
   useEffect(() => {
     const fetchPetData = async () => {
@@ -68,6 +69,18 @@ const PetProfile = ({ route, navigation }) => {
 
   const handleFieldChange = (key, value) => {
     setFormData((prevData) => ({ ...prevData, [key]: value }));
+
+    // Validate numeric fields
+    if (key === "age" || key === "weight") {
+      if (isNaN(value) || value.trim() === "") {
+        setErrors((prevErrors) => ({ ...prevErrors, [key]: "Invalid number" }));
+      } else {
+        setErrors((prevErrors) => {
+          const { [key]: removedError, ...rest } = prevErrors;
+          return rest;
+        });
+      }
+    }
   };
 
   const pickImage = async () => {
@@ -158,18 +171,22 @@ const PetProfile = ({ route, navigation }) => {
   }
 
   const renderField = (label, value, key, keyboardType = "default") => (
-    <View style={styles.infoSection}>
-      <Text style={styles.infoLabel}>{label}:</Text>
-      {isEditing ? (
-        <TextInput
-          style={styles.input}
-          value={value}
-          onChangeText={(text) => handleFieldChange(key, text)}
-          keyboardType={keyboardType}
-        />
-      ) : (
-        <Text style={styles.infoText}>{value}</Text>
-      )}
+    <View>
+      <View style={styles.infoSection}>
+        <Text style={styles.infoLabel}>{label}:</Text>
+        {isEditing ? (
+          <TextInput
+            style={styles.input}
+            value={value}
+            onChangeText={(text) => handleFieldChange(key, text)}
+            keyboardType={keyboardType}
+          />
+        ) : (
+          <Text style={styles.infoText}>{value}</Text>
+        )}
+      </View>
+      {/* Display error message outside the infoSection */}
+      {errors[key] && <Text style={styles.errorText}>*{errors[key]}</Text>}
     </View>
   );
 
@@ -209,9 +226,14 @@ const PetProfile = ({ route, navigation }) => {
           {renderField("Description", formData.description, "description")}
 
           <TouchableOpacity
-            style={styles.editButton}
+            style={[
+              styles.editButton,
+              isSaving || (isEditing && Object.keys(errors).length > 0)
+                ? styles.disabledButton
+                : null,
+            ]}
             onPress={() => (isEditing ? handleSave() : setIsEditing(true))}
-            disabled={isSaving}
+            disabled={isSaving || (isEditing && Object.keys(errors).length > 0)}
           >
             {isSaving ? (
               <ActivityIndicator size="small" color="#FFFFFF" />
@@ -251,7 +273,11 @@ const PetProfile = ({ route, navigation }) => {
                           `users/${userId}/pets`,
                           petId
                         );
-                        await petDocRef.delete();
+
+                        // Correctly delete the document
+                        await deleteDoc(petDocRef);
+
+                        // Navigate back after deletion
                         navigation.goBack();
                       } catch (error) {
                         console.error("Error deleting pet:", error);
@@ -352,6 +378,9 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginLeft: 8,
   },
+  disabledButton: {
+    opacity: 0.6,
+  },
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
@@ -363,7 +392,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   errorText: {
-    fontSize: 18,
+    fontSize: 14,
+    marginLeft: 10,
+    marginBottom: 10,
     color: "red",
   },
   back: {

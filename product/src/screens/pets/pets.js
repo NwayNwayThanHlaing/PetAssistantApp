@@ -94,18 +94,40 @@ const Pets = ({ navigation }) => {
   return (
     <View style={styles.container}>
       {pets.length === 0 ? (
-        <Text
+        <>
+          <Text
+            style={{
+              fontSize: 18,
+              color: colors.secondary,
+              textAlign: "center",
+              marginTop: 20,
+            }}
+          >
+            No pets found
+          </Text>
+          <TouchableOpacity
+            style={styles.addButton}
+            onPress={() => navigation.navigate("AddPet")}
+          >
+            <Text style={styles.addButtonText}>Add a Pet</Text>
+          </TouchableOpacity>
+        </>
+      ) : (
+        <View
           style={{
-            fontSize: 18,
-            color: colors.secondary,
-            textAlign: "center",
-            marginTop: 20,
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "center",
           }}
         >
-          No pets found
-        </Text>
-      ) : (
-        <Text style={styles.header}>My Pets</Text>
+          <Text style={styles.header}>My Pets</Text>
+          <TouchableOpacity
+            style={styles.addButton}
+            onPress={() => navigation.navigate("AddPet")}
+          >
+            <Text style={styles.addButtonText}>+ Add</Text>
+          </TouchableOpacity>
+        </View>
       )}
       <FlatList
         data={pets}
@@ -170,14 +192,14 @@ const styles = StyleSheet.create({
   },
   addButton: {
     backgroundColor: colors.accent,
-    paddingVertical: 15,
+    padding: 5,
     borderRadius: 10,
     alignItems: "center",
-    marginBottom: 20,
+    paddingHorizontal: 15,
   },
   addButtonText: {
     color: "white",
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: "bold",
   },
 });
