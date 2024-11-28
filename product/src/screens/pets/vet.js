@@ -171,22 +171,26 @@ const Vet = () => {
   };
 
   // Render pet profile
-  const renderPetProfile = (pet) => (
-    <TouchableOpacity
-      key={pet.id}
-      onPress={() => setSelectedPetId(pet.id)}
-      style={styles.petProfileContainer}
-    >
-      <Image
-        source={{ uri: pet.imageUrl || dog }}
-        style={[
-          styles.petImage,
-          selectedPetId === pet.id && styles.selectedPet,
-        ]}
-      />
-      <Text style={styles.petName}>{pet.name}</Text>
-    </TouchableOpacity>
-  );
+  const renderPetProfile = (pet) => {
+    const imageSource = pet.imageUrl ? { uri: pet.imageUrl } : dog;
+
+    return (
+      <TouchableOpacity
+        key={pet.id}
+        onPress={() => setSelectedPetId(pet.id)}
+        style={styles.petProfileContainer}
+      >
+        <Image
+          source={imageSource}
+          style={[
+            styles.petImage,
+            selectedPetId === pet.id && styles.selectedPet,
+          ]}
+        />
+        <Text style={styles.petName}>{pet.name}</Text>
+      </TouchableOpacity>
+    );
+  };
 
   // Render appointment
   const renderAppointment = (appointment) => {
@@ -211,6 +215,11 @@ const Vet = () => {
           <Text style={styles.appointmentTitle}>{appointment.title}</Text>
           <Text style={styles.appointmentDetails}>Date: {formattedDate}</Text>
           <Text style={styles.appointmentDetails}>Time: {formattedTime}</Text>
+          {appointment.notes && (
+            <Text style={styles.appointmentDetails}>
+              Notes: {appointment.notes}
+            </Text>
+          )}
         </View>
 
         <View style={{ flexDirection: "column" }}>
