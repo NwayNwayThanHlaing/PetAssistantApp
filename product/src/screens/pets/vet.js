@@ -284,7 +284,11 @@ const Vet = () => {
         <Text style={styles.appointmentDetails}>
           Date:{" "}
           {item.date instanceof Date
-            ? item.date.toLocaleDateString()
+            ? `${item.date.getDate().toString().padStart(2, "0")}/${(
+                item.date.getMonth() + 1
+              )
+                .toString()
+                .padStart(2, "0")}/${item.date.getFullYear()}`
             : item.date}
         </Text>
         <Text style={styles.appointmentDetails}>
