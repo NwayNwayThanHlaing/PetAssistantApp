@@ -52,6 +52,7 @@ export const fetchEvents = async () => {
         time: data.time ? `${data.time.hours}:${data.time.minutes}` : "00:00",
         notes: data.notes || "",
         pets: data.relatedPets || [],
+        appointment: data.appointment || false, // Include the appointment field
       });
     });
 
@@ -86,6 +87,7 @@ export const addEvent = async (newEvent, selectedDate, selectedPets) => {
       notes: newEvent.notes?.trim() || "", // Use notes if provided, otherwise use empty string
       relatedPets: Array.isArray(selectedPets) ? selectedPets : [], // Ensure relatedPets is an array
       date: selectedDate, // Must be in 'YYYY-MM-DD' format
+      appointment: newEvent.appointment || false, // Add the appointment field (default false if undefined)
       createdAt: Timestamp.now(),
       updatedAt: Timestamp.now(),
     });
@@ -142,6 +144,7 @@ export const updateEvent = async (selectedEvent) => {
       updatedAt: Timestamp.now(),
       time: { hours, minutes },
       date: updatedDate, // Update the date here to Firestore in 'YYYY-MM-DD' format
+      appointment: selectedEvent.appointment || false, // Add the appointment field (default false if undefined)
     };
 
     // Ensure all fields are updated correctly

@@ -30,7 +30,7 @@ const AddPet = ({ navigation }) => {
   const [description, setDescription] = useState("");
   const [gender, setGender] = useState("");
   const [weight, setWeight] = useState("");
-  const [imageUri, setImageUri] = useState(null);
+  const [imageUri, setImageUri] = useState("");
   const [loading, setLoading] = useState(false);
 
   const [ageError, setAgeError] = useState("");
