@@ -72,6 +72,9 @@ const Vet = () => {
       );
 
       const eventDocs = await getDocs(q);
+      const today = new Date(); // Get today's date
+      today.setHours(0, 0, 0, 0); // Reset time to midnight for accurate comparison
+
       const fetchedEvents = eventDocs.docs.map((doc) => {
         const data = doc.data();
         const date = new Date(data.date);
@@ -83,11 +86,12 @@ const Vet = () => {
         };
       });
 
-      setAppointments(
-        fetchedEvents.sort(
-          (a, b) => a.date - b.date || a.time.hours - b.time.hours
-        )
-      );
+      // Filter out past events and sort by date
+      const upcomingEvents = fetchedEvents
+        .filter((event) => event.date >= today) // Only include events from today or later
+        .sort((a, b) => a.date - b.date); // Sort by date
+
+      setAppointments(upcomingEvents);
     } catch (error) {
       console.error("Error fetching events:", error);
     } finally {
@@ -185,28 +189,58 @@ const Vet = () => {
   );
 
   // Render appointment
-  const renderAppointment = (appointment) => (
-    <View key={appointment.id} style={styles.appointmentContainer}>
-      <View>
-        <Text style={styles.appointmentTitle}>{appointment.title}</Text>
-        <Text style={styles.appointmentDetails}>
-          Date: {appointment.date.toDateString()}
-        </Text>
-        <Text style={styles.appointmentDetails}>
-          Time: {`${appointment.time.hours}:${appointment.time.minutes}`}
-        </Text>
+  const renderAppointment = (appointment) => {
+    // Format date as dd/mm/yyyy
+    const formattedDate =
+      appointment.date instanceof Date
+        ? appointment.date.toLocaleDateString("en-GB") // en-GB outputs dd/mm/yyyy
+        : new Date(appointment.date).toLocaleDateString("en-GB");
+
+    // Format time as hh:mm AM/PM
+    const hours = appointment.time.hours;
+    const minutes = appointment.time.minutes.toString().padStart(2, "0");
+    const period = hours >= 12 ? "PM" : "AM";
+    const formattedHours = (((hours + 11) % 12) + 1)
+      .toString()
+      .padStart(2, "0"); // Convert to 12-hour format
+    const formattedTime = `${formattedHours}:${minutes} ${period}`;
+
+    return (
+      <View key={appointment.id} style={styles.appointmentContainer}>
+        <View>
+          <Text style={styles.appointmentTitle}>{appointment.title}</Text>
+          <Text style={styles.appointmentDetails}>Date: {formattedDate}</Text>
+          <Text style={styles.appointmentDetails}>Time: {formattedTime}</Text>
+        </View>
+
+        <View style={{ flexDirection: "column" }}>
+          <TouchableOpacity
+            style={styles.editButton}
+            onPress={() => {
+              setSelectedEvent({
+                ...appointment,
+                date:
+                  appointment.date instanceof Date
+                    ? appointment.date
+                    : new Date(appointment.date),
+                time: appointment.time || { hours: 12, minutes: 0 },
+                selectedPets: appointment.selectedPets || [],
+              });
+              setIsModalVisible(true);
+            }}
+          >
+            <Text style={styles.buttonText}>Edit</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.deleteButton}
+            onPress={() => handleDeleteAppointment(appointment.id)}
+          >
+            <Text style={styles.buttonText}>Delete</Text>
+          </TouchableOpacity>
+        </View>
       </View>
-      <TouchableOpacity
-        style={styles.editButton}
-        onPress={() => {
-          setSelectedEvent(appointment);
-          setIsModalVisible(true);
-        }}
-      >
-        <Text style={styles.buttonText}>Edit</Text>
-      </TouchableOpacity>
-    </View>
-  );
+    );
+  };
 
   return (
     <ScrollView contentContainerStyle={styles.scrollContainer}>
