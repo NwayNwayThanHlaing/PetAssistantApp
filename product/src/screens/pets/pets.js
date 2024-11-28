@@ -14,6 +14,7 @@ import { firestore, auth } from "../../auth/firebaseConfig";
 import { collection, getDocs } from "firebase/firestore";
 import { useIsFocused } from "@react-navigation/native";
 import dog from "../../../assets/dog.png";
+import nothing from "../../../assets/nothing.png";
 
 const Pets = ({ navigation }) => {
   const [pets, setPets] = useState([]);
@@ -95,18 +96,33 @@ const Pets = ({ navigation }) => {
     <View style={styles.container}>
       {pets.length === 0 ? (
         <>
+          <Image
+            source={nothing}
+            style={{
+              width: 250,
+              height: 250,
+              alignSelf: "center",
+              marginTop: 70,
+              marginBottom: 40,
+            }}
+          />
           <Text
             style={{
               fontSize: 18,
               color: colors.secondary,
               textAlign: "center",
-              marginTop: 20,
             }}
           >
-            No pets found
+            No pets found! {"\n"} Add a pet to get started.
           </Text>
           <TouchableOpacity
-            style={styles.addButton}
+            style={[
+              styles.addButton,
+              {
+                paddingVertical: 15,
+                marginTop: 40,
+              },
+            ]}
             onPress={() => navigation.navigate("AddPet")}
           >
             <Text style={styles.addButtonText}>Add a Pet</Text>
@@ -198,8 +214,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
   },
   addButtonText: {
-    color: "white",
-    fontSize: 16,
+    color: "#fff",
+    fontSize: 18,
     fontWeight: "bold",
   },
 });

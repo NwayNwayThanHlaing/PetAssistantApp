@@ -25,6 +25,7 @@ import {
 } from "firebase/firestore";
 import { colors } from "../../styles/Theme";
 import NewAppointmentModal from "./newAppointmentModal"; // Importing the NewAppointmentModal
+import nothing from "../../../assets/nothing.png";
 
 const Vet = () => {
   const navigation = useNavigation();
@@ -346,53 +347,78 @@ const Vet = () => {
         </View>
       ) : (
         <>
-          <FlatList
-            data={pets}
-            renderItem={({ item }) => renderPetProfile(item)}
-            keyExtractor={(item) => item.id}
-            horizontal
-            contentContainerStyle={styles.petListContent}
-            showsHorizontalScrollIndicator={false}
-          />
-          <View style={styles.actionsWrapper}>
-            <TouchableOpacity
-              style={styles.addAppointmentButton}
-              onPress={() => navigation.navigate("AllAppointments")}
-            >
-              <Text style={styles.addAppointmentButtonText}>View All</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.addAppointmentButton}
-              onPress={() => {
-                setCurrentAppointment({
-                  vetName: "",
-                  date: new Date(),
-                  time: { hours: 0, minutes: 0 },
-                  location: "",
-                  notes: "",
-                  selectedPets: [],
-                });
-                setIsModalVisible(true);
-              }}
-            >
-              <Text style={styles.addAppointmentButtonText}>+ Add New</Text>
-            </TouchableOpacity>
-          </View>
-
-          {appointments.length === 0 ? (
-            <Text
-              style={{
-                fontSize: 18,
-                color: colors.secondary,
-                textAlign: "center",
-                marginTop: 30,
-              }}
-            >
-              No appointments found.
-            </Text>
+          {pets.length === 0 ? (
+            <>
+              <Image
+                source={nothing}
+                style={{
+                  width: 250,
+                  height: 250,
+                  alignSelf: "center",
+                  marginTop: 70,
+                  marginBottom: 40,
+                }}
+              />
+              <Text
+                style={{
+                  fontSize: 18,
+                  color: colors.secondary,
+                  textAlign: "center",
+                }}
+              >
+                No results found for appointments! {"\n"} Add a pet to get
+                started.
+              </Text>
+              <TouchableOpacity
+                style={[
+                  styles.addButton,
+                  {
+                    paddingVertical: 15,
+                    marginTop: 40,
+                  },
+                ]}
+                onPress={() => navigation.navigate("AddPet")}
+              >
+                <Text style={styles.addButtonText}>Add a Pet</Text>
+              </TouchableOpacity>
+            </>
           ) : (
-            appointments.map(renderAppointment)
+            <>
+              <FlatList
+                data={pets}
+                renderItem={({ item }) => renderPetProfile(item)}
+                keyExtractor={(item) => item.id}
+                horizontal
+                contentContainerStyle={styles.petListContent}
+                showsHorizontalScrollIndicator={false}
+              />
+              <View style={styles.actionsWrapper}>
+                <TouchableOpacity
+                  style={styles.addAppointmentButton}
+                  onPress={() => navigation.navigate("AllAppointments")}
+                >
+                  <Text style={styles.addAppointmentButtonText}>View All</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.addAppointmentButton}
+                  onPress={() => {
+                    setCurrentAppointment({
+                      vetName: "",
+                      date: new Date(),
+                      time: { hours: 0, minutes: 0 },
+                      location: "",
+                      notes: "",
+                      selectedPets: [],
+                    });
+                    setIsModalVisible(true);
+                  }}
+                >
+                  <Text style={styles.addAppointmentButtonText}>+ Add New</Text>
+                </TouchableOpacity>
+              </View>
+            </>
           )}
+          {appointments.map(renderAppointment)}
         </>
       )}
 
@@ -531,6 +557,18 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     paddingVertical: 5,
     paddingHorizontal: 10,
+  },
+  addButton: {
+    backgroundColor: colors.accent,
+    padding: 5,
+    borderRadius: 10,
+    alignItems: "center",
+    paddingHorizontal: 15,
+  },
+  addButtonText: {
+    color: "#fff",
+    fontSize: 18,
+    fontWeight: "bold",
   },
 });
 
