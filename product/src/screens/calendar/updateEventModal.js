@@ -39,6 +39,7 @@ const EventModal = ({
           ...prevEvent,
           dateTime: date,
           relatedPets: selectedEvent.relatedPets || [],
+          appointment: selectedEvent.appointment || false, // Initialize appointment field
         }));
       }
     }
@@ -106,7 +107,7 @@ const EventModal = ({
                 }
               />
               <TextInput
-                style={[styles.input, styles.notesInput]}
+                style={styles.input}
                 placeholder="Notes.."
                 placeholderTextColor={colors.primaryLighter}
                 value={selectedEvent?.notes || ""}
@@ -161,6 +162,25 @@ const EventModal = ({
                 ))}
               </View>
 
+              {/* Appointment Checkbox */}
+              <TouchableOpacity
+                style={styles.checkboxContainer}
+                onPress={() =>
+                  setSelectedEvent((prevEvent) => ({
+                    ...prevEvent,
+                    appointment: !prevEvent.appointment,
+                  }))
+                }
+              >
+                <View
+                  style={[
+                    styles.checkbox,
+                    selectedEvent?.appointment && styles.checkboxChecked,
+                  ]}
+                />
+                <Text style={styles.checkboxLabel}>Vet Appointment</Text>
+              </TouchableOpacity>
+
               {/* Buttons for Update, Delete, and Cancel */}
               <View style={styles.buttonContainer}>
                 <TouchableOpacity
@@ -203,6 +223,27 @@ const EventModal = ({
 };
 
 const styles = StyleSheet.create({
+  // Include the styles from your existing component
+  checkboxContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 20,
+  },
+  checkbox: {
+    width: 20,
+    height: 20,
+    borderWidth: 1,
+    borderColor: colors.primary,
+    marginRight: 10,
+    borderRadius: 4,
+  },
+  checkboxChecked: {
+    backgroundColor: colors.accent,
+  },
+  checkboxLabel: {
+    fontSize: 16,
+    color: colors.primary,
+  },
   modalContainer: {
     justifyContent: "center",
     alignItems: "center",

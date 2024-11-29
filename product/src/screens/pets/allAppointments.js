@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import { firestore, auth } from "../../auth/firebaseConfig";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, query, where } from "firebase/firestore";
 import { colors } from "../../styles/Theme";
 import { useNavigation } from "@react-navigation/native";
 import dayjs from "dayjs";
@@ -27,9 +27,9 @@ const AllAppointments = () => {
         setLoading(true);
         const userId = auth.currentUser.uid;
         const petsCollectionRef = collection(firestore, `users/${userId}/pets`);
-        const appointmentsCollectionRef = collection(
+        const eventsCollectionRef = collection(
           firestore,
-          `users/${userId}/appointments`
+          `users/${userId}/events`
         );
 
         // Fetch pets
@@ -40,9 +40,14 @@ const AllAppointments = () => {
         });
         setPets(fetchedPets);
 
-        // Fetch appointments
-        const appointmentDocs = await getDocs(appointmentsCollectionRef);
-        const fetchedAppointments = appointmentDocs.docs.map((doc) => {
+        // Fetch events where appointment is true
+        const eventsQuery = query(
+          eventsCollectionRef,
+          where("appointment", "==", true)
+        );
+        const eventDocs = await getDocs(eventsQuery);
+
+        const fetchedAppointments = eventDocs.docs.map((doc) => {
           const data = doc.data();
 
           // Date is directly from Firestore as a string in "YYYY-MM-DD" format
@@ -110,23 +115,20 @@ const AllAppointments = () => {
   const renderAppointment = (appointment) => {
     return (
       <View key={appointment.id} style={styles.appointmentContainer}>
-        <Text style={styles.appointmentTitle}>
-          Appointment with {appointment.vetName}
-        </Text>
-        <Text style={styles.appointmentDetails}>Date: {appointment.date}</Text>
-        <Text style={styles.appointmentDetails}>Time: {appointment.time}</Text>
-        {appointment.location && (
-          <Text style={styles.appointmentDetails}>
-            Location: {appointment.location}
+        <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+          <Text style={styles.appointmentTitle}>
+            {appointment.title || "Appointment"}
           </Text>
-        )}
+
+          <Text style={styles.appointmentDetails}>{appointment.time}</Text>
+        </View>
         {appointment.notes && (
           <Text style={styles.appointmentDetails}>
             Notes: {appointment.notes}
           </Text>
         )}
         <Text style={styles.appointmentDetails}>
-          Pet: {pets[appointment.petId]?.name || "No pets selected"}
+          Pets: {appointment.relatedPets?.join(", ") || "No pets"}
         </Text>
       </View>
     );
@@ -144,6 +146,12 @@ const AllAppointments = () => {
   };
 
   const groupedAppointments = groupAppointmentsByDate(appointments);
+  const formatDateWithDay = (dateString) => {
+    const date = new Date(dateString); // Convert to Date object
+    const dayName = date.toLocaleDateString("en-US", { weekday: "long" }); // Get full day name
+    const formattedDate = dateString.split("-").reverse().join("/"); // Format as dd/mm/yyyy
+    return `${formattedDate}, ${dayName}`; // Combine day name and formatted date
+  };
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
@@ -161,7 +169,12 @@ const AllAppointments = () => {
             {Object.keys(groupedAppointments).length > 0 ? (
               Object.keys(groupedAppointments).map((date) => (
                 <View key={date} style={styles.dateSection}>
-                  <Text style={styles.dateHeader}>{date}</Text>
+                  {/* Format the date with the day name */}
+                  <Text style={styles.dateHeader}>
+                    {formatDateWithDay(date)}
+                  </Text>
+
+                  {/* Render appointments for the date */}
                   {groupedAppointments[date].map((appointment) =>
                     renderAppointment(appointment)
                   )}

@@ -11,37 +11,34 @@ import {
   Alert,
 } from "react-native";
 import { firestore, auth } from "../../auth/firebaseConfig";
-import { useNavigation } from "@react-navigation/native";
 import {
   collection,
   query,
   where,
   getDocs,
-  addDoc,
+  doc,
   updateDoc,
   deleteDoc,
-  doc,
   Timestamp,
 } from "firebase/firestore";
+import EventModal from "../calendar/updateEventModal";
+import nothing from "../../../assets/nothing.png";
+import dog from "../../../assets/dog.png";
 import { colors } from "../../styles/Theme";
-import NewAppointmentModal from "./newAppointmentModal"; // Importing the NewAppointmentModal
+import { useNavigation } from "@react-navigation/native";
 
 const Vet = () => {
-  const navigation = useNavigation();
   const [pets, setPets] = useState([]);
   const [selectedPetId, setSelectedPetId] = useState(null);
   const [appointments, setAppointments] = useState([]);
-  const [loading, setLoading] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [currentAppointment, setCurrentAppointment] = useState({
-    vetName: "",
-    date: new Date().toISOString().split("T")[0], // Set default date to today in 'yyyy-mm-dd' format
-    time: { hours: 0, minutes: 0 }, // Set default time to midnight (12:00 AM)
-    location: "",
-    notes: "",
-    selectedPets: [],
-  });
-  // Fetch pets from Firestore
+  const [selectedEvent, setSelectedEvent] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [updateLoading, setUpdateLoading] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const navigation = useNavigation();
+
+  // Fetch pets
   useEffect(() => {
     const fetchPets = async () => {
       try {
@@ -61,267 +58,198 @@ const Vet = () => {
     fetchPets();
   }, []);
 
-  // Fetch appointments for selected pet
-  const fetchAppointments = async (petId) => {
+  // Fetch events for the selected pet
+  const fetchAppointments = async (petName) => {
     try {
-      const appointmentsRef = collection(
-        firestore,
-        `users/${auth.currentUser.uid}/appointments`
-      );
-      const q = query(appointmentsRef, where("petId", "==", petId));
-      const appointmentDocs = await getDocs(q);
-      const fetchedAppointments = appointmentDocs.docs.map((doc) => {
-        const data = doc.data();
-        // Handle both string date or Timestamp
-        let date = data.date;
-        if (data.date instanceof Timestamp) {
-          date = data.date.toDate();
-        } else if (typeof data.date === "string") {
-          const [year, month, day] = data.date.split("-").map(Number);
-          date = new Date(year, month - 1, day);
-        }
+      setLoading(true);
+      const userId = auth.currentUser.uid;
+      const eventsRef = collection(firestore, `users/${userId}/events`);
 
+      const q = query(
+        eventsRef,
+        where("relatedPets", "array-contains", petName),
+        where("appointment", "==", true)
+      );
+
+      const eventDocs = await getDocs(q);
+      const today = new Date(); // Get today's date
+      today.setHours(0, 0, 0, 0); // Reset time to midnight for accurate comparison
+
+      const fetchedEvents = eventDocs.docs.map((doc) => {
+        const data = doc.data();
+        const date = new Date(data.date);
         return {
           id: doc.id,
           ...data,
-          date: date, // Correctly assign the Date object
+          date,
           time: data.time || { hours: 12, minutes: 0 },
         };
       });
-      // Sort appointments by both date and time
-      const sortedAppointments = fetchedAppointments.sort((a, b) => {
-        // Handle potential null values for date to prevent crashes
-        if (!a.date || !b.date) {
-          return !a.date ? 1 : -1;
-        }
 
-        // Create Date objects that combine date and time for each appointment
-        const aDateTime = new Date(
-          a.date.getFullYear(),
-          a.date.getMonth(),
-          a.date.getDate(),
-          a.time.hours,
-          a.time.minutes
-        );
-        const bDateTime = new Date(
-          b.date.getFullYear(),
-          b.date.getMonth(),
-          b.date.getDate(),
-          b.time.hours,
-          b.time.minutes
-        );
+      // Filter out past events and sort by date
+      const upcomingEvents = fetchedEvents
+        .filter((event) => event.date >= today) // Only include events from today or later
+        .sort((a, b) => a.date - b.date); // Sort by date
 
-        // Sort in ascending order by date and time
-        return aDateTime - bDateTime;
-      });
-      setAppointments(sortedAppointments);
+      setAppointments(upcomingEvents);
     } catch (error) {
-      console.error("Error fetching appointments:", error);
-    }
-  };
-
-  useEffect(() => {
-    if (selectedPetId) {
-      fetchAppointments(selectedPetId);
-    }
-  }, [selectedPetId]);
-
-  // Handle Save Appointment (new or update)
-  const handleSaveAppointment = async () => {
-    if (!currentAppointment.vetName.trim()) {
-      alert("Vet name is required.");
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const userId = auth.currentUser?.uid;
-
-      if (!userId) {
-        throw new Error("No user ID found");
-      }
-
-      const appointmentsRef = collection(
-        firestore,
-        `users/${userId}/appointments`
-      );
-
-      // Ensure the `date` is always in 'yyyy-mm-dd' format
-      const updatedDate =
-        typeof currentAppointment.date === "string"
-          ? currentAppointment.date
-          : currentAppointment.date.toISOString().split("T")[0];
-
-      // Extract hours and minutes from `currentAppointment.time`
-      const { hours, minutes } = currentAppointment.time;
-
-      // Prepare the appointment data
-      const appointmentData = {
-        vetName: currentAppointment.vetName || "",
-        location: currentAppointment.location || "",
-        notes: currentAppointment.notes || "",
-        petId: selectedPetId,
-        relatedPets: currentAppointment.selectedPets || [],
-        updatedAt: Timestamp.now(),
-        time: { hours, minutes }, // Keep time as an object
-        date: updatedDate, // Always store the date in 'yyyy-mm-dd' format
-      };
-
-      if (currentAppointment.id) {
-        // Update existing appointment
-        const appointmentDocRef = doc(
-          firestore,
-          `users/${userId}/appointments`,
-          currentAppointment.id
-        );
-        await updateDoc(appointmentDocRef, appointmentData);
-      } else {
-        // Add new appointment
-        await addDoc(appointmentsRef, {
-          ...appointmentData,
-          createdAt: Timestamp.now(),
-        });
-      }
-
-      // Close the modal and reset the appointment form
-      setIsModalVisible(false);
-      setCurrentAppointment({
-        vetName: "",
-        date: new Date().toISOString().split("T")[0], // Reset date to today in 'yyyy-mm-dd' format
-        time: { hours: 0, minutes: 0 },
-        location: "",
-        notes: "",
-        selectedPets: [],
-      });
-      // Initialize currentAppointment state
-
-      // Fetch updated appointments list
-      fetchAppointments(selectedPetId);
-    } catch (error) {
-      console.error("Error saving appointment:", error);
+      console.error("Error fetching events:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  // Updated handleDeleteAppointment function
-  const handleDeleteAppointment = async (appointmentId) => {
-    Alert.alert(
-      "Delete Appointment",
-      "Are you sure you want to delete this appointment?",
-      [
-        {
-          text: "Cancel",
-          style: "cancel",
-        },
-        {
-          text: "Delete",
-          style: "destructive",
-          onPress: async () => {
-            setLoading(true);
-            try {
-              const userId = auth.currentUser.uid;
-              const appointmentDocRef = doc(
-                firestore,
-                `users/${userId}/appointments`,
-                appointmentId
-              );
-              await deleteDoc(appointmentDocRef);
-              setAppointments((prev) =>
-                prev.filter((item) => item.id !== appointmentId)
-              );
+  useEffect(() => {
+    if (selectedPetId) {
+      const selectedPet = pets.find((pet) => pet.id === selectedPetId);
+      if (selectedPet) {
+        fetchAppointments(selectedPet.name);
+      }
+    }
+  }, [selectedPetId]);
 
-              console.log(
-                `Appointment with id: ${appointmentId} deleted successfully.`
-              );
-            } catch (error) {
-              console.error("Error deleting appointment:", error);
-            } finally {
-              setLoading(false);
-            }
-          },
+  // Update an event
+  const updateEvent = async () => {
+    if (!selectedEvent?.title) {
+      alert("Event title is required.");
+      return;
+    }
+
+    setUpdateLoading(true);
+    try {
+      const userId = auth.currentUser.uid;
+      const eventDocRef = doc(
+        firestore,
+        `users/${userId}/events`,
+        selectedEvent.id
+      );
+
+      await updateDoc(eventDocRef, {
+        ...selectedEvent,
+        updatedAt: Timestamp.now(),
+      });
+
+      setIsModalVisible(false);
+      fetchAppointments(pets.find((pet) => pet.id === selectedPetId)?.name);
+    } catch (error) {
+      console.error("Error updating event:", error);
+    } finally {
+      setUpdateLoading(false);
+    }
+  };
+
+  // Delete an event
+  const deleteEvent = async () => {
+    Alert.alert("Delete Event", "Are you sure you want to delete this event?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Delete",
+        style: "destructive",
+        onPress: async () => {
+          setDeleteLoading(true);
+          try {
+            const userId = auth.currentUser.uid;
+            const eventDocRef = doc(
+              firestore,
+              `users/${userId}/events`,
+              selectedEvent.id
+            );
+
+            await deleteDoc(eventDocRef);
+            setIsModalVisible(false);
+            fetchAppointments(
+              pets.find((pet) => pet.id === selectedPetId)?.name
+            );
+          } catch (error) {
+            console.error("Error deleting event:", error);
+          } finally {
+            setDeleteLoading(false);
+          }
         },
-      ]
+      },
+    ]);
+  };
+
+  // Render pet profile
+  const renderPetProfile = (pet) => {
+    const imageSource = pet.imageUrl ? { uri: pet.imageUrl } : dog;
+
+    return (
+      <TouchableOpacity
+        key={pet.id}
+        onPress={() => setSelectedPetId(pet.id)}
+        style={styles.petProfileContainer}
+      >
+        <Image
+          source={imageSource}
+          style={[
+            styles.petImage,
+            selectedPetId === pet.id && styles.selectedPet,
+          ]}
+        />
+        <Text style={styles.petName}>{pet.name}</Text>
+      </TouchableOpacity>
     );
   };
 
-  // Render Pet Profile
-  const renderPetProfile = (item) => (
-    <TouchableOpacity
-      key={item.id}
-      onPress={() => setSelectedPetId(item.id)}
-      style={styles.petProfileContainer}
-    >
-      <Image
-        source={{ uri: item.imageUrl }}
-        style={[
-          styles.petImage,
-          selectedPetId === item.id && styles.selectedPet,
-        ]}
-      />
-      <Text style={styles.petName}>{item.name}</Text>
-    </TouchableOpacity>
-  );
+  // Render appointment
+  const renderAppointment = (appointment) => {
+    // Format date as dd/mm/yyyy
+    const formattedDate =
+      appointment.date instanceof Date
+        ? appointment.date.toLocaleDateString("en-GB") // en-GB outputs dd/mm/yyyy
+        : new Date(appointment.date).toLocaleDateString("en-GB");
 
-  // Render Appointment
-  const renderAppointment = (item) => (
-    <View key={item.id} style={styles.appointmentContainer}>
-      <View>
-        <Text style={styles.appointmentTitle}>
-          Appointment with {item.vetName}
-        </Text>
-        <Text style={styles.appointmentDetails}>
-          Date:{" "}
-          {item.date instanceof Date
-            ? item.date.toLocaleDateString()
-            : item.date}
-        </Text>
-        <Text style={styles.appointmentDetails}>
-          Time:{" "}
-          {item.time
-            ? `${
-                item.time.hours % 12 === 0 ? 12 : item.time.hours % 12
-              }:${item.time.minutes.toString().padStart(2, "0")} ${
-                item.time.hours >= 12 ? "PM" : "AM"
-              }`
-            : "Invalid Time"}
-        </Text>
-        {item.location && (
-          <Text style={styles.appointmentDetails}>
-            Location: {item.location}
-          </Text>
-        )}
-        {item.notes && (
-          <Text style={styles.appointmentDetails}>Notes: {item.notes}</Text>
-        )}
+    // Format time as hh:mm AM/PM
+    const hours = appointment.time.hours;
+    const minutes = appointment.time.minutes.toString().padStart(2, "0");
+    const period = hours >= 12 ? "PM" : "AM";
+    const formattedHours = (((hours + 11) % 12) + 1)
+      .toString()
+      .padStart(2, "0"); // Convert to 12-hour format
+    const formattedTime = `${formattedHours}:${minutes} ${period}`;
+
+    return (
+      <View key={appointment.id} style={styles.appointmentContainer}>
+        <View>
+          <Text style={styles.appointmentTitle}>{appointment.title}</Text>
+          <Text style={styles.appointmentDetails}>Date: {formattedDate}</Text>
+          <Text style={styles.appointmentDetails}>Time: {formattedTime}</Text>
+          {appointment.notes && (
+            <Text style={styles.appointmentDetails}>
+              Notes: {appointment.notes}
+            </Text>
+          )}
+        </View>
+
+        <View style={{ flexDirection: "column" }}>
+          <TouchableOpacity
+            style={styles.editButton}
+            onPress={() => {
+              setSelectedEvent({
+                ...appointment,
+                date:
+                  appointment.date instanceof Date
+                    ? appointment.date
+                    : new Date(appointment.date),
+                time: appointment.time || { hours: 12, minutes: 0 },
+                selectedPets: appointment.selectedPets || [],
+              });
+              setIsModalVisible(true);
+            }}
+          >
+            <Text style={styles.buttonText}>Edit</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.deleteButton}
+            onPress={() => handleDeleteAppointment(appointment.id)}
+          >
+            <Text style={styles.buttonText}>Delete</Text>
+          </TouchableOpacity>
+        </View>
       </View>
-      <View style={styles.appointmentActions}>
-        <TouchableOpacity
-          style={styles.editButton}
-          onPress={() => {
-            setCurrentAppointment({
-              ...item,
-              date:
-                item.date instanceof Date
-                  ? item.date.toISOString().split("T")[0] // Ensure date is in "yyyy-mm-dd" format
-                  : item.date,
-              time: item.time || { hours: 0, minutes: 0 },
-              selectedPets: item.selectedPets || [],
-            });
-            setIsModalVisible(true);
-          }}
-        >
-          <Text style={styles.buttonText}>Edit</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.deleteButton}
-          onPress={() => handleDeleteAppointment(item.id)}
-        >
-          <Text style={styles.buttonText}>Delete</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
-  );
+    );
+  };
 
   return (
     <ScrollView contentContainerStyle={styles.scrollContainer}>
@@ -331,64 +259,92 @@ const Vet = () => {
         </View>
       ) : (
         <>
-          <FlatList
-            data={pets}
-            renderItem={({ item }) => renderPetProfile(item)}
-            keyExtractor={(item) => item.id}
-            horizontal
-            contentContainerStyle={styles.petListContent}
-            showsHorizontalScrollIndicator={false}
-          />
-          <View style={styles.actionsWrapper}>
-            <TouchableOpacity
-              style={styles.addAppointmentButton}
-              onPress={() => navigation.navigate("AllAppointments")}
-            >
-              <Text style={styles.addAppointmentButtonText}>View All</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.addAppointmentButton}
-              onPress={() => {
-                setCurrentAppointment({
-                  vetName: "",
-                  date: new Date(),
-                  time: { hours: 0, minutes: 0 },
-                  location: "",
-                  notes: "",
-                  selectedPets: [],
-                });
-                setIsModalVisible(true);
-              }}
-            >
-              <Text style={styles.addAppointmentButtonText}>+ Add New</Text>
-            </TouchableOpacity>
-          </View>
-
-          {appointments.length === 0 ? (
-            <Text
-              style={{
-                fontSize: 18,
-                color: colors.secondary,
-                textAlign: "center",
-                marginTop: 30,
-              }}
-            >
-              No appointments found.
-            </Text>
+          {pets.length === 0 ? (
+            <>
+              <Image
+                source={nothing}
+                style={{
+                  width: 250,
+                  height: 250,
+                  alignSelf: "center",
+                  marginTop: 70,
+                  marginBottom: 40,
+                }}
+              />
+              <Text
+                style={{
+                  fontSize: 18,
+                  color: colors.secondary,
+                  textAlign: "center",
+                }}
+              >
+                No results found for appointments! {"\n"} Add a pet to get
+                started.
+              </Text>
+              <TouchableOpacity
+                style={[
+                  styles.addButton,
+                  {
+                    paddingVertical: 15,
+                    marginTop: 40,
+                  },
+                ]}
+                onPress={() => navigation.navigate("AddPet")}
+              >
+                <Text style={styles.addButtonText}>Add a Pet</Text>
+              </TouchableOpacity>
+            </>
           ) : (
-            appointments.map(renderAppointment)
+            <>
+              <FlatList
+                data={pets}
+                renderItem={({ item }) => renderPetProfile(item)}
+                keyExtractor={(item) => item.id}
+                horizontal
+                contentContainerStyle={styles.petListContent}
+                showsHorizontalScrollIndicator={false}
+              />
+
+              <View style={styles.actionsWrapper}>
+                <TouchableOpacity
+                  style={styles.addAppointmentButton}
+                  onPress={() => navigation.navigate("AllAppointments")}
+                >
+                  <Text style={styles.addAppointmentButtonText}>View All</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.addAppointmentButton}
+                  onPress={() => {
+                    setCurrentAppointment({
+                      vetName: "",
+                      date: new Date(),
+                      time: { hours: 0, minutes: 0 },
+                      location: "",
+                      notes: "",
+                      selectedPets: [],
+                    });
+                    setIsModalVisible(true);
+                  }}
+                >
+                  <Text style={styles.addAppointmentButtonText}>+ Add New</Text>
+                </TouchableOpacity>
+              </View>
+            </>
           )}
+          {appointments.map(renderAppointment)}
         </>
       )}
 
-      <NewAppointmentModal
+      <EventModal
         isVisible={isModalVisible}
         setIsVisible={setIsModalVisible}
-        currentAppointment={currentAppointment}
-        setCurrentAppointment={setCurrentAppointment}
-        handleSaveAppointment={handleSaveAppointment}
-        pets={pets}
-        loading={loading}
+        selectedEvent={selectedEvent}
+        setSelectedEvent={setSelectedEvent}
+        petNames={pets.map((pet) => pet.name)}
+        updateEvent={updateEvent}
+        deleteEvent={deleteEvent}
+        updateLoading={updateLoading}
+        deleteLoading={deleteLoading}
       />
     </ScrollView>
   );
@@ -516,6 +472,18 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     paddingVertical: 5,
     paddingHorizontal: 10,
+  },
+  addButton: {
+    backgroundColor: colors.accent,
+    padding: 5,
+    borderRadius: 10,
+    alignItems: "center",
+    paddingHorizontal: 15,
+  },
+  addButtonText: {
+    color: "#fff",
+    fontSize: 18,
+    fontWeight: "bold",
   },
 });
 

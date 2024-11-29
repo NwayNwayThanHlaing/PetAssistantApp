@@ -11,6 +11,7 @@ import {
   StyleSheet,
   Alert,
 } from "react-native";
+import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import { colors } from "../../styles/Theme";
 import * as ImagePicker from "expo-image-picker";
 import { firestore, auth } from "../../auth/firebaseConfig";
@@ -29,8 +30,11 @@ const AddPet = ({ navigation }) => {
   const [description, setDescription] = useState("");
   const [gender, setGender] = useState("");
   const [weight, setWeight] = useState("");
-  const [imageUri, setImageUri] = useState(null);
+  const [imageUri, setImageUri] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const [ageError, setAgeError] = useState("");
+  const [weightError, setWeightError] = useState("");
 
   const pickImage = async () => {
     const permissionResult =
@@ -90,7 +94,7 @@ const AddPet = ({ navigation }) => {
   };
 
   const handleAddPet = async () => {
-    if (!name || !breed || !age || !color || !gender || !weight) {
+    if (!name) {
       Alert.alert("Error", "Please fill out all required fields.");
       return;
     }
@@ -126,91 +130,121 @@ const AddPet = ({ navigation }) => {
       style={{ flex: 1 }}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
-      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-        <View style={styles.container}>
-          <Text style={styles.header}>Add a new Pet Profile</Text>
-
-          <TouchableOpacity onPress={pickImage} style={styles.image}>
-            <Image
-              source={imageUri ? { uri: imageUri } : dog}
-              style={styles.petImage}
-            />
-            <Text
-              style={{
-                textAlign: "center",
-                marginBottom: 20,
-                textDecorationLine: "underline",
-              }}
-            >
-              Upload Pet Image
-            </Text>
-          </TouchableOpacity>
-
-          <TextInput
-            style={styles.input}
-            placeholder="Pet Name"
-            placeholderTextColor={colors.primaryLight}
-            value={name}
-            onChangeText={setName}
+      <ScrollView contentContainerStyle={styles.container}>
+        <TouchableOpacity
+          style={styles.back}
+          onPress={() => navigation.goBack()}
+        >
+          <MaterialIcons name="arrow-back" size={24} color="black" />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={pickImage} style={styles.image}>
+          <Image
+            source={imageUri ? { uri: imageUri } : dog}
+            style={styles.petImage}
           />
-          <TextInput
-            style={styles.input}
-            placeholder="Breed"
-            placeholderTextColor={colors.primaryLight}
-            value={breed}
-            onChangeText={setBreed}
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Age"
-            placeholderTextColor={colors.primaryLight}
-            value={age}
-            keyboardType="numeric"
-            onChangeText={setAge}
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Color"
-            placeholderTextColor={colors.primaryLight}
-            value={color}
-            onChangeText={setColor}
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Gender"
-            placeholderTextColor={colors.primaryLight}
-            value={gender}
-            onChangeText={setGender}
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Weight (kg)"
-            placeholderTextColor={colors.primaryLight}
-            value={weight}
-            keyboardType="numeric"
-            onChangeText={setWeight}
-          />
-          <TextInput
-            style={[styles.input, { height: 80 }]}
-            placeholder="Description"
-            placeholderTextColor={colors.primaryLight}
-            value={description}
-            onChangeText={setDescription}
-            multiline
-          />
-
-          <TouchableOpacity
-            style={styles.addButton}
-            onPress={handleAddPet}
-            disabled={loading}
+          <Text
+            style={{
+              textAlign: "center",
+              marginBottom: 20,
+              textDecorationLine: "underline",
+            }}
           >
-            {isLoading ? (
-              <Text style={styles.addButtonText}>+ Add</Text>
-            ) : (
-              <Text style={styles.addButtonText}>Loading...</Text>
-            )}
-          </TouchableOpacity>
-        </View>
+            Upload Pet Image
+          </Text>
+        </TouchableOpacity>
+        <TextInput
+          style={styles.input}
+          placeholder="Pet Name *"
+          placeholderTextColor={colors.primaryLight}
+          value={name}
+          onChangeText={setName}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Breed"
+          placeholderTextColor={colors.primaryLight}
+          value={breed}
+          onChangeText={setBreed}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Age"
+          placeholderTextColor={colors.primaryLight}
+          value={age}
+          keyboardType="default" // Allow all input types to handle strings
+          onChangeText={(value) => {
+            const numericValue = value.replace(/[^0-9.]/g, ""); // Allow numbers and dots
+            if (value !== numericValue || value.trim() === "") {
+              setAgeError("* Age must be a number");
+            } else {
+              setAgeError("");
+            }
+            setAge(value); // Update value even if invalid to allow correction
+          }}
+        />
+        {ageError ? <Text style={styles.errorText}>{ageError}</Text> : null}
+
+        <TextInput
+          style={styles.input}
+          placeholder="Weight (kg)"
+          placeholderTextColor={colors.primaryLight}
+          value={weight}
+          keyboardType="default" // Allow all input types to handle strings
+          onChangeText={(value) => {
+            const numericValue = value.replace(/[^0-9.]/g, ""); // Allow numbers and dots
+            if (value !== numericValue || value.trim() === "") {
+              setWeightError("* Weight must be a number");
+            } else {
+              setWeightError("");
+            }
+            setWeight(value); // Update value even if invalid to allow correction
+          }}
+        />
+        {weightError ? (
+          <Text style={styles.errorText}>{weightError}</Text>
+        ) : null}
+
+        <TextInput
+          style={styles.input}
+          placeholder="Color"
+          placeholderTextColor={colors.primaryLight}
+          value={color}
+          onChangeText={setColor}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Gender"
+          placeholderTextColor={colors.primaryLight}
+          value={gender}
+          onChangeText={setGender}
+        />
+        <TextInput
+          style={[styles.input, { height: 80 }]}
+          placeholder="Description"
+          placeholderTextColor={colors.primaryLight}
+          value={description}
+          onChangeText={setDescription}
+          multiline
+        />
+        <TouchableOpacity
+          style={[
+            styles.addButton,
+            {
+              opacity:
+                loading || ageError.length > 0 || weightError.length > 0
+                  ? 0.7
+                  : 1,
+            },
+          ]}
+          onPress={handleAddPet}
+          disabled={loading || ageError.length > 0 || weightError.length > 0}
+        >
+          {isLoading ? (
+            <Text style={styles.addButtonText}>+ Add</Text>
+          ) : (
+            <Text style={styles.addButtonText}>Loading...</Text>
+          )}
+        </TouchableOpacity>
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -220,7 +254,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    paddingTop: 40,
+    paddingTop: 70,
     backgroundColor: colors.background,
   },
   header: {
@@ -261,6 +295,11 @@ const styles = StyleSheet.create({
   },
   image: {
     alignItems: "center",
+  },
+  errorText: {
+    color: "red",
+    marginLeft: 10,
+    marginBottom: 10,
   },
 });
 

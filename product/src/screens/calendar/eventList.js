@@ -1,4 +1,3 @@
-// EventList Component
 import React, { useEffect, useState } from "react";
 import {
   View,
@@ -118,6 +117,7 @@ const EventList = ({ onEventPress, selectedDate }) => {
               }}
             >
               <Text style={styles.eventTitle}>{item.title}</Text>
+
               <Text style={styles.eventTime}>
                 {item.time &&
                 typeof item.time.hours === "number" &&
@@ -128,13 +128,16 @@ const EventList = ({ onEventPress, selectedDate }) => {
                   : "00:00 AM"}
               </Text>
             </View>
+            {item.appointment && (
+              <Text style={styles.vet}>(Vet Appointment)</Text>
+            )}
             {item.relatedPets && item.relatedPets.length > 0 && (
               <Text style={styles.petsText}>
                 Pets: {item.relatedPets.join(", ")}
               </Text>
             )}
             {item.notes && item.notes.trim() !== "" && (
-              <Text style={styles.eventNotes}>
+              <Text style={styles.petsText}>
                 Note: {item.notes.replace(/\n{2,}/g, "\n").trim()}
               </Text>
             )}
@@ -174,15 +177,15 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: colors.primary,
   },
-  eventNotes: {
-    marginTop: 3,
-    fontSize: 14,
-    color: colors.primary,
-  },
   petsText: {
     marginTop: 5,
     fontSize: 14,
     color: colors.primary,
+  },
+  vet: {
+    marginTop: 5,
+    fontSize: 14,
+    color: colors.accent,
   },
 });
 

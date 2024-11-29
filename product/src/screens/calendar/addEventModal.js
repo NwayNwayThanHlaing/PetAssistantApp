@@ -26,12 +26,34 @@ const AddEventModal = ({
   loading,
 }) => {
   const resetNewEvent = () => {
-    setNewEvent({
-      title: "",
-      time: new Date(new Date().setHours(0, 0, 0, 0)),
-      notes: "",
+    setNewEvent((prev) => {
+      if (Object.keys(prev).length === 0) {
+        return {
+          title: "",
+          time: new Date(new Date().setHours(0, 0, 0, 0)),
+          notes: "",
+          appointment: false,
+        };
+      }
+      return prev; // Don't overwrite if `newEvent` is already set
     });
-    setSelectedPets([]);
+    setSelectedPets((prev) => (prev.length === 0 ? [] : prev));
+  };
+
+  useEffect(() => {
+    if (isVisible) {
+      console.log("Modal opened, resetting newEvent.");
+      if (Object.keys(newEvent).length === 0) {
+        resetNewEvent(); // Only reset if `newEvent` is empty
+      }
+    }
+  }, [isVisible, newEvent]);
+
+  const handleTextInputChange = (field, value) => {
+    setNewEvent((prevEvent) => ({
+      ...prevEvent,
+      [field]: value,
+    }));
   };
 
   const togglePetSelection = (petName) => {
@@ -42,30 +64,31 @@ const AddEventModal = ({
     );
   };
 
-  useEffect(() => {
-    if (isVisible) {
-      resetNewEvent();
-    }
-  }, [isVisible]);
-
   return (
     <Modal
       isVisible={isVisible}
       onBackdropPress={() => setIsVisible(false)}
       style={styles.modalContainer}
       useNativeDriver={true}
+      hideModalContentWhileAnimating={true}
+      animationIn="slideInUp"
+      animationOut="slideOutDown"
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <View style={styles.modalContent}>
           <ScrollView contentContainerStyle={styles.scrollViewContent}>
             <Text style={styles.modalHeader}>Add New Event</Text>
+
+            {/* Event Title */}
             <TextInput
               style={styles.input}
               placeholder="Event Title"
               placeholderTextColor={colors.primaryLighter}
               value={newEvent.title}
-              onChangeText={(text) => setNewEvent({ ...newEvent, title: text })}
+              onChangeText={(text) => handleTextInputChange("title", text)}
             />
+
+            {/* Event Time */}
             <View style={styles.datePickerContainer}>
               <Text style={{ color: colors.primaryLighter }}>Event Time</Text>
               <DateTimePicker
@@ -86,14 +109,18 @@ const AddEventModal = ({
                 is24Hour={false} // Use AM/PM format
               />
             </View>
+
+            {/* Notes */}
             <TextInput
               style={[styles.input, styles.notesInput]}
               placeholder="Notes"
               placeholderTextColor={colors.primaryLighter}
               value={newEvent.notes}
-              onChangeText={(text) => setNewEvent({ ...newEvent, notes: text })}
+              onChangeText={(text) => handleTextInputChange("notes", text)}
               multiline
             />
+
+            {/* Pet Selection */}
             <Text style={styles.petsSelectionHeader}>Select Pets</Text>
             <View style={styles.petButtonsContainer}>
               {petNames.map((item) => (
@@ -117,17 +144,41 @@ const AddEventModal = ({
               ))}
             </View>
 
+            {/* Appointment Checkbox */}
+            <TouchableOpacity
+              style={styles.checkboxContainer}
+              onPress={() =>
+                setNewEvent((prevEvent) => ({
+                  ...prevEvent,
+                  appointment: !prevEvent.appointment,
+                }))
+              }
+            >
+              <View
+                style={[
+                  styles.checkbox,
+                  newEvent.appointment && styles.checkboxChecked,
+                ]}
+              />
+              <Text style={styles.checkboxLabel}>Vet Appointment</Text>
+            </TouchableOpacity>
+
+            {/* Action Buttons */}
             <View style={styles.buttonContainer}>
               <TouchableOpacity
                 style={[styles.modalButton, styles.cancelButton]}
-                onPress={() => setIsVisible(false)}
+                onPress={() => {
+                  setIsVisible(false);
+                  Keyboard.dismiss(); // Dismiss keyboard on cancel
+                }}
               >
                 <Text style={styles.buttonText}>Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.modalButton, styles.saveButton]}
                 onPress={() => {
-                  addEvent();
+                  Keyboard.dismiss(); // Dismiss keyboard on save
+                  addEvent(); // Call addEvent only
                 }}
                 disabled={loading}
               >
@@ -146,6 +197,26 @@ const AddEventModal = ({
 };
 
 const styles = StyleSheet.create({
+  checkboxContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 20,
+  },
+  checkbox: {
+    width: 20,
+    height: 20,
+    borderWidth: 1,
+    borderColor: colors.primary,
+    marginRight: 10,
+    borderRadius: 4,
+  },
+  checkboxChecked: {
+    backgroundColor: colors.accent,
+  },
+  checkboxLabel: {
+    fontSize: 16,
+    color: colors.primary,
+  },
   modalContainer: {
     justifyContent: "center",
     alignItems: "center",

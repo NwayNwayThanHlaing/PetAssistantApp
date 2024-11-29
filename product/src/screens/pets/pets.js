@@ -14,6 +14,7 @@ import { firestore, auth } from "../../auth/firebaseConfig";
 import { collection, getDocs } from "firebase/firestore";
 import { useIsFocused } from "@react-navigation/native";
 import dog from "../../../assets/dog.png";
+import nothing from "../../../assets/nothing.png";
 
 const Pets = ({ navigation }) => {
   const [pets, setPets] = useState([]);
@@ -94,18 +95,55 @@ const Pets = ({ navigation }) => {
   return (
     <View style={styles.container}>
       {pets.length === 0 ? (
-        <Text
+        <>
+          <Image
+            source={nothing}
+            style={{
+              width: 250,
+              height: 250,
+              alignSelf: "center",
+              marginTop: 70,
+              marginBottom: 40,
+            }}
+          />
+          <Text
+            style={{
+              fontSize: 18,
+              color: colors.secondary,
+              textAlign: "center",
+            }}
+          >
+            No pets found! {"\n"} Add a pet to get started.
+          </Text>
+          <TouchableOpacity
+            style={[
+              styles.addButton,
+              {
+                paddingVertical: 15,
+                marginTop: 40,
+              },
+            ]}
+            onPress={() => navigation.navigate("AddPet")}
+          >
+            <Text style={styles.addButtonText}>Add a Pet</Text>
+          </TouchableOpacity>
+        </>
+      ) : (
+        <View
           style={{
-            fontSize: 18,
-            color: colors.secondary,
-            textAlign: "center",
-            marginTop: 20,
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "center",
           }}
         >
-          No pets found
-        </Text>
-      ) : (
-        <Text style={styles.header}>My Pets</Text>
+          <Text style={styles.header}>My Pets</Text>
+          <TouchableOpacity
+            style={styles.addButton}
+            onPress={() => navigation.navigate("AddPet")}
+          >
+            <Text style={styles.addButtonText}>+ Add</Text>
+          </TouchableOpacity>
+        </View>
       )}
       <FlatList
         data={pets}
@@ -170,13 +208,13 @@ const styles = StyleSheet.create({
   },
   addButton: {
     backgroundColor: colors.accent,
-    paddingVertical: 15,
+    padding: 5,
     borderRadius: 10,
     alignItems: "center",
-    marginBottom: 20,
+    paddingHorizontal: 15,
   },
   addButtonText: {
-    color: "white",
+    color: "#fff",
     fontSize: 18,
     fontWeight: "bold",
   },
