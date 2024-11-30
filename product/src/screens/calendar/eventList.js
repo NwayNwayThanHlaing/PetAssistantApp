@@ -161,7 +161,7 @@ const styles = StyleSheet.create({
     marginVertical: 20,
   },
   eventItem: {
-    backgroundColor: colors.background,
+    backgroundColor: "white",
     padding: 15,
     borderRadius: 10,
     borderWidth: 1,

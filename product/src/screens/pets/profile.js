@@ -12,10 +12,20 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
+import {
+  arrayRemove,
+  updateDoc,
+  doc,
+  deleteDoc,
+  getDoc,
+  collection,
+  query,
+  where,
+  getDocs,
+} from "firebase/firestore";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import * as ImagePicker from "expo-image-picker";
 import { firestore, auth } from "../../auth/firebaseConfig";
-import { doc, getDoc, updateDoc, deleteDoc } from "firebase/firestore";
 import { colors } from "../../styles/Theme";
 import dog from "../../../assets/dog.png";
 
@@ -268,19 +278,60 @@ const PetProfile = ({ route, navigation }) => {
                     onPress: async () => {
                       try {
                         const userId = auth.currentUser.uid;
+
+                        // Reference to the pet document to be deleted
                         const petDocRef = doc(
                           firestore,
                           `users/${userId}/pets`,
                           petId
                         );
 
-                        // Correctly delete the document
+                        // Fetch the pet name before deleting
+                        const petDocSnap = await getDoc(petDocRef);
+                        if (!petDocSnap.exists()) {
+                          throw new Error("Pet not found");
+                        }
+                        const petData = petDocSnap.data();
+                        const petName = petData.name; // Assuming the pet document contains a `name` field
+
+                        // Delete the pet document
                         await deleteDoc(petDocRef);
+
+                        // Reference to the events subcollection
+                        const eventsCollectionRef = collection(
+                          firestore,
+                          `users/${userId}/events`
+                        );
+
+                        // Query to find all events that contain the pet name in relatedPets
+                        const eventsQuery = query(
+                          eventsCollectionRef,
+                          where("relatedPets", "array-contains", petName)
+                        );
+
+                        // Fetch all matching event documents
+                        const querySnapshot = await getDocs(eventsQuery);
+
+                        // Loop through each event and remove the pet name from relatedPets
+                        for (const docSnap of querySnapshot.docs) {
+                          const eventDocRef = doc(
+                            firestore,
+                            `users/${userId}/events`,
+                            docSnap.id
+                          );
+
+                          await updateDoc(eventDocRef, {
+                            relatedPets: arrayRemove(petName),
+                          });
+                        }
 
                         // Navigate back after deletion
                         navigation.goBack();
                       } catch (error) {
-                        console.error("Error deleting pet:", error);
+                        console.error(
+                          "Error deleting pet and updating events:",
+                          error
+                        );
                         Alert.alert("Error", "Failed to delete pet profile.");
                       }
                     },

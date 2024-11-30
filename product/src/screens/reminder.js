@@ -8,10 +8,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { colors } from "../styles/Theme";
-import {
-  fetchUserEvents,
-  fetchUserVetAppointments,
-} from "../actions/userActions";
+import { fetchUserEvents } from "../actions/userActions";
 import { getAuth } from "firebase/auth";
 import { Timestamp } from "firebase/firestore";
 import { useNavigation } from "@react-navigation/native";
@@ -26,7 +23,6 @@ const ReminderPage = () => {
   const auth = getAuth();
   const userId = auth.currentUser ? auth.currentUser.uid : null;
 
-  // Fetch all events and vet appointments for a user
   useEffect(() => {
     if (!userId) return;
 
@@ -57,25 +53,6 @@ const ReminderPage = () => {
         });
 
         setEvents(filteredEvents);
-
-        // Fetch Vet Appointments
-        const vetData = await fetchUserVetAppointments(userId);
-
-        // Filter out past vet appointments based on the date (ignoring time)
-        const filteredVetAppointments = vetData.filter((appointment) => {
-          const appointmentDate = getDateOnly(getDateTime(appointment));
-          const today = getDateOnly(new Date());
-          return appointmentDate >= today; // Keep vet appointments from today or in the future
-        });
-
-        // Sort vet appointments by date and time
-        filteredVetAppointments.sort((a, b) => {
-          const dateA = getDateTime(a);
-          const dateB = getDateTime(b);
-          return dateA - dateB;
-        });
-
-        setVetAppointments(filteredVetAppointments);
       } catch (error) {
         console.error("Failed to fetch events or vet appointments:", error);
       } finally {
@@ -200,26 +177,6 @@ const ReminderPage = () => {
             </TouchableOpacity>
           </View>
           {events.slice(0, 3).map((item) => renderReminderItem(item))}
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "baseline",
-              justifyContent: "space-between",
-            }}
-          >
-            <Text style={styles.subHeader}>Vet Appointments</Text>
-
-            <TouchableOpacity
-              onPress={() =>
-                navigation.push("Dashboard", {
-                  initialScreen: "Vet",
-                })
-              }
-            >
-              <Text style={styles.showAll}>Show All</Text>
-            </TouchableOpacity>
-          </View>
-          {vetAppointments.slice(0, 3).map((item) => renderReminderItem(item))}
         </>
       )}
     </ScrollView>
