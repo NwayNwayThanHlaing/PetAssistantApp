@@ -1,9 +1,25 @@
-## Week 10 (24 November 2024)
+## Week 11 (2 December 2024)
 
 Summary:
 Challenges:
 Next Step:
 
+
+## Week 10 (24 November 2024)
+
+Summary:
+    - managed to make all features in the consistent ui
+    - improved features such as showing appointments in calendar for user experience
+    - modified vet appointment database models for easy access
+    - redesigned home page
+    - tested each feature for functionality
+Challenges:
+    - Implementation of notification is challenging since firebase stopped providing functions for free.
+Next Step:
+    - To test notification with NativeNotify
+    - To implement landscape mode as the mobile gets rotated
+    - To start working on report and presentation
+    
 ## Week 9 (18 November 2024)
 
 Summary:
