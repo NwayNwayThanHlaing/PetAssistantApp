@@ -273,7 +273,6 @@ const CalendarPage = () => {
               justifyContent: "space-between",
               paddingHorizontal: 15,
               paddingVertical: 10,
-              backgroundColor: "white",
             }}
           >
             <TouchableOpacity style={styles.addEventButton} onPress={goToToday}>
@@ -367,7 +366,6 @@ const CalendarPage = () => {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "white",
     flex: 1,
   },
   today: {
@@ -380,7 +378,6 @@ const styles = StyleSheet.create({
   eventsContainer: {
     padding: 15,
     paddingTop: 20,
-    backgroundColor: "white",
     paddingBottom: 80,
   },
   selectedDateText: {
