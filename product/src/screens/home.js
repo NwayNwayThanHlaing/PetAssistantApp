@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   ScrollView,
   Alert,
+  ActivityIndicator,
 } from "react-native";
 import { colors } from "../styles/Theme";
 import calendar from "../../assets/calendar.png";
@@ -20,6 +21,7 @@ import { doc, getDoc } from "firebase/firestore";
 const Home = ({ navigation }) => {
   const currentUser = auth.currentUser;
   const [userData, setUserData] = useState(null);
+  const [loading, setLoading] = useState(true); // Track loading state
 
   useEffect(() => {
     // Redirect to Login if no current user
@@ -44,6 +46,8 @@ const Home = ({ navigation }) => {
       } catch (error) {
         console.error("Error fetching user data:", error);
         Alert.alert("Error", "Failed to fetch user data.");
+      } finally {
+        setLoading(false); // Stop loading
       }
     };
 
@@ -55,30 +59,36 @@ const Home = ({ navigation }) => {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.welcomeCard}>
-        <Image
-          source={home}
-          style={{
-            width: "100%",
-            height: 180,
-            borderRadius: 20,
-          }}
-        />
-        <View style={styles.welcomeTextGroup}>
-          <Text style={styles.welcomeHeader}>
-            Hi, {userData?.name || "User"}!
-          </Text>
-          <TouchableOpacity
-            style={styles.button}
-            onPress={() =>
-              navigation.push("Dashboard", {
-                initialScreen: "Pets",
-                previousScreen: "Home",
-              })
-            }
-          >
-            <Text style={styles.buttonText}>Let's explore</Text>
-          </TouchableOpacity>
-        </View>
+        {loading ? ( // Show loading indicator while fetching data
+          <ActivityIndicator size="large" color={colors.primary} />
+        ) : (
+          <>
+            <Image
+              source={home}
+              style={{
+                width: "100%",
+                height: 180,
+                borderRadius: 20,
+              }}
+            />
+            <View style={styles.welcomeTextGroup}>
+              <Text style={styles.welcomeHeader}>
+                Hi, {userData?.name || "User"}!
+              </Text>
+              <TouchableOpacity
+                style={styles.button}
+                onPress={() =>
+                  navigation.push("Dashboard", {
+                    initialScreen: "Pets",
+                    previousScreen: "Home",
+                  })
+                }
+              >
+                <Text style={styles.buttonText}>Let's explore</Text>
+              </TouchableOpacity>
+            </View>
+          </>
+        )}
       </View>
       <View style={styles.explore}>
         <TouchableOpacity
@@ -118,7 +128,7 @@ const styles = StyleSheet.create({
   welcomeCard: {
     backgroundColor: "white",
     marginHorizontal: 15,
-    marginVertical: 20,
+    marginVertical: 15,
     borderRadius: 20,
   },
   welcomeTextGroup: {
@@ -133,10 +143,6 @@ const styles = StyleSheet.create({
     color: colors.primary,
     marginTop: 20,
     marginLeft: 3,
-  },
-  welcomeText: {
-    fontSize: 16,
-    color: colors.primary,
   },
   explore: {
     paddingHorizontal: 15,
@@ -156,7 +162,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    padding: 20,
+    padding: 18,
     width: "48%",
     borderRadius: 20,
   },
@@ -167,16 +173,15 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   icon: {
-    width: 45,
-    height: 45,
+    width: 50,
+    height: 50,
     alignSelf: "center",
-    marginBottom: 10,
   },
   button: {
     backgroundColor: colors.accent,
     padding: 10,
     borderRadius: 10,
-    marginTop: 10,
+    marginTop: 15,
     alignSelf: "flex-start",
   },
   buttonText: {

@@ -132,11 +132,6 @@ const ReminderPage = () => {
             Pets: {item.relatedPetsNames.join(", ")}
           </Text>
         )}
-        {item.notes && (
-          <Text style={styles.reminderNotes}>
-            Note: {item.notes.replace(/\n{2,}/g, "\n").trim()}
-          </Text>
-        )}
       </View>
     );
   };
@@ -181,6 +176,17 @@ const ReminderPage = () => {
           {events
             .slice(0, 2)
             .map((item, index) => renderReminderItem(item, index))}
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() =>
+              navigation.push("Dashboard", {
+                initialScreen: "Calendar",
+                previousScreen: "Home",
+              })
+            }
+          >
+            <Text style={styles.buttonText}>Go to Calendar</Text>
+          </TouchableOpacity>
         </>
       )}
     </View>
@@ -200,7 +206,7 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.25,
     marginHorizontal: 15,
-    marginVertical: 5,
+    marginTop: 2,
     borderRadius: 20,
   },
   subHeader: {
@@ -224,7 +230,8 @@ const styles = StyleSheet.create({
   noRemindersText: {
     fontSize: 16,
     color: colors.secondary,
-    marginBottom: 10,
+    marginTop: 10,
+    marginBottom: 20,
   },
   reminderItem: {
     borderColor: colors.primaryLightest,
@@ -255,7 +262,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 15,
     borderRadius: 10,
-    marginTop: 10,
     marginBottom: 7,
     alignItems: "center",
   },
