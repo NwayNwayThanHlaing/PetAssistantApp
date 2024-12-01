@@ -3,9 +3,7 @@ import {
   View,
   Text,
   StyleSheet,
-  ScrollView,
   ActivityIndicator,
-  Touchable,
   TouchableOpacity,
 } from "react-native";
 import { colors } from "../styles/Theme";
@@ -153,7 +151,7 @@ const ReminderPage = () => {
   }
 
   return (
-    <ScrollView contentContainerStyle={[styles.container]}>
+    <View style={[styles.container]}>
       {events.length === 0 ? (
         <>
           <Text style={styles.subHeader}>Reminders</Text>
@@ -185,7 +183,7 @@ const ReminderPage = () => {
             .map((item, index) => renderReminderItem(item, index))}
         </>
       )}
-    </ScrollView>
+    </View>
   );
 };
 
@@ -205,17 +203,13 @@ const styles = StyleSheet.create({
     marginVertical: 5,
     borderRadius: 20,
   },
-  header: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: colors.primary,
-  },
   subHeader: {
     fontSize: 20,
     fontWeight: "bold",
     color: colors.accent,
     marginTop: 15,
     marginBottom: 5,
+    textAlign: "center",
   },
   loadingContainer: {
     flex: 1,

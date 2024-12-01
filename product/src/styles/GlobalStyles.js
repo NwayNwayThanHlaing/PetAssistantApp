@@ -16,7 +16,7 @@ export const AppBarStyles = StyleSheet.create({
     borderBottomColor: colors.primaryLightest,
   },
   title: {
-    fontSize: 18,
+    fontSize: 20,
     marginLeft: 10,
     fontWeight: "bold",
     color: colors.primary,
