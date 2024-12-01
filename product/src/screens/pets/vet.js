@@ -170,11 +170,11 @@ const Vet = () => {
           <Image
             source={nothing}
             style={{
-              width: 250,
-              height: 250,
+              width: 150,
+              height: 150,
               alignSelf: "center",
-              marginTop: 70,
-              marginBottom: 40,
+              marginTop: 100,
+              marginBottom: 30,
             }}
           />
           <Text
@@ -228,6 +228,7 @@ const Vet = () => {
 const styles = StyleSheet.create({
   scrollContainer: {
     padding: 10,
+    paddingHorizontal: 15,
     paddingBottom: 80,
     backgroundColor: colors.background,
   },
