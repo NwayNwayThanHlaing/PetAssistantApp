@@ -154,7 +154,9 @@ const ReminderPage = () => {
       contentContainerStyle={[styles.container, { paddingBottom: 80 }]}
     >
       {events.length === 0 && vetAppointments.length === 0 ? (
-        <Text style={styles.noRemindersText}>No upcoming reminders.</Text>
+        <Text style={styles.noRemindersText}>
+          No upcoming reminders. {"\n"} Add a reminder to get started.
+        </Text>
       ) : (
         <>
           <View

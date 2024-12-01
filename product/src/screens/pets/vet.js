@@ -21,12 +21,14 @@ const Vet = () => {
   const [selectedPetId, setSelectedPetId] = useState(null);
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [petsLoading, setPetsLoading] = useState(true); // New state
   const navigation = useNavigation();
 
   // Fetch pets
   useEffect(() => {
     const fetchPets = async () => {
       try {
+        setPetsLoading(true);
         const userId = auth.currentUser.uid;
         const petsCollectionRef = collection(firestore, `users/${userId}/pets`);
         const petDocs = await getDocs(petsCollectionRef);
@@ -38,6 +40,8 @@ const Vet = () => {
         if (fetchedPets.length > 0) setSelectedPetId(fetchedPets[0].id);
       } catch (error) {
         console.error("Error fetching pets:", error);
+      } finally {
+        setPetsLoading(false);
       }
     };
     fetchPets();
@@ -157,71 +161,66 @@ const Vet = () => {
 
   return (
     <ScrollView contentContainerStyle={styles.scrollContainer}>
-      {loading ? (
+      {petsLoading ? (
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={colors.primary} />
         </View>
+      ) : pets.length === 0 ? (
+        <>
+          <Image
+            source={nothing}
+            style={{
+              width: 250,
+              height: 250,
+              alignSelf: "center",
+              marginTop: 70,
+              marginBottom: 40,
+            }}
+          />
+          <Text
+            style={{
+              fontSize: 18,
+              color: colors.secondary,
+              textAlign: "center",
+            }}
+          >
+            No results found for appointments! {"\n"} Add a pet to get started.
+          </Text>
+          <TouchableOpacity
+            style={[
+              styles.addButton,
+              {
+                paddingVertical: 15,
+                marginTop: 40,
+              },
+            ]}
+            onPress={() => navigation.navigate("AddPet")}
+          >
+            <Text style={styles.addButtonText}>Add a Pet</Text>
+          </TouchableOpacity>
+        </>
       ) : (
         <>
-          {pets.length === 0 ? (
-            <>
-              <Image
-                source={nothing}
-                style={{
-                  width: 250,
-                  height: 250,
-                  alignSelf: "center",
-                  marginTop: 70,
-                  marginBottom: 40,
-                }}
-              />
-              <Text
-                style={{
-                  fontSize: 18,
-                  color: colors.secondary,
-                  textAlign: "center",
-                }}
-              >
-                No results found for appointments! {"\n"} Add a pet to get
-                started.
-              </Text>
-              <TouchableOpacity
-                style={[
-                  styles.addButton,
-                  {
-                    paddingVertical: 15,
-                    marginTop: 40,
-                  },
-                ]}
-                onPress={() => navigation.navigate("AddPet")}
-              >
-                <Text style={styles.addButtonText}>Add a Pet</Text>
-              </TouchableOpacity>
-            </>
-          ) : (
-            <>
-              <FlatList
-                data={pets}
-                renderItem={({ item }) => renderPetProfile(item)}
-                keyExtractor={(item) => item.id}
-                horizontal
-                contentContainerStyle={styles.petListContent}
-                showsHorizontalScrollIndicator={false}
-              />
+          <FlatList
+            data={pets}
+            renderItem={({ item }) => renderPetProfile(item)}
+            keyExtractor={(item) => item.id}
+            horizontal
+            contentContainerStyle={styles.petListContent}
+            showsHorizontalScrollIndicator={false}
+          />
 
-              <View style={styles.actionsWrapper}>
-                <TouchableOpacity
-                  style={styles.addAppointmentButton}
-                  onPress={() => navigation.navigate("AllAppointments")}
-                >
-                  <Text style={styles.addAppointmentButtonText}>View All</Text>
-                </TouchableOpacity>
-              </View>
-            </>
-          )}
-          {appointments.map(renderAppointment)}
+          <View style={styles.actionsWrapper}>
+            <TouchableOpacity
+              style={styles.addAppointmentButton}
+              onPress={() => navigation.navigate("AllAppointments")}
+            >
+              <Text style={styles.addAppointmentButtonText}>View All</Text>
+            </TouchableOpacity>
+          </View>
         </>
       )}
+      {appointments.map(renderAppointment)}
     </ScrollView>
   );
 };
