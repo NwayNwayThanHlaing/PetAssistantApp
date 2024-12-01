@@ -69,7 +69,8 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "bold",
     color: colors.primary,
-    margin: 20,
+    marginHorizontal: 20,
+    marginVertical: 15,
     textAlign: "center",
   },
   exploreText: {
