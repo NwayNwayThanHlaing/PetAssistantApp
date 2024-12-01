@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import ReminderPage from "./reminder";
 import {
   View,
@@ -7,21 +7,50 @@ import {
   Image,
   TouchableOpacity,
   ScrollView,
+  Alert,
 } from "react-native";
 import { colors } from "../styles/Theme";
 import calendar from "../../assets/calendar.png";
 import vet from "../../assets/vet.png";
 import home from "../../assets/home.jpg";
 import { auth } from "../auth/firebaseConfig";
+import { firestore } from "../auth/firebaseConfig";
+import { doc, getDoc } from "firebase/firestore";
 
 const Home = ({ navigation }) => {
   const currentUser = auth.currentUser;
+  const [userData, setUserData] = useState(null);
 
   useEffect(() => {
+    // Redirect to Login if no current user
     if (!currentUser) {
       navigation.navigate("Login");
     }
-  }, []);
+  }, [currentUser, navigation]);
+
+  // Fetch current user data from Firestore
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const userDocRef = doc(firestore, "users", currentUser.uid); // Reference to the document
+        const userDoc = await getDoc(userDocRef); // Fetch the document
+
+        if (userDoc.exists()) {
+          setUserData(userDoc.data());
+        } else {
+          console.log("No such user document found!");
+          Alert.alert("Error", "User data not found.");
+        }
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+        Alert.alert("Error", "Failed to fetch user data.");
+      }
+    };
+
+    if (currentUser) {
+      fetchUserData();
+    }
+  }, [currentUser]);
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -36,9 +65,19 @@ const Home = ({ navigation }) => {
         />
         <View style={styles.welcomeTextGroup}>
           <Text style={styles.welcomeHeader}>
-            Welcome, {currentUser.displayName}
+            Hi, {userData?.name || "User"}!
           </Text>
-          <Text style={styles.welcomeText}>See your pets</Text>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() =>
+              navigation.push("Dashboard", {
+                initialScreen: "Pets",
+                previousScreen: "Home",
+              })
+            }
+          >
+            <Text style={styles.buttonText}>Let's explore</Text>
+          </TouchableOpacity>
         </View>
       </View>
       <View style={styles.explore}>
@@ -92,7 +131,8 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "bold",
     color: colors.primary,
-    marginBottom: 10,
+    marginTop: 20,
+    marginLeft: 3,
   },
   welcomeText: {
     fontSize: 16,
@@ -132,5 +172,19 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     marginBottom: 10,
   },
+  button: {
+    backgroundColor: colors.accent,
+    padding: 10,
+    borderRadius: 10,
+    marginTop: 10,
+    alignSelf: "flex-start",
+  },
+  buttonText: {
+    color: "white",
+    textAlign: "center",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
 });
+
 export default Home;
