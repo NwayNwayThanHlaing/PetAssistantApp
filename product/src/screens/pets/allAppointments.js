@@ -199,9 +199,10 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.background,
     paddingVertical: 10,
+    paddingHorizontal: 5,
   },
   header: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: "bold",
     color: colors.primary,
     textAlign: "center",
@@ -222,13 +223,13 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   appointmentTitle: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: "bold",
     color: colors.primary,
     marginBottom: 5,
   },
   appointmentDetails: {
-    fontSize: 14,
+    fontSize: 16,
     color: colors.primary,
   },
   noAppointmentsContainer: {
@@ -246,7 +247,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 10,
   },
   dateHeader: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: "bold",
     color: colors.accent,
     marginBottom: 10,

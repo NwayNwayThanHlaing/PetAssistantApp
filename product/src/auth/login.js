@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import {
   View,
@@ -28,7 +28,10 @@ const Login = ({ navigation }) => {
     try {
       await signInWithEmailAndPassword(auth, email, password);
       Alert.alert("Success", "You have successfully logged in!");
-      navigation.navigate("Dashboard");
+      navigation.reset({
+        index: 0,
+        routes: [{ name: "Dashboard" }],
+      });
     } catch (error) {
       Alert.alert("Login Failed", error.message);
     } finally {

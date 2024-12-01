@@ -147,6 +147,7 @@ const Pets = ({ navigation }) => {
       )}
       <FlatList
         data={pets}
+        style={{ paddingTop: 15 }}
         renderItem={renderPetItem}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.listContainer}
@@ -158,7 +159,7 @@ const Pets = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingHorizontal: 10,
+    paddingHorizontal: 15,
     paddingVertical: 10,
   },
   loadingContainer: {
@@ -169,7 +170,7 @@ const styles = StyleSheet.create({
   header: {
     fontSize: 20,
     fontWeight: "bold",
-    marginVertical: 20,
+    paddingVertical: 10,
     color: colors.primary,
   },
   listContainer: {
@@ -178,10 +179,17 @@ const styles = StyleSheet.create({
   petCard: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: colors.primaryLightest,
+    backgroundColor: "white",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.2,
     padding: 15,
+    marginHorizontal: 5,
     borderRadius: 10,
-    marginBottom: 10,
+    marginBottom: 15,
     justifyContent: "space-between",
   },
   petInfo: {
@@ -203,7 +211,8 @@ const styles = StyleSheet.create({
     color: colors.primary,
   },
   petBreed: {
-    fontSize: 14,
+    fontSize: 16,
+    marginTop: 5,
     color: colors.primary,
   },
   addButton: {

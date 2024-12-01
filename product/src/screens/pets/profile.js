@@ -379,7 +379,7 @@ const styles = StyleSheet.create({
     paddingTop: 20,
   },
   header: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: "bold",
     marginBottom: 15,
     textAlign: "center",

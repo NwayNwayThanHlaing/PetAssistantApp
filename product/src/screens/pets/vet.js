@@ -215,7 +215,7 @@ const Vet = () => {
               style={styles.addAppointmentButton}
               onPress={() => navigation.navigate("AllAppointments")}
             >
-              <Text style={styles.addAppointmentButtonText}>View All</Text>
+              <Text style={styles.viewAllText}>View All</Text>
             </TouchableOpacity>
           </View>
         </>
@@ -241,9 +241,10 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     flexDirection: "row",
   },
-  addAppointmentButtonText: {
+  viewAllText: {
     color: "white",
     fontWeight: "bold",
+    fontSize: 18,
   },
   loadingContainer: {
     flex: 1,
@@ -269,38 +270,16 @@ const styles = StyleSheet.create({
   },
   petName: {
     marginTop: 5,
-    fontSize: 12,
+    fontSize: 14,
     color: colors.primary,
   },
   petListContent: {
     paddingRight: 10,
   },
   actionsWrapper: {
-    // flexDirection: "row",
-    // justifyContent: "space-between",
     borderTopWidth: 1,
     borderTopColor: colors.primaryLightest,
     paddingTop: 10,
-  },
-  editButton: {
-    backgroundColor: colors.primary,
-    paddingVertical: 5,
-    height: 27,
-    paddingHorizontal: 10,
-    borderRadius: 8,
-    marginBottom: 5,
-  },
-  deleteButton: {
-    backgroundColor: "red",
-    paddingVertical: 5,
-    paddingHorizontal: 10,
-    borderRadius: 8,
-  },
-  buttonText: {
-    color: "white",
-    fontWeight: "bold",
-    fontSize: 14,
-    textAlign: "center",
   },
   appointmentContainer: {
     padding: 15,
@@ -313,43 +292,14 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   appointmentTitle: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: "bold",
     color: colors.primary,
     marginBottom: 5,
   },
   appointmentDetails: {
-    fontSize: 14,
+    fontSize: 16,
     color: colors.primary,
-  },
-  appointmentActions: {
-    marginTop: 10,
-    alignSelf: "center",
-  },
-  modalContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-  },
-  modalContent: {
-    width: "80%",
-    padding: 20,
-    backgroundColor: "white",
-    borderRadius: 10,
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 15,
-    textAlign: "center",
-  },
-  input: {
-    borderBottomWidth: 1,
-    borderBottomColor: colors.primary,
-    marginBottom: 10,
-    paddingVertical: 5,
-    paddingHorizontal: 10,
   },
   addButton: {
     backgroundColor: colors.accent,
@@ -359,7 +309,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
   },
   addButtonText: {
-    color: "#fff",
+    color: "white",
     fontSize: 18,
     fontWeight: "bold",
   },

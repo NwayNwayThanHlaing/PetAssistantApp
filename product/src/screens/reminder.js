@@ -4,8 +4,9 @@ import {
   Text,
   StyleSheet,
   ScrollView,
-  TouchableOpacity,
   ActivityIndicator,
+  Touchable,
+  TouchableOpacity,
 } from "react-native";
 import { colors } from "../styles/Theme";
 import { fetchUserEvents } from "../actions/userActions";
@@ -14,12 +15,9 @@ import { Timestamp } from "firebase/firestore";
 import { useNavigation } from "@react-navigation/native";
 
 const ReminderPage = () => {
-  const navigation = useNavigation();
-
   const [events, setEvents] = useState([]);
-  const [vetAppointments, setVetAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
-
+  const navigation = useNavigation();
   const auth = getAuth();
   const userId = auth.currentUser ? auth.currentUser.uid : null;
 
@@ -92,7 +90,8 @@ const ReminderPage = () => {
     return new Date(date.getFullYear(), date.getMonth(), date.getDate());
   };
 
-  const renderReminderItem = (item) => {
+  // Render each reminder item
+  const renderReminderItem = (item, index) => {
     const eventTime = getDateTime(item);
     const isValidDate = eventTime && !isNaN(eventTime.getTime());
 
@@ -108,19 +107,23 @@ const ReminderPage = () => {
       : "No Date Available";
 
     return (
-      <View style={styles.reminderItem} key={item.id}>
-        <View
-          style={{
-            flexDirection: "row",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-        >
-          <Text style={styles.reminderTitle}>
-            {item.type === "vet" ? `Vet: ${item.vetName}` : item.title}
-          </Text>
-          <Text style={styles.reminderTime}>{formattedDateAndTime}</Text>
-        </View>
+      <View
+        style={[
+          styles.reminderItem,
+          index != 1
+            ? {
+                borderBottomWidth: 1,
+                borderBottomColor: colors.primaryLightest,
+              }
+            : null,
+        ]}
+        key={item.id}
+      >
+        <Text style={styles.reminderTitle}>
+          {item.type === "vet" ? `Vet: ${item.vetName}` : item.title}
+        </Text>
+        <Text style={styles.reminderTime}>Date: {formattedDateAndTime}</Text>
+
         {item.type === "vet" && item.petName && (
           <>
             <Text style={styles.reminderNotes}>Pet: {item.petName}</Text>
@@ -150,13 +153,22 @@ const ReminderPage = () => {
   }
 
   return (
-    <ScrollView
-      contentContainerStyle={[styles.container, { paddingBottom: 80 }]}
-    >
-      {events.length === 0 && vetAppointments.length === 0 ? (
-        <Text style={styles.noRemindersText}>
-          No upcoming reminders. {"\n"} Add a reminder to get started.
-        </Text>
+    <ScrollView contentContainerStyle={[styles.container]}>
+      {events.length === 0 ? (
+        <>
+          <Text style={styles.subHeader}>Reminders</Text>
+          <Text style={styles.noRemindersText}>
+            No upcoming reminders. Please create reminders in the Calendar page.
+          </Text>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() =>
+              navigation.replace("Dashboard", { initialScreen: "Calendar" })
+            }
+          >
+            <Text style={styles.buttonText}>Go to Calendar</Text>
+          </TouchableOpacity>
+        </>
       ) : (
         <>
           <View
@@ -166,19 +178,11 @@ const ReminderPage = () => {
               justifyContent: "space-between",
             }}
           >
-            <Text style={styles.subHeader}>Events</Text>
-
-            <TouchableOpacity
-              onPress={() =>
-                navigation.push("Dashboard", {
-                  initialScreen: "Calendar",
-                })
-              }
-            >
-              <Text style={styles.showAll}>Show All</Text>
-            </TouchableOpacity>
+            <Text style={styles.subHeader}>Upcoming Reminders</Text>
           </View>
-          {events.slice(0, 3).map((item) => renderReminderItem(item))}
+          {events
+            .slice(0, 2)
+            .map((item, index) => renderReminderItem(item, index))}
         </>
       )}
     </ScrollView>
@@ -188,7 +192,18 @@ const ReminderPage = () => {
 const styles = StyleSheet.create({
   container: {
     backgroundColor: "white",
-    paddingHorizontal: 15,
+    paddingHorizontal: 20,
+    paddingBottom: 10,
+    paddingTop: 5,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    marginHorizontal: 15,
+    marginVertical: 5,
+    borderRadius: 20,
   },
   header: {
     fontSize: 18,
@@ -196,11 +211,11 @@ const styles = StyleSheet.create({
     color: colors.primary,
   },
   subHeader: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: "bold",
     color: colors.accent,
     marginTop: 15,
-    marginBottom: 15,
+    marginBottom: 5,
   },
   loadingContainer: {
     flex: 1,
@@ -213,21 +228,16 @@ const styles = StyleSheet.create({
     color: colors.primary,
   },
   noRemindersText: {
-    fontSize: 18,
+    fontSize: 16,
     color: colors.secondary,
-    textAlign: "center",
-    marginTop: 20,
-  },
-  reminderItem: {
-    backgroundColor: colors.background,
-    borderWidth: 1,
-    borderColor: colors.primaryLightest,
-    padding: 10,
-    borderRadius: 10,
     marginBottom: 10,
   },
+  reminderItem: {
+    borderColor: colors.primaryLightest,
+    paddingVertical: 10,
+  },
   reminderTitle: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: "bold",
     color: colors.primary,
   },
@@ -237,19 +247,28 @@ const styles = StyleSheet.create({
     marginTop: 5,
   },
   reminderType: {
-    fontSize: 14,
+    fontSize: 16,
     color: colors.accent,
     marginTop: 5,
   },
   reminderNotes: {
-    fontSize: 14,
+    fontSize: 16,
     color: colors.secondary,
     marginTop: 5,
   },
-  showAll: {
-    color: colors.accent,
-    textDecorationLine: "underline",
+  button: {
+    backgroundColor: colors.accent,
+    paddingHorizontal: 10,
+    paddingVertical: 15,
+    borderRadius: 10,
+    marginTop: 10,
+    marginBottom: 7,
+    alignItems: "center",
+  },
+  buttonText: {
+    color: "white",
     fontSize: 16,
+    fontWeight: "bold",
   },
 });
 

@@ -26,7 +26,7 @@ export const AppBarStyles = StyleSheet.create({
 export const BottomNavBarStyles = StyleSheet.create({
   iconText: {
     color: colors.primary,
-    fontSize: 12,
+    fontSize: 14,
     paddingTop: 2,
   },
   container: {
@@ -37,8 +37,8 @@ export const BottomNavBarStyles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-around",
     alignItems: "center",
-    paddingVertical: 10,
-    paddingBottom: 18,
+    paddingVertical: 12,
+    paddingBottom: 20,
     zIndex: 10,
   },
   button: {

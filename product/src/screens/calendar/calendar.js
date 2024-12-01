@@ -290,11 +290,11 @@ const CalendarPage = () => {
               shadowColor: "#000",
               shadowOffset: {
                 width: 0,
-                height: 2,
+                height: 1,
               },
-              shadowOpacity: 0.5,
+              shadowOpacity: 0.2,
               shadowRadius: 3.84,
-              borderRadius: 10,
+              borderRadius: 20,
               backgroundColor: "white",
               margin: 15,
               padding: 10,
@@ -310,7 +310,9 @@ const CalendarPage = () => {
                 todayTextColor: colors.accent,
                 arrowColor: colors.accent,
                 textMonthFontWeight: "bold",
-                textMonthFontSize: 18,
+                textMonthFontSize: 20,
+                textDayFontSize: 17,
+                textDayHeaderFontSize: 14,
                 textSectionTitleColor: colors.primary,
                 textDayHeaderFontWeight: "bold",
               }}
@@ -371,7 +373,7 @@ const styles = StyleSheet.create({
   today: {
     color: colors.primary,
     textDecorationLine: "underline",
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: "600",
     alignSelf: "flex-end",
   },
@@ -381,7 +383,7 @@ const styles = StyleSheet.create({
     paddingBottom: 80,
   },
   selectedDateText: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: "bold",
     color: colors.accent,
     marginBottom: 10,
@@ -389,14 +391,14 @@ const styles = StyleSheet.create({
   addEventButton: {
     backgroundColor: colors.accent,
     paddingHorizontal: 10,
-    paddingVertical: 5,
+    paddingVertical: 7,
     borderRadius: 10,
     marginTop: 10,
     alignItems: "center",
   },
   addEventButtonText: {
     color: "white",
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: "bold",
   },
 });

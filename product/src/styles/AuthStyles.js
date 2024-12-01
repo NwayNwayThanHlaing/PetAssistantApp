@@ -40,7 +40,7 @@ const AuthStyles = StyleSheet.create({
     color: colors.primary,
   },
   subheading: {
-    fontSize: 16,
+    fontSize: 18,
     color: colors.primaryLighter,
     marginBottom: 30,
   },
@@ -50,7 +50,7 @@ const AuthStyles = StyleSheet.create({
     paddingHorizontal: 15,
     marginBottom: 20,
     backgroundColor: colors.primaryLightest,
-    fontSize: 16,
+    fontSize: 18,
   },
   button: {
     flexDirection: "row",
@@ -67,7 +67,7 @@ const AuthStyles = StyleSheet.create({
   },
   buttonText: {
     color: "white",
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: "bold",
     marginRight: 5,
   },
@@ -76,7 +76,8 @@ const AuthStyles = StyleSheet.create({
   },
   loginText: {
     textAlign: "center",
-    fontSize: 14,
+    marginTop: 10,
+    fontSize: 16,
     color: colors.primary,
   },
   loginLink: {

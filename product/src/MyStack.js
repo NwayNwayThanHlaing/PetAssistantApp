@@ -22,10 +22,19 @@ const MyStack = () => {
       <Stack.Navigator
         initialRouteName="Login"
         screenOptions={{
+          headerMode: "screen",
           headerShown: false,
+          gestureEnabled: true,
         }}
       >
-        <Stack.Screen name="Login" component={Login} />
+        <Stack.Screen
+          name="Login"
+          component={Login}
+          options={{
+            gestureEnabled: false,
+            headerShown: false,
+          }}
+        />
         <Stack.Screen name="SignUp" component={Signup} />
         <Stack.Screen name="Home" component={Home} />
         <Stack.Screen name="ReminderPage" component={ReminderPage} />

@@ -321,6 +321,7 @@ const Profile = ({ navigation }) => {
               <Text
                 style={{
                   color: colors.primary,
+                  fontSize: 16,
                   marginBottom: 10,
                   textAlign: "center",
                   textDecorationLine: "underline",
@@ -397,14 +398,14 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   name: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: "bold",
     textAlign: "center",
     marginBottom: 5,
     color: colors.primary,
   },
   email: {
-    fontSize: 16,
+    fontSize: 18,
     textAlign: "center",
     color: colors.secondary,
     marginBottom: 30,
@@ -423,7 +424,7 @@ const styles = StyleSheet.create({
   },
   settingText: {
     marginLeft: 10,
-    fontSize: 16,
+    fontSize: 18,
     color: colors.primary,
   },
   modalContainer: {
@@ -439,7 +440,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   modalTitle: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: "bold",
     marginTop: 15,
     marginBottom: 25,
@@ -452,10 +453,11 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     paddingHorizontal: 10,
     borderRadius: 5,
+    fontSize: 18,
   },
   buttonText: {
     color: "white",
-    fontSize: 16,
+    fontSize: 18,
   },
   imagePicker: {
     alignItems: "center",
