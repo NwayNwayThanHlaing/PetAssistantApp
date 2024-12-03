@@ -18,7 +18,7 @@ import { useNavigation } from "@react-navigation/native";
 
 const Vet = () => {
   const [pets, setPets] = useState([]);
-  const [selectedPetId, setSelectedPetId] = useState(null);
+  const [selectedPetId, setSelectedPetId] = useState("all");
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(false);
   const [petsLoading, setPetsLoading] = useState(true); // New state
@@ -37,7 +37,7 @@ const Vet = () => {
           ...doc.data(),
         }));
         setPets(fetchedPets);
-        if (fetchedPets.length > 0) setSelectedPetId(fetchedPets[0].id);
+        // if (fetchedPets.length > 0) setSelectedPetId(fetchedPets[0].id);
       } catch (error) {
         console.error("Error fetching pets:", error);
       } finally {
@@ -53,20 +53,23 @@ const Vet = () => {
       setLoading(true);
       const userId = auth.currentUser.uid;
       const eventsRef = collection(firestore, `users/${userId}/events`);
-
-      const q = query(
-        eventsRef,
-        where("relatedPets", "array-contains", petName),
-        where("appointment", "==", true)
-      );
+      let q;
+      if (petName === "all") {
+        // Fetch all events regardless of the related pet
+        q = query(eventsRef, where("appointment", "==", true));
+      } else {
+        q = query(
+          eventsRef,
+          where("relatedPets", "array-contains", petName),
+          where("appointment", "==", true)
+        );
+      }
 
       const eventDocs = await getDocs(q);
       const today = new Date();
       today.setHours(0, 0, 0, 0);
 
       const fetchedEvents = eventDocs.docs.map((doc) => {
-        const data = doc.data();
-        const date = new Date(data.date);
         return {
           id: doc.id, // Ensure ID is included
           ...doc.data(),
@@ -89,9 +92,13 @@ const Vet = () => {
 
   useEffect(() => {
     if (selectedPetId) {
-      const selectedPet = pets.find((pet) => pet.id === selectedPetId);
-      if (selectedPet) {
-        fetchAppointments(selectedPet.name);
+      if (selectedPetId === "all") {
+        fetchAppointments("all");
+      } else {
+        const selectedPet = pets.find((pet) => pet.id === selectedPetId);
+        if (selectedPet) {
+          fetchAppointments(selectedPet.name);
+        }
       }
     }
   }, [selectedPetId]);
@@ -202,22 +209,31 @@ const Vet = () => {
       ) : (
         <>
           <FlatList
-            data={pets}
-            renderItem={({ item }) => renderPetProfile(item)}
+            data={[{ id: "all", name: "All" }, ...pets]}
+            renderItem={({ item }) =>
+              item.id === "all" ? (
+                <TouchableOpacity
+                  onPress={() => setSelectedPetId("all")}
+                  style={styles.petProfileContainer}
+                >
+                  <Image
+                    source={dog}
+                    style={[
+                      styles.petImage,
+                      selectedPetId === "all" && styles.selectedPet,
+                    ]}
+                  />
+                  <Text style={styles.petName}>All</Text>
+                </TouchableOpacity>
+              ) : (
+                renderPetProfile(item)
+              )
+            }
             keyExtractor={(item) => item.id}
             horizontal
             contentContainerStyle={styles.petListContent}
             showsHorizontalScrollIndicator={false}
           />
-
-          <View style={styles.actionsWrapper}>
-            <TouchableOpacity
-              style={styles.addAppointmentButton}
-              onPress={() => navigation.navigate("AllAppointments")}
-            >
-              <Text style={styles.viewAllText}>View All</Text>
-            </TouchableOpacity>
-          </View>
         </>
       )}
       {appointments.map(renderAppointment)}
@@ -232,21 +248,6 @@ const styles = StyleSheet.create({
     paddingBottom: 80,
     backgroundColor: colors.background,
   },
-  addAppointmentButton: {
-    backgroundColor: colors.accent,
-    paddingVertical: 10,
-    paddingHorizontal: 15,
-    borderRadius: 10,
-    alignItems: "center",
-    marginBottom: 15,
-    justifyContent: "center",
-    flexDirection: "row",
-  },
-  viewAllText: {
-    color: "white",
-    fontWeight: "bold",
-    fontSize: 18,
-  },
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
@@ -256,17 +257,17 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginRight: 10,
     marginBottom: 10,
-    height: 90,
+    height: 80,
   },
   selectedPet: {
     borderColor: colors.accent,
     borderWidth: 3,
-    height: 70,
+    height: 60,
     borderRadius: 100,
   },
   petImage: {
-    width: 70,
-    height: 70,
+    width: 60,
+    height: 60,
     borderRadius: 35,
   },
   petName: {
@@ -276,11 +277,6 @@ const styles = StyleSheet.create({
   },
   petListContent: {
     paddingRight: 10,
-  },
-  actionsWrapper: {
-    borderTopWidth: 1,
-    borderTopColor: colors.primaryLightest,
-    paddingTop: 10,
   },
   appointmentContainer: {
     padding: 15,
@@ -313,6 +309,19 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 18,
     fontWeight: "bold",
+  },
+  viewAllContainer: {
+    alignItems: "center",
+    marginRight: 10,
+    marginBottom: 10,
+    height: 90,
+  },
+
+  viewAllImage: {
+    width: 60,
+    height: 60,
+    padding: 10,
+    borderRadius: 35,
   },
 });
 
