@@ -1,10 +1,9 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
   TouchableOpacity,
   TextInput,
-  ScrollView,
   TouchableWithoutFeedback,
   Keyboard,
   ActivityIndicator,
@@ -12,6 +11,7 @@ import {
 } from "react-native";
 import Modal from "react-native-modal";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import DropDownPicker from "react-native-dropdown-picker";
 import { colors } from "../../styles/Theme";
 
 const AddEventModal = ({
@@ -25,6 +25,10 @@ const AddEventModal = ({
   addEvent,
   loading,
 }) => {
+  const [recurrence, setRecurrence] = useState("none"); // Default to non-recurring
+  const [endDate, setEndDate] = useState(null);
+  const [open, setOpen] = useState(false);
+  const [value, setValue] = useState(null);
   const resetNewEvent = () => {
     setNewEvent((prev) => {
       if (Object.keys(prev).length === 0) {
@@ -38,11 +42,12 @@ const AddEventModal = ({
       return prev; // Don't overwrite if `newEvent` is already set
     });
     setSelectedPets((prev) => (prev.length === 0 ? [] : prev));
+    setRecurrence("none"); // Reset recurrence to default
+    setEndDate(null); // Reset end date
   };
 
   useEffect(() => {
     if (isVisible) {
-      console.log("Modal opened, resetting newEvent.");
       if (Object.keys(newEvent).length === 0) {
         resetNewEvent(); // Only reset if `newEvent` is empty
       }
@@ -76,7 +81,7 @@ const AddEventModal = ({
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <View style={styles.modalContent}>
-          <ScrollView contentContainerStyle={styles.scrollViewContent}>
+          <View style={styles.scrollViewContent}>
             <Text style={styles.modalHeader}>Add New Event</Text>
 
             {/* Event Title */}
@@ -119,6 +124,44 @@ const AddEventModal = ({
               onChangeText={(text) => handleTextInputChange("notes", text)}
               multiline
             />
+
+            {/* Recurrence */}
+            <View>
+              <Text style={styles.label}>Repeat</Text>
+              <DropDownPicker
+                open={open}
+                value={value}
+                items={[
+                  { label: "None", value: "none" },
+                  { label: "Every Day", value: "daily" },
+                  { label: "Every Week", value: "weekly" },
+                  { label: "Every Two Weeks", value: "biweekly" },
+                  { label: "Every Month", value: "monthly" },
+                  { label: "Every Year", value: "yearly" },
+                ]}
+                setOpen={setOpen}
+                setValue={setValue}
+                onChangeValue={(itemValue) => {
+                  setRecurrence(itemValue);
+                  if (itemValue === "none") setEndDate(null); // Reset end date for non-recurring
+                }}
+                style={styles.picker} // Use the same picker style or customize it further
+                dropDownDirection="BOTTOM" // Open dropdown below
+              />
+              {/* End Date */}
+              {recurrence !== "none" && (
+                <View style={styles.datePickerContainer}>
+                  <Text style={{ color: colors.primaryLighter }}>End Date</Text>
+                  <DateTimePicker
+                    mode="date"
+                    value={endDate || new Date()}
+                    onChange={(event, selectedDate) => {
+                      if (selectedDate) setEndDate(selectedDate);
+                    }}
+                  />
+                </View>
+              )}
+            </View>
 
             {/* Pet Selection */}
             <Text style={styles.petsSelectionHeader}>Select Pets</Text>
@@ -178,7 +221,11 @@ const AddEventModal = ({
                 style={[styles.modalButton, styles.saveButton]}
                 onPress={() => {
                   Keyboard.dismiss(); // Dismiss keyboard on save
-                  addEvent(); // Call addEvent only
+                  addEvent({
+                    ...newEvent,
+                    recurrence,
+                    endDate,
+                  }); // Pass recurrence data
                 }}
                 disabled={loading}
               >
@@ -189,34 +236,13 @@ const AddEventModal = ({
                 )}
               </TouchableOpacity>
             </View>
-          </ScrollView>
+          </View>
         </View>
       </TouchableWithoutFeedback>
     </Modal>
   );
 };
-
 const styles = StyleSheet.create({
-  checkboxContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: 20,
-  },
-  checkbox: {
-    width: 20,
-    height: 20,
-    borderWidth: 1,
-    borderColor: colors.primary,
-    marginRight: 10,
-    borderRadius: 4,
-  },
-  checkboxChecked: {
-    backgroundColor: colors.accent,
-  },
-  checkboxLabel: {
-    fontSize: 16,
-    color: colors.primary,
-  },
   modalContainer: {
     justifyContent: "center",
     alignItems: "center",
@@ -260,6 +286,17 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     backgroundColor: colors.background,
+  },
+  label: {
+    fontSize: 16,
+    color: colors.primary,
+    marginVertical: 10,
+  },
+  picker: {
+    width: "100%",
+    backgroundColor: colors.background,
+    borderRadius: 8,
+    marginBottom: 10,
   },
   buttonContainer: {
     flexDirection: "row",
@@ -316,6 +353,25 @@ const styles = StyleSheet.create({
     color: colors.primary,
     marginTop: 20,
   },
+  checkboxContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 20,
+  },
+  checkbox: {
+    width: 20,
+    height: 20,
+    borderWidth: 1,
+    borderColor: colors.primary,
+    marginRight: 10,
+    borderRadius: 4,
+  },
+  checkboxChecked: {
+    backgroundColor: colors.accent,
+  },
+  checkboxLabel: {
+    fontSize: 16,
+    color: colors.primary,
+  },
 });
-
 export default AddEventModal;

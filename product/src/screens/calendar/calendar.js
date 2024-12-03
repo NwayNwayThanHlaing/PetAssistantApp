@@ -22,8 +22,12 @@ import {
 import EventList from "./eventList";
 import EventModal from "./updateEventModal";
 import AddEventModal from "./addEventModal";
+import { useNavigation, useRoute } from "@react-navigation/native";
 
 const CalendarPage = () => {
+  const navigation = useNavigation();
+  const route = useRoute();
+
   const [selectedDate, setSelectedDate] = useState("");
   const [events, setEvents] = useState({});
   const [markedDates, setMarkedDates] = useState({});
@@ -91,6 +95,12 @@ const CalendarPage = () => {
     setSelectedDate(today);
     setCurrentDate(today);
   };
+
+  useEffect(() => {
+    if (route.params?.openAddEventModal) {
+      setIsAddingEvent(true);
+    }
+  }, [route.params]);
 
   // Add new event
   const handleAddEvent = async () => {

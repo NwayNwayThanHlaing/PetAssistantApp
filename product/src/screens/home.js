@@ -84,7 +84,7 @@ const Home = ({ navigation }) => {
                   })
                 }
               >
-                <Text style={styles.buttonText}>Let's explore</Text>
+                <Text style={styles.buttonText}>My Pets</Text>
               </TouchableOpacity>
             </View>
           </>
