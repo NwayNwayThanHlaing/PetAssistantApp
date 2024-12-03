@@ -41,8 +41,8 @@ const Profile = ({ navigation }) => {
   const defaultProfileImage = profile;
 
   const settingsOptions = [
-    { id: "1", title: "Change Password", icon: "lock" },
-    { id: "2", title: "Update Profile", icon: "image" },
+    { id: "1", title: "Edit Profile", icon: "image" },
+    { id: "2", title: "Change Password", icon: "lock" },
     { id: "3", title: "Log Out", icon: "logout" },
     { id: "4", title: "Delete Account", icon: "delete" },
   ];
@@ -96,7 +96,7 @@ const Profile = ({ navigation }) => {
       handleDeleteAccount(navigation);
     } else if (title === "Change Password") {
       setModalVisible(true);
-    } else if (title === "Update Profile") {
+    } else if (title === "Edit Profile") {
       setEditModalVisible(true);
     }
   };
