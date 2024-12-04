@@ -8,6 +8,7 @@ import {
   FlatList,
   ActivityIndicator,
   Button,
+  ScrollView,
   Alert,
   Modal,
   TextInput,
@@ -24,6 +25,7 @@ import { firestore, auth } from "../auth/firebaseConfig";
 import { doc, updateDoc } from "firebase/firestore";
 import { updateEmail } from "firebase/auth";
 import * as ImagePicker from "expo-image-picker";
+import profile from "../../assets/profile.jpg";
 
 const Profile = ({ navigation }) => {
   const [user, setUser] = useState(null);
@@ -36,11 +38,11 @@ const Profile = ({ navigation }) => {
   const [name, setName] = useState("");
   const [newEmail, setNewEmail] = useState("");
   const [profileImage, setProfileImage] = useState(null);
-  const defaultProfileImage = require("../../assets/profile.jpg");
+  const defaultProfileImage = profile;
 
   const settingsOptions = [
-    { id: "1", title: "Change Password", icon: "lock" },
-    { id: "2", title: "Update Profile", icon: "image" },
+    { id: "1", title: "Edit Profile", icon: "image" },
+    { id: "2", title: "Change Password", icon: "lock" },
     { id: "3", title: "Log Out", icon: "logout" },
     { id: "4", title: "Delete Account", icon: "delete" },
   ];
@@ -94,7 +96,7 @@ const Profile = ({ navigation }) => {
       handleDeleteAccount(navigation);
     } else if (title === "Change Password") {
       setModalVisible(true);
-    } else if (title === "Update Profile") {
+    } else if (title === "Edit Profile") {
       setEditModalVisible(true);
     }
   };
@@ -228,7 +230,7 @@ const Profile = ({ navigation }) => {
   }
 
   return (
-    <View style={styles.container}>
+    <ScrollView contentContainerStyle={styles.scrollContainer}>
       <Image
         source={getProfileImageSource(profileImage)}
         style={styles.profilePicture}
@@ -319,6 +321,7 @@ const Profile = ({ navigation }) => {
               <Text
                 style={{
                   color: colors.primary,
+                  fontSize: 16,
                   marginBottom: 10,
                   textAlign: "center",
                   textDecorationLine: "underline",
@@ -367,13 +370,13 @@ const Profile = ({ navigation }) => {
           </View>
         </View>
       </Modal>
-    </View>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
+  scrollContainer: {
+    flexGrow: 1,
     padding: 20,
   },
   loadingContainer: {
@@ -395,14 +398,14 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   name: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: "bold",
     textAlign: "center",
     marginBottom: 5,
     color: colors.primary,
   },
   email: {
-    fontSize: 16,
+    fontSize: 18,
     textAlign: "center",
     color: colors.secondary,
     marginBottom: 30,
@@ -421,7 +424,7 @@ const styles = StyleSheet.create({
   },
   settingText: {
     marginLeft: 10,
-    fontSize: 16,
+    fontSize: 18,
     color: colors.primary,
   },
   modalContainer: {
@@ -437,7 +440,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   modalTitle: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: "bold",
     marginTop: 15,
     marginBottom: 25,
@@ -450,10 +453,11 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     paddingHorizontal: 10,
     borderRadius: 5,
+    fontSize: 18,
   },
   buttonText: {
     color: "white",
-    fontSize: 16,
+    fontSize: 18,
   },
   imagePicker: {
     alignItems: "center",

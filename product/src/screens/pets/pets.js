@@ -13,6 +13,8 @@ import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import { firestore, auth } from "../../auth/firebaseConfig";
 import { collection, getDocs } from "firebase/firestore";
 import { useIsFocused } from "@react-navigation/native";
+import dog from "../../../assets/dog.png";
+import nothing from "../../../assets/nothing.png";
 
 const Pets = ({ navigation }) => {
   const [pets, setPets] = useState([]);
@@ -65,11 +67,7 @@ const Pets = ({ navigation }) => {
       >
         <View style={styles.petInfo}>
           <Image
-            source={
-              item.imageUrl
-                ? { uri: item.imageUrl }
-                : require("../../../assets/dog.png")
-            }
+            source={item.imageUrl ? { uri: item.imageUrl } : dog}
             style={styles.avatar}
           />
           <View style={styles.petText}>
@@ -97,21 +95,59 @@ const Pets = ({ navigation }) => {
   return (
     <View style={styles.container}>
       {pets.length === 0 ? (
-        <Text
+        <>
+          <Image
+            source={nothing}
+            style={{
+              width: 150,
+              height: 150,
+              alignSelf: "center",
+              marginTop: 100,
+              marginBottom: 30,
+            }}
+          />
+          <Text
+            style={{
+              fontSize: 18,
+              color: colors.secondary,
+              textAlign: "center",
+            }}
+          >
+            No pets found! {"\n"} Add a pet to get started.
+          </Text>
+          <TouchableOpacity
+            style={[
+              styles.addButton,
+              {
+                paddingVertical: 15,
+                marginTop: 40,
+              },
+            ]}
+            onPress={() => navigation.navigate("AddPet")}
+          >
+            <Text style={styles.addButtonText}>Add a Pet</Text>
+          </TouchableOpacity>
+        </>
+      ) : (
+        <View
           style={{
-            fontSize: 18,
-            color: colors.secondary,
-            textAlign: "center",
-            marginTop: 20,
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "center",
           }}
         >
-          No pets found
-        </Text>
-      ) : (
-        <Text style={styles.header}>My Pets</Text>
+          <Text style={styles.header}>My Pets</Text>
+          <TouchableOpacity
+            style={styles.addButton}
+            onPress={() => navigation.navigate("AddPet")}
+          >
+            <Text style={styles.addButtonText}>+ Add</Text>
+          </TouchableOpacity>
+        </View>
       )}
       <FlatList
         data={pets}
+        style={{ paddingTop: 15 }}
         renderItem={renderPetItem}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.listContainer}
@@ -123,7 +159,7 @@ const Pets = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingHorizontal: 20,
+    paddingHorizontal: 15,
     paddingVertical: 10,
   },
   loadingContainer: {
@@ -134,7 +170,7 @@ const styles = StyleSheet.create({
   header: {
     fontSize: 20,
     fontWeight: "bold",
-    marginVertical: 20,
+    paddingVertical: 10,
     color: colors.primary,
   },
   listContainer: {
@@ -143,10 +179,17 @@ const styles = StyleSheet.create({
   petCard: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: colors.primaryLightest,
+    backgroundColor: "white",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.2,
     padding: 15,
+    marginHorizontal: 5,
     borderRadius: 10,
-    marginBottom: 10,
+    marginBottom: 15,
     justifyContent: "space-between",
   },
   petInfo: {
@@ -168,18 +211,19 @@ const styles = StyleSheet.create({
     color: colors.primary,
   },
   petBreed: {
-    fontSize: 14,
+    fontSize: 16,
+    marginTop: 5,
     color: colors.primary,
   },
   addButton: {
     backgroundColor: colors.accent,
-    paddingVertical: 15,
+    padding: 5,
     borderRadius: 10,
     alignItems: "center",
-    marginBottom: 20,
+    paddingHorizontal: 15,
   },
   addButtonText: {
-    color: "white",
+    color: "#fff",
     fontSize: 18,
     fontWeight: "bold",
   },

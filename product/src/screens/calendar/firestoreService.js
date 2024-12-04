@@ -52,6 +52,7 @@ export const fetchEvents = async () => {
         time: data.time ? `${data.time.hours}:${data.time.minutes}` : "00:00",
         notes: data.notes || "",
         pets: data.relatedPets || [],
+        appointment: data.appointment || false, // Include the appointment field
       });
     });
 
@@ -62,7 +63,7 @@ export const fetchEvents = async () => {
   }
 };
 
-export const addEvent = async (newEvent, selectedDate, selectedPets) => {
+export const addEvent = async (newEvent, selectedPets) => {
   try {
     // Get the user ID
     const userId = getUserId();
@@ -75,7 +76,7 @@ export const addEvent = async (newEvent, selectedDate, selectedPets) => {
     const minutes = dateTime.getMinutes();
 
     // Validate the selectedDate format (ensure it's 'YYYY-MM-DD')
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(selectedDate)) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(newEvent.date)) {
       throw new Error("Invalid date format. Expected 'YYYY-MM-DD'.");
     }
 
@@ -85,7 +86,8 @@ export const addEvent = async (newEvent, selectedDate, selectedPets) => {
       time: { hours, minutes }, // Store time as hours and minutes
       notes: newEvent.notes?.trim() || "", // Use notes if provided, otherwise use empty string
       relatedPets: Array.isArray(selectedPets) ? selectedPets : [], // Ensure relatedPets is an array
-      date: selectedDate, // Must be in 'YYYY-MM-DD' format
+      date: newEvent.date, // Must be in 'YYYY-MM-DD' format
+      appointment: newEvent.appointment || false, // Add the appointment field (default false if undefined)
       createdAt: Timestamp.now(),
       updatedAt: Timestamp.now(),
     });
@@ -142,6 +144,7 @@ export const updateEvent = async (selectedEvent) => {
       updatedAt: Timestamp.now(),
       time: { hours, minutes },
       date: updatedDate, // Update the date here to Firestore in 'YYYY-MM-DD' format
+      appointment: selectedEvent.appointment || false, // Add the appointment field (default false if undefined)
     };
 
     // Ensure all fields are updated correctly

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import {
   View,
@@ -15,6 +15,7 @@ import {
 import { colors } from "../styles/Theme";
 import { auth } from "./firebaseConfig";
 import { signInWithEmailAndPassword } from "firebase/auth";
+import logo from "../../assets/logo.png";
 import AuthStyles from "../styles/AuthStyles";
 
 const Login = ({ navigation }) => {
@@ -27,7 +28,10 @@ const Login = ({ navigation }) => {
     try {
       await signInWithEmailAndPassword(auth, email, password);
       Alert.alert("Success", "You have successfully logged in!");
-      navigation.navigate("Dashboard");
+      navigation.reset({
+        index: 0,
+        routes: [{ name: "Dashboard" }],
+      });
     } catch (error) {
       Alert.alert("Login Failed", error.message);
     } finally {
@@ -43,10 +47,7 @@ const Login = ({ navigation }) => {
       <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
         <View style={AuthStyles.container}>
           <View style={AuthStyles.logoContainer}>
-            <Image
-              source={require("../../assets/logo.png")}
-              style={AuthStyles.logo}
-            />
+            <Image source={logo} style={AuthStyles.logo} />
             <Text style={[AuthStyles.title]}>PURRNOTE</Text>
           </View>
 

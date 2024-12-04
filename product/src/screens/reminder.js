@@ -3,30 +3,22 @@ import {
   View,
   Text,
   StyleSheet,
-  ScrollView,
-  TouchableOpacity,
   ActivityIndicator,
+  TouchableOpacity,
 } from "react-native";
 import { colors } from "../styles/Theme";
-import {
-  fetchUserEvents,
-  fetchUserVetAppointments,
-} from "../actions/userActions";
+import { fetchUserEvents } from "../actions/userActions";
 import { getAuth } from "firebase/auth";
 import { Timestamp } from "firebase/firestore";
 import { useNavigation } from "@react-navigation/native";
 
 const ReminderPage = () => {
-  const navigation = useNavigation();
-
   const [events, setEvents] = useState([]);
-  const [vetAppointments, setVetAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
-
+  const navigation = useNavigation();
   const auth = getAuth();
   const userId = auth.currentUser ? auth.currentUser.uid : null;
 
-  // Fetch all events and vet appointments for a user
   useEffect(() => {
     if (!userId) return;
 
@@ -57,27 +49,8 @@ const ReminderPage = () => {
         });
 
         setEvents(filteredEvents);
-
-        // Fetch Vet Appointments
-        const vetData = await fetchUserVetAppointments(userId);
-
-        // Filter out past vet appointments based on the date (ignoring time)
-        const filteredVetAppointments = vetData.filter((appointment) => {
-          const appointmentDate = getDateOnly(getDateTime(appointment));
-          const today = getDateOnly(new Date());
-          return appointmentDate >= today; // Keep vet appointments from today or in the future
-        });
-
-        // Sort vet appointments by date and time
-        filteredVetAppointments.sort((a, b) => {
-          const dateA = getDateTime(a);
-          const dateB = getDateTime(b);
-          return dateA - dateB;
-        });
-
-        setVetAppointments(filteredVetAppointments);
       } catch (error) {
-        console.error("Failed to fetch events or vet appointments:", error);
+        console.error("Failed to fetch events:", error);
       } finally {
         setLoading(false);
       }
@@ -115,48 +88,40 @@ const ReminderPage = () => {
     return new Date(date.getFullYear(), date.getMonth(), date.getDate());
   };
 
-  const renderReminderItem = (item) => {
+  // Render each reminder item
+  const renderReminderItem = (item, index) => {
     const eventTime = getDateTime(item);
     const isValidDate = eventTime && !isNaN(eventTime.getTime());
 
     const formattedDateAndTime = isValidDate
-      ? eventTime.toLocaleString([], {
-          year: "numeric",
-          month: "2-digit",
-          day: "2-digit",
+      ? `${eventTime.getDate()}/${
+          eventTime.getMonth() + 1
+        }/${eventTime.getFullYear()} ${eventTime.toLocaleTimeString([], {
           hour: "2-digit",
           minute: "2-digit",
           hour12: true,
-        })
+        })}`
       : "No Date Available";
 
     return (
-      <View style={styles.reminderItem} key={item.id}>
-        <View
-          style={{
-            flexDirection: "row",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-        >
-          <Text style={styles.reminderTitle}>
-            {item.type === "vet" ? `Vet: ${item.vetName}` : item.title}
-          </Text>
-          <Text style={styles.reminderTime}>{formattedDateAndTime}</Text>
-        </View>
-        {item.type === "vet" && item.petName && (
-          <>
-            <Text style={styles.reminderNotes}>Pet: {item.petName}</Text>
-          </>
-        )}
+      <View
+        style={[
+          styles.reminderItem,
+          index != 1
+            ? {
+                borderBottomWidth: 1,
+                borderBottomColor: colors.primaryLightest,
+              }
+            : null,
+        ]}
+        key={item.id}
+      >
+        <Text style={styles.reminderTitle}>{item.title}</Text>
+        <Text style={styles.reminderTime}>Date: {formattedDateAndTime}</Text>
+
         {item.relatedPetsNames && item.relatedPetsNames.length > 0 && (
           <Text style={styles.reminderNotes}>
             Pets: {item.relatedPetsNames.join(", ")}
-          </Text>
-        )}
-        {item.notes && (
-          <Text style={styles.reminderNotes}>
-            Note: {item.notes.replace(/\n{2,}/g, "\n").trim()}
           </Text>
         )}
       </View>
@@ -173,11 +138,26 @@ const ReminderPage = () => {
   }
 
   return (
-    <ScrollView
-      contentContainerStyle={[styles.container, { paddingBottom: 80 }]}
-    >
-      {events.length === 0 && vetAppointments.length === 0 ? (
-        <Text style={styles.noRemindersText}>No upcoming reminders.</Text>
+    <View style={[styles.container]}>
+      {events.length === 0 ? (
+        <>
+          <Text style={styles.subHeader}>Reminders</Text>
+          <Text style={styles.noRemindersText}>
+            No upcoming reminders. Please create reminders in the Calendar page.
+          </Text>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() =>
+              navigation.replace("Dashboard", {
+                initialScreen: "Calendar",
+                previousScreen: "Home",
+                openAddEventModal: true,
+              })
+            }
+          >
+            <Text style={styles.buttonText}>Add Event</Text>
+          </TouchableOpacity>
+        </>
       ) : (
         <>
           <View
@@ -187,61 +167,52 @@ const ReminderPage = () => {
               justifyContent: "space-between",
             }}
           >
-            <Text style={styles.subHeader}>Events</Text>
-
-            <TouchableOpacity
-              onPress={() =>
-                navigation.push("Dashboard", {
-                  initialScreen: "Calendar",
-                })
-              }
-            >
-              <Text style={styles.showAll}>Show All</Text>
-            </TouchableOpacity>
+            <Text style={styles.subHeader}>Upcoming Reminders</Text>
           </View>
-          {events.slice(0, 3).map((item) => renderReminderItem(item))}
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "baseline",
-              justifyContent: "space-between",
-            }}
+          {events
+            .slice(0, 2)
+            .map((item, index) => renderReminderItem(item, index))}
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() =>
+              navigation.push("Dashboard", {
+                initialScreen: "Calendar",
+                previousScreen: "Home",
+                openAddEventModal: true,
+              })
+            }
           >
-            <Text style={styles.subHeader}>Vet Appointments</Text>
-
-            <TouchableOpacity
-              onPress={() =>
-                navigation.push("Dashboard", {
-                  initialScreen: "Vet",
-                })
-              }
-            >
-              <Text style={styles.showAll}>Show All</Text>
-            </TouchableOpacity>
-          </View>
-          {vetAppointments.slice(0, 3).map((item) => renderReminderItem(item))}
+            <Text style={styles.buttonText}>Add Event</Text>
+          </TouchableOpacity>
         </>
       )}
-    </ScrollView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     backgroundColor: "white",
-    paddingHorizontal: 15,
-  },
-  header: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: colors.primary,
+    paddingHorizontal: 20,
+    paddingBottom: 10,
+    paddingTop: 5,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    marginHorizontal: 15,
+    marginTop: 2,
+    borderRadius: 20,
   },
   subHeader: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: "bold",
     color: colors.accent,
     marginTop: 15,
-    marginBottom: 15,
+    marginBottom: 5,
+    textAlign: "center",
   },
   loadingContainer: {
     flex: 1,
@@ -254,21 +225,17 @@ const styles = StyleSheet.create({
     color: colors.primary,
   },
   noRemindersText: {
-    fontSize: 18,
+    fontSize: 16,
     color: colors.secondary,
-    textAlign: "center",
-    marginTop: 20,
+    marginTop: 10,
+    marginBottom: 20,
   },
   reminderItem: {
-    backgroundColor: colors.background,
-    borderWidth: 1,
     borderColor: colors.primaryLightest,
-    padding: 10,
-    borderRadius: 10,
-    marginBottom: 10,
+    paddingVertical: 10,
   },
   reminderTitle: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: "bold",
     color: colors.primary,
   },
@@ -278,19 +245,27 @@ const styles = StyleSheet.create({
     marginTop: 5,
   },
   reminderType: {
-    fontSize: 14,
+    fontSize: 16,
     color: colors.accent,
     marginTop: 5,
   },
   reminderNotes: {
-    fontSize: 14,
+    fontSize: 16,
     color: colors.secondary,
     marginTop: 5,
   },
-  showAll: {
-    color: colors.accent,
-    textDecorationLine: "underline",
+  button: {
+    backgroundColor: colors.accent,
+    paddingHorizontal: 10,
+    paddingVertical: 15,
+    borderRadius: 10,
+    marginBottom: 7,
+    alignItems: "center",
+  },
+  buttonText: {
+    color: "white",
     fontSize: 16,
+    fontWeight: "bold",
   },
 });
 

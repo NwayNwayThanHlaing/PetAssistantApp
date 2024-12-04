@@ -9,15 +9,14 @@ import {
 import { MaterialIcons } from "@expo/vector-icons";
 import { AppBarStyles } from "../styles/GlobalStyles";
 import { colors } from "../styles/Theme";
+import logo from "../../assets/logo.png";
+
 const AppBar = ({ title, onLogout }) => {
   return (
     <SafeAreaView style={AppBarStyles.safeArea}>
       <View style={AppBarStyles.container}>
         <View style={{ flexDirection: "row", alignItems: "center" }}>
-          <Image
-            source={require("../../assets/logo.png")}
-            style={{ width: 70, height: 70 }}
-          />
+          <Image source={logo} style={{ width: 70, height: 70 }} />
           <Text style={AppBarStyles.title}>
             {title == "Home" ? "Purrnote" : title}
           </Text>

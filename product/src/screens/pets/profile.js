@@ -12,11 +12,22 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
+import {
+  arrayRemove,
+  updateDoc,
+  doc,
+  deleteDoc,
+  getDoc,
+  collection,
+  query,
+  where,
+  getDocs,
+} from "firebase/firestore";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import * as ImagePicker from "expo-image-picker";
 import { firestore, auth } from "../../auth/firebaseConfig";
-import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { colors } from "../../styles/Theme";
+import dog from "../../../assets/dog.png";
 
 const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/dunbwugns/image/upload";
 const UPLOAD_PRESET = "purr_note";
@@ -25,8 +36,10 @@ const PetProfile = ({ route, navigation }) => {
   const { petId } = route.params;
   const [pet, setPet] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [isSaving, setIsSaving] = useState(false); // New state for saving
+  const [isSaving, setIsSaving] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
+
   const [formData, setFormData] = useState({
     name: "",
     breed: "",
@@ -37,6 +50,7 @@ const PetProfile = ({ route, navigation }) => {
     description: "",
     imageUrl: null,
   });
+  const [errors, setErrors] = useState({}); // Error state for inputs
 
   useEffect(() => {
     const fetchPetData = async () => {
@@ -67,6 +81,18 @@ const PetProfile = ({ route, navigation }) => {
 
   const handleFieldChange = (key, value) => {
     setFormData((prevData) => ({ ...prevData, [key]: value }));
+
+    // Validate numeric fields
+    if (key === "age" || key === "weight") {
+      if (isNaN(value) || value.trim() === "") {
+        setErrors((prevErrors) => ({ ...prevErrors, [key]: "Invalid number" }));
+      } else {
+        setErrors((prevErrors) => {
+          const { [key]: removedError, ...rest } = prevErrors;
+          return rest;
+        });
+      }
+    }
   };
 
   const pickImage = async () => {
@@ -157,18 +183,45 @@ const PetProfile = ({ route, navigation }) => {
   }
 
   const renderField = (label, value, key, keyboardType = "default") => (
-    <View style={styles.infoSection}>
-      <Text style={styles.infoLabel}>{label}:</Text>
-      {isEditing ? (
-        <TextInput
-          style={styles.input}
-          value={value}
-          onChangeText={(text) => handleFieldChange(key, text)}
-          keyboardType={keyboardType}
-        />
-      ) : (
-        <Text style={styles.infoText}>{value}</Text>
-      )}
+    <View>
+      <View
+        style={
+          !isEditing
+            ? styles.infoSection
+            : {
+                ...styles.infoSection,
+                paddingVertical: 5,
+              }
+        }
+      >
+        <Text style={styles.infoLabel}>{label}</Text>
+        {isEditing ? (
+          <TextInput
+            style={[
+              styles.input,
+              key === "description"
+                ? { maxHeight: 109, textAlignVertical: "top" }
+                : {},
+            ]}
+            value={value}
+            onChangeText={(text) => handleFieldChange(key, text)}
+            keyboardType={keyboardType}
+            multiline={key === "description"}
+          />
+        ) : (
+          <Text
+            style={[
+              styles.infoText,
+              {
+                maxHeight: key === "description" ? 109 : "auto",
+              },
+            ]}
+          >
+            {value.replace(/\n/g, "")}
+          </Text>
+        )}
+      </View>
+      {errors[key] && <Text style={styles.errorText}>*{errors[key]}</Text>}
     </View>
   );
 
@@ -189,32 +242,36 @@ const PetProfile = ({ route, navigation }) => {
           style={styles.image}
         >
           <Image
-            source={
-              formData.imageUrl
-                ? { uri: formData.imageUrl }
-                : require("../../../assets/dog.png")
-            }
+            source={formData.imageUrl ? { uri: formData.imageUrl } : dog}
             style={styles.petImage}
           />
-          {isEditing && (
-            <Text style={styles.uploadText}>Tap to change profile photo</Text>
-          )}
+          {isEditing && <Text style={styles.uploadText}>Upload photo</Text>}
         </TouchableOpacity>
 
         <View style={styles.detailsContainer}>
-          {!isEditing && <Text style={styles.header}>Pet Profile</Text>}
-          {renderField("Name", formData.name, "name")}
-          {renderField("Breed", formData.breed, "breed")}
-          {renderField("Age", formData.age, "age", "numeric")}
-          {renderField("Color", formData.color, "color")}
-          {renderField("Gender", formData.gender, "gender")}
-          {renderField("Weight(kg)", formData.weight, "weight", "numeric")}
-          {renderField("Description", formData.description, "description")}
+          <View style={!isEditing ? styles.infoContainer : null}>
+            {!isEditing && <Text style={styles.header}>Pet Profile</Text>}
+            {renderField("Name", formData.name, "name")}
+            {renderField("Breed", formData.breed, "breed")}
+            {renderField("Age", formData.age, "age", "numeric")}
+            {renderField("Color", formData.color, "color")}
+            {renderField("Gender", formData.gender, "gender")}
+            {renderField("Weight(kg)", formData.weight, "weight", "numeric")}
+            {renderField("Description", formData.description, "description")}
+          </View>
 
           <TouchableOpacity
-            style={styles.editButton}
+            style={[
+              styles.editButton,
+              {
+                marginTop: 30,
+              },
+              isSaving || (isEditing && Object.keys(errors).length > 0)
+                ? styles.disabledButton
+                : null,
+            ]}
             onPress={() => (isEditing ? handleSave() : setIsEditing(true))}
-            disabled={isSaving}
+            disabled={isSaving || (isEditing && Object.keys(errors).length > 0)}
           >
             {isSaving ? (
               <ActivityIndicator size="small" color="#FFFFFF" />
@@ -249,15 +306,60 @@ const PetProfile = ({ route, navigation }) => {
                     onPress: async () => {
                       try {
                         const userId = auth.currentUser.uid;
+
+                        // Reference to the pet document to be deleted
                         const petDocRef = doc(
                           firestore,
                           `users/${userId}/pets`,
                           petId
                         );
-                        await petDocRef.delete();
+
+                        // Fetch the pet name before deleting
+                        const petDocSnap = await getDoc(petDocRef);
+                        if (!petDocSnap.exists()) {
+                          throw new Error("Pet not found");
+                        }
+                        const petData = petDocSnap.data();
+                        const petName = petData.name; // Assuming the pet document contains a `name` field
+
+                        // Delete the pet document
+                        await deleteDoc(petDocRef);
+
+                        // Reference to the events subcollection
+                        const eventsCollectionRef = collection(
+                          firestore,
+                          `users/${userId}/events`
+                        );
+
+                        // Query to find all events that contain the pet name in relatedPets
+                        const eventsQuery = query(
+                          eventsCollectionRef,
+                          where("relatedPets", "array-contains", petName)
+                        );
+
+                        // Fetch all matching event documents
+                        const querySnapshot = await getDocs(eventsQuery);
+
+                        // Loop through each event and remove the pet name from relatedPets
+                        for (const docSnap of querySnapshot.docs) {
+                          const eventDocRef = doc(
+                            firestore,
+                            `users/${userId}/events`,
+                            docSnap.id
+                          );
+
+                          await updateDoc(eventDocRef, {
+                            relatedPets: arrayRemove(petName),
+                          });
+                        }
+
+                        // Navigate back after deletion
                         navigation.goBack();
                       } catch (error) {
-                        console.error("Error deleting pet:", error);
+                        console.error(
+                          "Error deleting pet and updating events:",
+                          error
+                        );
                         Alert.alert("Error", "Failed to delete pet profile.");
                       }
                     },
@@ -285,18 +387,17 @@ const styles = StyleSheet.create({
   },
   image: {
     alignItems: "center",
-    marginTop: 20,
   },
   petImage: {
-    width: 130,
-    height: 130,
-    borderRadius: 75,
+    width: 150,
+    height: 150,
+    borderRadius: 45,
     backgroundColor: colors.accent,
   },
   uploadText: {
     color: colors.primary,
     textAlign: "center",
-    marginTop: 5,
+    marginTop: 10,
     textDecorationLine: "underline",
   },
   detailsContainer: {
@@ -307,17 +408,28 @@ const styles = StyleSheet.create({
   header: {
     fontSize: 18,
     fontWeight: "bold",
-    marginBottom: 15,
+    marginVertical: 10,
+    textDecorationLine: "underline",
     textAlign: "center",
     color: colors.primary,
+  },
+  infoContainer: {
+    marginTop: 10,
+    backgroundColor: colors.background,
+    padding: 10,
+    borderRadius: 10,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.3,
   },
   infoSection: {
     flexDirection: "row",
     alignItems: "center",
-    marginVertical: 5,
-    backgroundColor: colors.primaryLightest,
-    padding: 10,
-    borderRadius: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 10,
   },
   infoLabel: {
     fontSize: 16,
@@ -334,9 +446,16 @@ const styles = StyleSheet.create({
   input: {
     fontSize: 16,
     color: colors.primary,
-    padding: 8,
-    backgroundColor: colors.primaryLightest,
+    backgroundColor: "white",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
     borderRadius: 10,
+    padding: 10,
+    marginLeft: 5,
     flex: 1,
   },
   editButton: {
@@ -355,6 +474,9 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginLeft: 8,
   },
+  disabledButton: {
+    opacity: 0.6,
+  },
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
@@ -366,7 +488,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   errorText: {
-    fontSize: 18,
+    fontSize: 14,
+    marginLeft: 10,
+    marginBottom: 10,
     color: "red",
   },
   back: {

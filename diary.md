@@ -1,3 +1,37 @@
+## Week 11 (2 December 2024)
+
+Summary:
+Challenges:
+Next Step:
+
+
+## Week 10 (24 November 2024)
+
+Summary:
+    - managed to make all features in the consistent ui
+    - improved features such as showing appointments in calendar for user experience
+    - modified vet appointment database models for easy access
+    - redesigned home page
+    - tested each feature for functionality
+Challenges:
+    - Implementation of notification is challenging since firebase stopped providing functions for free.
+Next Step:
+    - To test notification with NativeNotify
+    - To implement landscape mode as the mobile gets rotated
+    - To start working on report and presentation
+    
+## Week 9 (18 November 2024)
+
+Summary:
+    - implemented reminder page
+    - fixed layout and did UI touch up for all pages 
+    - researched on notification system
+Challenges:
+    - No challenges so far
+Next Step:
+    - To do testings and start working on interim report
+    - Release a version for term 1
+
 ## Week 8 (11 November 2024)
 
 Summary:
@@ -6,11 +40,10 @@ Summary:
     - Managed to update event marks on calendar to change instantly when there is update on event
     - Created Reminder page and displayed data collected from database
 Challenges:
-    - Everything worked well
+    - Everything worked well.
 Next Step:
-    - To finish up with reminders and implement notification page.
-    - Test all the pages and final code. 
-    - Release a version for term 1
+    - To finish up with reminders and implement notification page
+    - Test all the pages and final code
     
 ## Week 7 (4 November 2024)
 
@@ -26,26 +59,26 @@ Challenges:
     - Decided to implement monthly view but user will be able to see all months by going left and right, which is better than implementing yearly view separately.
     - Developed Vet appointment page and connected to database.  
 Next Step:
-    - To implement reminders for the existing events in the calendar
+    - To implement reminders for the existing events in the calendar.
 
 ## Week 6 (28 October 2024)
 
 Summary:
-    - Implemented User profile, Change password, Account deletion using Flutter
-    - Changed framework to React Native since Flutter is not compatible for my project needs
+    - Implemented User profile, Change password, Account deletion using Flutter.
+    - Changed framework to React Native since Flutter is not compatible for my project needs.
     - Implemented Authentication features: Login, Signup
 Challenges: 
     - I initially chose Flutter for its powerful widget library but found Firebase integration challenging. 
     - Switching required redoing the setup and completed pages; however, it significantly improved the development process.
 Next Step: 
-    - Continue with the Pet profiles, and Calendar
+    - Continue with the Pet profiles, and Calendar.
     
 ## Week 5 (21 October 2024)
 
 Summary:
-    - Created a structured layout, aligned with the GitLab rules
-    - Implemented LogIn and SignUp Pagea with proper UI and authentication
-    - Created Dashboard or landing page
+    - Created a structured layout, aligned with the GitLab rules.
+    - Implemented LogIn and SignUp Pagea with proper UI and authentication.
+    - Created Dashboard or landing page.
 Challenges: 
     - Took a good amount of time to implement authentication.
 Next Step:
@@ -55,10 +88,10 @@ Next Step:
 
 Summary:
     - Initialised small projects to test out appropriate technologies.
-    - Tested out Flutter and Firebase by creating mock projects like to-do list and counter
+    - Tested out Flutter and Firebase by creating mock projects like to-do list and counter.
     - Researched Flutter Riverpod for state management.
-Challenges: not quite familiar with Flutter. 
-Next Step: Start structuring the project layout and implement authentication
+Challenges: not quite familiar with Flutter.
+Next Step: Start structuring the project layout and implement authentication.
 
 ## Week 3 (7 October 2024)
 

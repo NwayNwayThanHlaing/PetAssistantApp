@@ -1,4 +1,3 @@
-// EventList Component
 import React, { useEffect, useState } from "react";
 import {
   View,
@@ -55,7 +54,20 @@ const EventList = ({ onEventPress, selectedDate }) => {
               const eventData = doc.data();
               return { id: doc.id, ...eventData };
             });
-            setTodayEvents(eventsData);
+            // Sort events by time (hours and minutes)
+            const sortedEvents = eventsData.sort((a, b) => {
+              // Handle events without time set
+              if (!a.time || !b.time) {
+                return !a.time ? 1 : -1;
+              }
+
+              const aTotalMinutes = a.time.hours * 60 + a.time.minutes;
+              const bTotalMinutes = b.time.hours * 60 + b.time.minutes;
+
+              return aTotalMinutes - bTotalMinutes; // Sort in ascending order by total minutes
+            });
+
+            setTodayEvents(sortedEvents);
           }
           setLoading(false);
         });
@@ -105,6 +117,7 @@ const EventList = ({ onEventPress, selectedDate }) => {
               }}
             >
               <Text style={styles.eventTitle}>{item.title}</Text>
+
               <Text style={styles.eventTime}>
                 {item.time &&
                 typeof item.time.hours === "number" &&
@@ -115,13 +128,14 @@ const EventList = ({ onEventPress, selectedDate }) => {
                   : "00:00 AM"}
               </Text>
             </View>
+            {item.appointment && <Text style={styles.vet}>(Appointment)</Text>}
             {item.relatedPets && item.relatedPets.length > 0 && (
               <Text style={styles.petsText}>
                 Pets: {item.relatedPets.join(", ")}
               </Text>
             )}
             {item.notes && item.notes.trim() !== "" && (
-              <Text style={styles.eventNotes}>
+              <Text style={styles.petsText}>
                 Note: {item.notes.replace(/\n{2,}/g, "\n").trim()}
               </Text>
             )}
@@ -145,7 +159,7 @@ const styles = StyleSheet.create({
     marginVertical: 20,
   },
   eventItem: {
-    backgroundColor: colors.background,
+    backgroundColor: "white",
     padding: 15,
     borderRadius: 10,
     borderWidth: 1,
@@ -161,15 +175,15 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: colors.primary,
   },
-  eventNotes: {
-    marginTop: 3,
-    fontSize: 14,
-    color: colors.primary,
-  },
   petsText: {
     marginTop: 5,
     fontSize: 14,
     color: colors.primary,
+  },
+  vet: {
+    marginTop: 5,
+    fontSize: 14,
+    color: colors.accent,
   },
 });
 

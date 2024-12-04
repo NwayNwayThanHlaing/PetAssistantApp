@@ -17,6 +17,7 @@ import { createUserWithEmailAndPassword } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
 import { MaterialIcons } from "@expo/vector-icons";
 import AuthStyles from "../styles/AuthStyles";
+import logo from "../../assets/logo.png";
 
 const Signup = ({ navigation }) => {
   const [name, setName] = useState("");
@@ -63,10 +64,7 @@ const Signup = ({ navigation }) => {
       <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
         <View style={AuthStyles.container}>
           <View style={AuthStyles.logoContainer}>
-            <Image
-              source={require("../../assets/logo.png")}
-              style={AuthStyles.logo}
-            />
+            <Image source={logo} style={AuthStyles.logo} />
             <Text style={[AuthStyles.title]}>PURRNOTE</Text>
           </View>
 

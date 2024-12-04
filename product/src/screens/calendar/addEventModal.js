@@ -1,10 +1,9 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
   TouchableOpacity,
   TextInput,
-  ScrollView,
   TouchableWithoutFeedback,
   Keyboard,
   ActivityIndicator,
@@ -12,6 +11,7 @@ import {
 } from "react-native";
 import Modal from "react-native-modal";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import DropDownPicker from "react-native-dropdown-picker";
 import { colors } from "../../styles/Theme";
 
 const AddEventModal = ({
@@ -25,13 +25,39 @@ const AddEventModal = ({
   addEvent,
   loading,
 }) => {
+  const [recurrence, setRecurrence] = useState("none"); // Default to non-recurring
+  const [endDate, setEndDate] = useState(null);
+  const [open, setOpen] = useState(false);
+  const [value, setValue] = useState(null);
   const resetNewEvent = () => {
-    setNewEvent({
-      title: "",
-      time: new Date(new Date().setHours(0, 0, 0, 0)),
-      notes: "",
+    setNewEvent((prev) => ({
+      title: prev.title || "",
+      date: prev.date instanceof Date ? prev.date : new Date(),
+      time: prev.time instanceof Date ? prev.time : new Date(),
+      notes: prev.notes || "",
+      appointment: prev.appointment || false,
+    }));
+    setSelectedPets((prev) => (prev.length === 0 ? [] : prev));
+    setRecurrence("none"); // Reset recurrence to default
+    setEndDate(null); // Reset end date
+  };
+
+  useEffect(() => {
+    if (!isVisible) {
+      resetNewEvent(); // Only reset when the modal is actually closing
+    }
+  }, [isVisible]);
+
+  const handleTextInputChange = (field, value) => {
+    setNewEvent((prevEvent) => {
+      if (prevEvent[field] !== value) {
+        return {
+          ...prevEvent,
+          [field]: value,
+        };
+      }
+      return prevEvent;
     });
-    setSelectedPets([]);
   };
 
   const togglePetSelection = (petName) => {
@@ -42,30 +68,61 @@ const AddEventModal = ({
     );
   };
 
-  useEffect(() => {
-    if (isVisible) {
-      resetNewEvent();
-    }
-  }, [isVisible]);
-
   return (
     <Modal
       isVisible={isVisible}
       onBackdropPress={() => setIsVisible(false)}
       style={styles.modalContainer}
       useNativeDriver={true}
+      hideModalContentWhileAnimating={true}
+      animationIn="slideInUp"
+      animationOut="slideOutDown"
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <View style={styles.modalContent}>
-          <ScrollView contentContainerStyle={styles.scrollViewContent}>
+          <View style={styles.scrollViewContent}>
             <Text style={styles.modalHeader}>Add New Event</Text>
+
+            {/* Event Title */}
             <TextInput
               style={styles.input}
               placeholder="Event Title"
               placeholderTextColor={colors.primaryLighter}
               value={newEvent.title}
-              onChangeText={(text) => setNewEvent({ ...newEvent, title: text })}
+              onChangeText={(text) => handleTextInputChange("title", text)}
             />
+
+            {/* Event Date */}
+            <View style={styles.datePickerContainer}>
+              <Text style={{ color: colors.primaryLighter }}>Event Date</Text>
+              <DateTimePicker
+                mode="date"
+                value={
+                  newEvent.date instanceof Date
+                    ? newEvent.date
+                    : new Date(newEvent.date)
+                }
+                onChange={(event, selectedDate) => {
+                  if (selectedDate) {
+                    // Format the date as YYYY-MM-DD inline
+                    const year = selectedDate.getFullYear();
+                    const month = String(selectedDate.getMonth() + 1).padStart(
+                      2,
+                      "0"
+                    ); // Months are 0-based
+                    const day = String(selectedDate.getDate()).padStart(2, "0");
+                    const formattedDate = `${year}-${month}-${day}`;
+
+                    setNewEvent((prevEvent) => ({
+                      ...prevEvent,
+                      date: formattedDate, // Store the formatted date
+                    }));
+                  }
+                }}
+              />
+            </View>
+
+            {/* Event Time */}
             <View style={styles.datePickerContainer}>
               <Text style={{ color: colors.primaryLighter }}>Event Time</Text>
               <DateTimePicker
@@ -86,14 +143,56 @@ const AddEventModal = ({
                 is24Hour={false} // Use AM/PM format
               />
             </View>
+
+            {/* Notes */}
             <TextInput
               style={[styles.input, styles.notesInput]}
               placeholder="Notes"
               placeholderTextColor={colors.primaryLighter}
               value={newEvent.notes}
-              onChangeText={(text) => setNewEvent({ ...newEvent, notes: text })}
+              onChangeText={(text) => handleTextInputChange("notes", text)}
               multiline
             />
+
+            {/* Recurrence */}
+            <View>
+              <Text style={styles.label}>Repeat</Text>
+              <DropDownPicker
+                open={open}
+                value={value}
+                items={[
+                  { label: "None", value: "none" },
+                  { label: "Every Day", value: "daily" },
+                  { label: "Every Week", value: "weekly" },
+                  { label: "Every Two Weeks", value: "biweekly" },
+                  { label: "Every Month", value: "monthly" },
+                  { label: "Every Year", value: "yearly" },
+                ]}
+                setOpen={setOpen}
+                setValue={setValue}
+                onChangeValue={(itemValue) => {
+                  setRecurrence(itemValue);
+                  if (itemValue === "none") setEndDate(null); // Reset end date for non-recurring
+                }}
+                style={styles.picker} // Use the same picker style or customize it further
+                dropDownDirection="BOTTOM" // Open dropdown below
+              />
+              {/* End Date */}
+              {recurrence !== "none" && (
+                <View style={styles.datePickerContainer}>
+                  <Text style={{ color: colors.primaryLighter }}>End Date</Text>
+                  <DateTimePicker
+                    mode="date"
+                    value={endDate || new Date()}
+                    onChange={(event, selectedDate) => {
+                      if (selectedDate) setEndDate(selectedDate);
+                    }}
+                  />
+                </View>
+              )}
+            </View>
+
+            {/* Pet Selection */}
             <Text style={styles.petsSelectionHeader}>Select Pets</Text>
             <View style={styles.petButtonsContainer}>
               {petNames.map((item) => (
@@ -117,17 +216,45 @@ const AddEventModal = ({
               ))}
             </View>
 
+            {/* Appointment Checkbox */}
+            <TouchableOpacity
+              style={styles.checkboxContainer}
+              onPress={() =>
+                setNewEvent((prevEvent) => ({
+                  ...prevEvent,
+                  appointment: !prevEvent.appointment,
+                }))
+              }
+            >
+              <View
+                style={[
+                  styles.checkbox,
+                  newEvent.appointment && styles.checkboxChecked,
+                ]}
+              />
+              <Text style={styles.checkboxLabel}>Appointment</Text>
+            </TouchableOpacity>
+
+            {/* Action Buttons */}
             <View style={styles.buttonContainer}>
               <TouchableOpacity
                 style={[styles.modalButton, styles.cancelButton]}
-                onPress={() => setIsVisible(false)}
+                onPress={() => {
+                  setIsVisible(false);
+                  Keyboard.dismiss(); // Dismiss keyboard on cancel
+                }}
               >
                 <Text style={styles.buttonText}>Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.modalButton, styles.saveButton]}
                 onPress={() => {
-                  addEvent();
+                  Keyboard.dismiss(); // Dismiss keyboard on save
+                  addEvent({
+                    ...newEvent,
+                    recurrence,
+                    endDate,
+                  }); // Pass recurrence data
                 }}
                 disabled={loading}
               >
@@ -138,13 +265,12 @@ const AddEventModal = ({
                 )}
               </TouchableOpacity>
             </View>
-          </ScrollView>
+          </View>
         </View>
       </TouchableWithoutFeedback>
     </Modal>
   );
 };
-
 const styles = StyleSheet.create({
   modalContainer: {
     justifyContent: "center",
@@ -189,6 +315,17 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     backgroundColor: colors.background,
+  },
+  label: {
+    fontSize: 16,
+    color: colors.primary,
+    marginVertical: 10,
+  },
+  picker: {
+    width: "100%",
+    backgroundColor: colors.background,
+    borderRadius: 8,
+    marginBottom: 10,
   },
   buttonContainer: {
     flexDirection: "row",
@@ -245,6 +382,25 @@ const styles = StyleSheet.create({
     color: colors.primary,
     marginTop: 20,
   },
+  checkboxContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 20,
+  },
+  checkbox: {
+    width: 20,
+    height: 20,
+    borderWidth: 1,
+    borderColor: colors.primary,
+    marginRight: 10,
+    borderRadius: 4,
+  },
+  checkboxChecked: {
+    backgroundColor: colors.accent,
+  },
+  checkboxLabel: {
+    fontSize: 16,
+    color: colors.primary,
+  },
 });
-
 export default AddEventModal;
