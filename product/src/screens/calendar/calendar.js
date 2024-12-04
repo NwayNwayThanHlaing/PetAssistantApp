@@ -1,4 +1,3 @@
-// CalendarPage Component
 import React, { useState, useEffect } from "react";
 import {
   View,
@@ -9,6 +8,8 @@ import {
   Platform,
   ScrollView,
   Alert,
+  Modal,
+  TouchableWithoutFeedback,
 } from "react-native";
 import { Calendar } from "react-native-calendars";
 import { colors } from "../../styles/Theme";
@@ -23,6 +24,8 @@ import EventList from "./eventList";
 import EventModal from "./updateEventModal";
 import AddEventModal from "./addEventModal";
 import { useNavigation, useRoute } from "@react-navigation/native";
+import { Picker } from "@react-native-picker/picker";
+import Svg, { Path } from "react-native-svg";
 
 const CalendarPage = () => {
   const navigation = useNavigation();
@@ -41,13 +44,41 @@ const CalendarPage = () => {
   });
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [selectedPets, setSelectedPets] = useState([]);
-  const [currentDate, setCurrentDate] = useState(
-    new Date().toISOString().split("T")[0]
-  );
   const [petNames, setPetNames] = useState([]);
   const [loading, setLoading] = useState(false);
   const [updateLoading, setUpdateLoading] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
+
+  // Month and Year Selectors States
+  const [selectedMonth, setSelectedMonth] = useState(
+    (new Date().getMonth() + 1).toString()
+  );
+  const [selectedYear, setSelectedYear] = useState(
+    new Date().getFullYear().toString()
+  );
+  const [showMonthModal, setShowMonthModal] = useState(false);
+  const [showYearModal, setShowYearModal] = useState(false);
+
+  // Define arrays for months and years
+  const months = [
+    { label: "January", value: "1" },
+    { label: "February", value: "2" },
+    { label: "March", value: "3" },
+    { label: "April", value: "4" },
+    { label: "May", value: "5" },
+    { label: "June", value: "6" },
+    { label: "July", value: "7" },
+    { label: "August", value: "8" },
+    { label: "September", value: "9" },
+    { label: "October", value: "10" },
+    { label: "November", value: "11" },
+    { label: "December", value: "12" },
+  ];
+
+  const years = Array.from({ length: 30 }, (_, index) => {
+    const year = new Date().getFullYear() - 15 + index;
+    return year.toString();
+  });
 
   // Fetch pet names from Firestore
   useEffect(() => {
@@ -89,18 +120,70 @@ const CalendarPage = () => {
     setSelectedDate(today);
   }, []);
 
+  // Prepare marked dates for the calendar
+  const prepareMarkedDates = () => {
+    const newMarkedDates = {};
+
+    Object.keys(events).forEach((date) => {
+      if (events[date] && events[date].length > 0) {
+        newMarkedDates[date] = {
+          marked: true,
+          dots: [{ color: colors.accent }],
+        };
+      }
+    });
+
+    if (selectedDate) {
+      newMarkedDates[selectedDate] = {
+        ...newMarkedDates[selectedDate],
+        selected: true,
+        selectedColor: colors.primary,
+      };
+    }
+
+    return newMarkedDates;
+  };
+
+  // Function to handle arrow clicks and update month and year
+  const handleArrowClick = (direction) => {
+    let newMonth = parseInt(selectedMonth);
+    let newYear = parseInt(selectedYear);
+
+    if (direction === "left") {
+      if (newMonth === 1) {
+        newMonth = 12;
+        newYear -= 1;
+      } else {
+        newMonth -= 1;
+      }
+    } else if (direction === "right") {
+      if (newMonth === 12) {
+        newMonth = 1;
+        newYear += 1;
+      } else {
+        newMonth += 1;
+      }
+    }
+
+    setSelectedMonth(newMonth.toString());
+    setSelectedYear(newYear.toString());
+  };
+
+  // Set the current date based on selected month and year
+  const getFormattedDate = (year, month) => {
+    const monthString = month < 10 ? `0${month}` : month;
+    return `${year}-${monthString}-01`;
+  };
+
+  const formattedDate = getFormattedDate(selectedYear, selectedMonth);
+
   // Go to today's date
   const goToToday = () => {
     const today = new Date().toISOString().split("T")[0];
     setSelectedDate(today);
-    setCurrentDate(today);
+    setSelectedMonth((new Date().getMonth() + 1).toString());
+    setSelectedYear(new Date().getFullYear().toString());
   };
-
-  useEffect(() => {
-    if (route.params?.openAddEventModal) {
-      setIsAddingEvent(true);
-    }
-  }, [route.params]);
 
   // Add new event
   const handleAddEvent = async () => {
@@ -139,31 +222,6 @@ const CalendarPage = () => {
       pets: [],
     });
     setSelectedPets([]);
-  };
-  // Prepare marked dates for the calendar
-  const prepareMarkedDates = () => {
-    const newMarkedDates = {};
-
-    // Iterate over all event dates
-    Object.keys(events).forEach((date) => {
-      if (events[date] && events[date].length > 0) {
-        newMarkedDates[date] = {
-          marked: true,
-          dots: [{ color: colors.accent }], // Ensure only one dot is displayed
-        };
-      }
-    });
-
-    // Ensure the selected date is highlighted, even if it has no events
-    if (selectedDate) {
-      newMarkedDates[selectedDate] = {
-        ...newMarkedDates[selectedDate], // Retain existing dots if any
-        selected: true,
-        selectedColor: colors.primary,
-      };
-    }
-
-    return newMarkedDates;
   };
 
   // Update Event
@@ -306,26 +364,75 @@ const CalendarPage = () => {
               shadowRadius: 3.84,
               borderRadius: 20,
               backgroundColor: "white",
-              margin: 15,
-              padding: 10,
+              padding: 5,
+              paddingVertical: 10,
+              marginHorizontal: 10,
             }}
           >
             <Calendar
-              current={currentDate}
+              key={formattedDate}
+              current={formattedDate}
               onDayPress={(day) => setSelectedDate(day.dateString)}
               markedDates={markedDates}
               markingType={"multi-dot"}
               theme={{
-                selectedDayBackgroundColor: colors.primary,
-                todayTextColor: colors.accent,
-                arrowColor: colors.accent,
                 textMonthFontWeight: "bold",
-                textMonthFontSize: 20,
-                textDayFontSize: 17,
-                textDayHeaderFontSize: 14,
-                textSectionTitleColor: colors.primary,
-                textDayHeaderFontWeight: "bold",
+                textDayFontWeight: "normal",
               }}
+              renderHeader={(date) => (
+                <View style={styles.header}>
+                  {/* Left arrow */}
+                  <TouchableOpacity onPress={() => handleArrowClick("left")}>
+                    <Svg width="25" height="25" viewBox="0 0 24 24" fill="none">
+                      <Path
+                        d="M15 18l-6-6 6-6"
+                        stroke={colors.accent}
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </Svg>
+                  </TouchableOpacity>
+
+                  <View style={{ flexDirection: "row", alignItems: "center" }}>
+                    {/* Touchable month selector */}
+                    <TouchableOpacity onPress={() => setShowMonthModal(true)}>
+                      <View
+                        style={[
+                          styles.headerItem,
+                          {
+                            marginRight: 5,
+                          },
+                        ]}
+                      >
+                        <Text style={styles.headerText}>
+                          {months[parseInt(selectedMonth) - 1].label}
+                        </Text>
+                      </View>
+                    </TouchableOpacity>
+
+                    {/* Touchable year selector */}
+                    <TouchableOpacity onPress={() => setShowYearModal(true)}>
+                      <View style={styles.headerItem}>
+                        <Text style={styles.headerText}>{selectedYear}</Text>
+                      </View>
+                    </TouchableOpacity>
+                  </View>
+                  {/* Right arrow */}
+                  <TouchableOpacity onPress={() => handleArrowClick("right")}>
+                    <Svg width="25" height="25" viewBox="0 0 24 24" fill="none">
+                      <Path
+                        d="M9 18l6-6-6-6"
+                        stroke={colors.accent}
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </Svg>
+                  </TouchableOpacity>
+                </View>
+              )}
+              hideArrows={true}
             />
           </View>
           <View style={styles.eventsContainer}>
@@ -345,6 +452,66 @@ const CalendarPage = () => {
             )}
           </View>
         </ScrollView>
+
+        {/* Month Picker Modal */}
+        <Modal
+          visible={showMonthModal}
+          transparent={true}
+          animationType="slide"
+          onRequestClose={() => setShowMonthModal(false)}
+        >
+          <TouchableWithoutFeedback onPress={() => setShowMonthModal(false)}>
+            <View style={styles.modalContainer}>
+              <TouchableWithoutFeedback>
+                <View style={styles.pickerContainer}>
+                  <Picker
+                    selectedValue={selectedMonth}
+                    onValueChange={(itemValue) => {
+                      setSelectedMonth(itemValue);
+                      setShowMonthModal(false);
+                    }}
+                  >
+                    {months.map((month) => (
+                      <Picker.Item
+                        label={month.label}
+                        value={month.value}
+                        key={month.value}
+                      />
+                    ))}
+                  </Picker>
+                </View>
+              </TouchableWithoutFeedback>
+            </View>
+          </TouchableWithoutFeedback>
+        </Modal>
+
+        {/* Year Picker Modal */}
+        <Modal
+          visible={showYearModal}
+          transparent={true}
+          animationType="slide"
+          onRequestClose={() => setShowYearModal(false)}
+        >
+          <TouchableWithoutFeedback onPress={() => setShowYearModal(false)}>
+            <View style={styles.modalContainer}>
+              <TouchableWithoutFeedback>
+                <View style={styles.pickerContainer}>
+                  <Picker
+                    selectedValue={selectedYear}
+                    onValueChange={(itemValue) => {
+                      setSelectedYear(itemValue);
+                      setShowYearModal(false);
+                    }}
+                  >
+                    {years.map((year) => (
+                      <Picker.Item label={year} value={year} key={year} />
+                    ))}
+                  </Picker>
+                </View>
+              </TouchableWithoutFeedback>
+            </View>
+          </TouchableWithoutFeedback>
+        </Modal>
 
         {/* Add Event Modal */}
         <AddEventModal
@@ -380,12 +547,34 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  today: {
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 5,
+    width: "100%",
+  },
+  headerItem: {
+    paddingVertical: 5,
+    backgroundColor: colors.background,
+    paddingHorizontal: 10,
+    borderRadius: 8,
+  },
+  headerText: {
+    fontSize: 16,
     color: colors.primary,
-    textDecorationLine: "underline",
-    fontSize: 18,
-    fontWeight: "600",
-    alignSelf: "flex-end",
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  pickerContainer: {
+    backgroundColor: "white",
+    borderRadius: 10,
+    width: "80%",
+    padding: 20,
   },
   eventsContainer: {
     padding: 15,
@@ -401,14 +590,13 @@ const styles = StyleSheet.create({
   addEventButton: {
     backgroundColor: colors.accent,
     paddingHorizontal: 10,
-    paddingVertical: 7,
+    paddingVertical: 5,
     borderRadius: 10,
-    marginTop: 10,
     alignItems: "center",
   },
   addEventButtonText: {
     color: "white",
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: "bold",
   },
 });
