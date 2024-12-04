@@ -148,7 +148,7 @@ const ReminderPage = () => {
           <TouchableOpacity
             style={styles.button}
             onPress={() =>
-              navigation.replace("Dashboard", {
+              navigation.push("Dashboard", {
                 initialScreen: "Calendar",
                 previousScreen: "Home",
                 openAddEventModal: true,

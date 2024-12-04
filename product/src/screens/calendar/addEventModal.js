@@ -25,7 +25,7 @@ const AddEventModal = ({
   addEvent,
   loading,
 }) => {
-  const [recurrence, setRecurrence] = useState("none"); // Default to non-recurring
+  const [recurrence, setRecurrence] = useState("none");
   const [endDate, setEndDate] = useState(null);
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState(null);
@@ -38,13 +38,13 @@ const AddEventModal = ({
       appointment: prev.appointment || false,
     }));
     setSelectedPets((prev) => (prev.length === 0 ? [] : prev));
-    setRecurrence("none"); // Reset recurrence to default
-    setEndDate(null); // Reset end date
+    setRecurrence("none");
+    setEndDate(null);
   };
 
   useEffect(() => {
     if (!isVisible) {
-      resetNewEvent(); // Only reset when the modal is actually closing
+      resetNewEvent();
     }
   }, [isVisible]);
 
