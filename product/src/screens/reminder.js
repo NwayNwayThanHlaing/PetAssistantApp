@@ -94,14 +94,13 @@ const ReminderPage = () => {
     const isValidDate = eventTime && !isNaN(eventTime.getTime());
 
     const formattedDateAndTime = isValidDate
-      ? eventTime.toLocaleString([], {
-          year: "numeric",
-          month: "2-digit",
-          day: "2-digit",
+      ? `${eventTime.getDate()}/${
+          eventTime.getMonth() + 1
+        }/${eventTime.getFullYear()} ${eventTime.toLocaleTimeString([], {
           hour: "2-digit",
           minute: "2-digit",
           hour12: true,
-        })
+        })}`
       : "No Date Available";
 
     return (
