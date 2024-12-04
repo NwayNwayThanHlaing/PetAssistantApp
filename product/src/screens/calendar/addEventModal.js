@@ -30,35 +30,34 @@ const AddEventModal = ({
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState(null);
   const resetNewEvent = () => {
-    setNewEvent((prev) => {
-      if (Object.keys(prev).length === 0) {
-        return {
-          title: "",
-          time: new Date(new Date().setHours(0, 0, 0, 0)),
-          notes: "",
-          appointment: false,
-        };
-      }
-      return prev; // Don't overwrite if `newEvent` is already set
-    });
+    setNewEvent((prev) => ({
+      title: prev.title || "",
+      date: prev.date instanceof Date ? prev.date : new Date(),
+      time: prev.time instanceof Date ? prev.time : new Date(),
+      notes: prev.notes || "",
+      appointment: prev.appointment || false,
+    }));
     setSelectedPets((prev) => (prev.length === 0 ? [] : prev));
     setRecurrence("none"); // Reset recurrence to default
     setEndDate(null); // Reset end date
   };
 
   useEffect(() => {
-    if (isVisible) {
-      if (Object.keys(newEvent).length === 0) {
-        resetNewEvent(); // Only reset if `newEvent` is empty
-      }
+    if (!isVisible) {
+      resetNewEvent(); // Only reset when the modal is actually closing
     }
-  }, [isVisible, newEvent]);
+  }, [isVisible]);
 
   const handleTextInputChange = (field, value) => {
-    setNewEvent((prevEvent) => ({
-      ...prevEvent,
-      [field]: value,
-    }));
+    setNewEvent((prevEvent) => {
+      if (prevEvent[field] !== value) {
+        return {
+          ...prevEvent,
+          [field]: value,
+        };
+      }
+      return prevEvent;
+    });
   };
 
   const togglePetSelection = (petName) => {
@@ -92,6 +91,36 @@ const AddEventModal = ({
               value={newEvent.title}
               onChangeText={(text) => handleTextInputChange("title", text)}
             />
+
+            {/* Event Date */}
+            <View style={styles.datePickerContainer}>
+              <Text style={{ color: colors.primaryLighter }}>Event Date</Text>
+              <DateTimePicker
+                mode="date"
+                value={
+                  newEvent.date instanceof Date
+                    ? newEvent.date
+                    : new Date(newEvent.date)
+                }
+                onChange={(event, selectedDate) => {
+                  if (selectedDate) {
+                    // Format the date as YYYY-MM-DD inline
+                    const year = selectedDate.getFullYear();
+                    const month = String(selectedDate.getMonth() + 1).padStart(
+                      2,
+                      "0"
+                    ); // Months are 0-based
+                    const day = String(selectedDate.getDate()).padStart(2, "0");
+                    const formattedDate = `${year}-${month}-${day}`;
+
+                    setNewEvent((prevEvent) => ({
+                      ...prevEvent,
+                      date: formattedDate, // Store the formatted date
+                    }));
+                  }
+                }}
+              />
+            </View>
 
             {/* Event Time */}
             <View style={styles.datePickerContainer}>

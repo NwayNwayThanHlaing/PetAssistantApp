@@ -23,14 +23,10 @@ import {
 import EventList from "./eventList";
 import EventModal from "./updateEventModal";
 import AddEventModal from "./addEventModal";
-import { useNavigation, useRoute } from "@react-navigation/native";
 import { Picker } from "@react-native-picker/picker";
 import Svg, { Path } from "react-native-svg";
 
 const CalendarPage = () => {
-  const navigation = useNavigation();
-  const route = useRoute();
-
   const [selectedDate, setSelectedDate] = useState("");
   const [events, setEvents] = useState({});
   const [markedDates, setMarkedDates] = useState({});
@@ -38,6 +34,7 @@ const CalendarPage = () => {
   const [isEventModalVisible, setIsEventModalVisible] = useState(false);
   const [newEvent, setNewEvent] = useState({
     title: "",
+    date: selectedDate,
     time: { hours: 0, minutes: 0 },
     notes: "",
     pets: [],
@@ -97,28 +94,34 @@ const CalendarPage = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        setLoading(true);
         const eventsData = await fetchEvents();
         setEvents(eventsData);
       } catch (error) {
         console.error("Failed to fetch events:", error);
-      } finally {
-        setLoading(false);
       }
     };
     fetchData();
-  }, []);
+  }, [newEvent]);
 
   // Update markedDates whenever events or selectedDate changes
   useEffect(() => {
     setMarkedDates(prepareMarkedDates());
-  }, [events, selectedDate, selectedEvent]);
+  }, [selectedDate, events]);
 
   // Set today's date by default
   useEffect(() => {
     const today = new Date().toISOString().split("T")[0];
     setSelectedDate(today);
   }, []);
+
+  // Update month and year when selectedDate changes
+  useEffect(() => {
+    if (selectedDate) {
+      const [year, month] = selectedDate.split("-");
+      setSelectedMonth(month);
+      setSelectedYear(year);
+    }
+  }, [selectedDate]);
 
   // Prepare marked dates for the calendar
   const prepareMarkedDates = () => {
@@ -185,7 +188,6 @@ const CalendarPage = () => {
     setSelectedYear(new Date().getFullYear().toString());
   };
 
-  // Add new event
   const handleAddEvent = async () => {
     if (!newEvent.title.trim()) {
       alert("Event title is required.");
@@ -198,30 +200,35 @@ const CalendarPage = () => {
 
     setLoading(true);
     try {
-      const docId = await addEvent(newEvent, selectedDate, selectedPets);
+      const docId = await addEvent(newEvent, selectedPets);
 
       const updatedEvent = {
         ...newEvent,
+        date: selectedDate, // Make sure the date is the selected date or the one from the modal
         pets: selectedPets,
         id: docId,
       };
 
-      setEvents((prevEvents) => ({
-        ...prevEvents,
-        [selectedDate]: [...(prevEvents[selectedDate] || []), updatedEvent],
-      }));
+      setEvents((prevEvents) => {
+        const newEvents = {
+          ...prevEvents,
+          [selectedDate]: [...(prevEvents[selectedDate] || []), updatedEvent],
+        };
+        return newEvents;
+      });
     } catch (error) {
       console.error("Error adding event:", error);
+    } finally {
+      setLoading(false);
+      setIsAddingEvent(false);
+      setNewEvent({
+        title: "",
+        time: { hours: 0, minutes: 0 },
+        notes: "",
+        pets: [],
+      });
+      setSelectedPets([]);
     }
-    setLoading(false);
-    setIsAddingEvent(false);
-    setNewEvent({
-      title: "",
-      time: { hours: 0, minutes: 0 },
-      notes: "",
-      pets: [],
-    });
-    setSelectedPets([]);
   };
 
   // Update Event
@@ -372,12 +379,17 @@ const CalendarPage = () => {
             <Calendar
               key={formattedDate}
               current={formattedDate}
-              onDayPress={(day) => setSelectedDate(day.dateString)}
+              onDayPress={(day) => {
+                setSelectedDate(day.dateString),
+                  setNewEvent({
+                    ...newEvent,
+                    date: day.dateString,
+                  });
+              }}
               markedDates={markedDates}
               markingType={"multi-dot"}
               theme={{
-                textMonthFontWeight: "bold",
-                textDayFontWeight: "normal",
+                textDayHeaderFontWeight: "bold",
               }}
               renderHeader={(date) => (
                 <View style={styles.header}>
@@ -562,6 +574,7 @@ const styles = StyleSheet.create({
   },
   headerText: {
     fontSize: 16,
+    fontWeight: "bold",
     color: colors.primary,
   },
   modalContainer: {
