@@ -263,6 +263,9 @@ const PetProfile = ({ route, navigation }) => {
           <TouchableOpacity
             style={[
               styles.editButton,
+              {
+                marginTop: 30,
+              },
               isSaving || (isEditing && Object.keys(errors).length > 0)
                 ? styles.disabledButton
                 : null,
@@ -411,7 +414,7 @@ const styles = StyleSheet.create({
     color: colors.primary,
   },
   infoContainer: {
-    marginVertical: 10,
+    marginTop: 10,
     backgroundColor: colors.background,
     padding: 10,
     borderRadius: 10,
