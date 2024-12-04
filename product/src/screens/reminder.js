@@ -50,7 +50,7 @@ const ReminderPage = () => {
 
         setEvents(filteredEvents);
       } catch (error) {
-        console.error("Failed to fetch events or vet appointments:", error);
+        console.error("Failed to fetch events:", error);
       } finally {
         setLoading(false);
       }
@@ -117,16 +117,9 @@ const ReminderPage = () => {
         ]}
         key={item.id}
       >
-        <Text style={styles.reminderTitle}>
-          {item.type === "vet" ? `Vet: ${item.vetName}` : item.title}
-        </Text>
+        <Text style={styles.reminderTitle}>{item.title}</Text>
         <Text style={styles.reminderTime}>Date: {formattedDateAndTime}</Text>
 
-        {item.type === "vet" && item.petName && (
-          <>
-            <Text style={styles.reminderNotes}>Pet: {item.petName}</Text>
-          </>
-        )}
         {item.relatedPetsNames && item.relatedPetsNames.length > 0 && (
           <Text style={styles.reminderNotes}>
             Pets: {item.relatedPetsNames.join(", ")}

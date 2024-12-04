@@ -128,9 +128,7 @@ const EventList = ({ onEventPress, selectedDate }) => {
                   : "00:00 AM"}
               </Text>
             </View>
-            {item.appointment && (
-              <Text style={styles.vet}>(Vet Appointment)</Text>
-            )}
+            {item.appointment && <Text style={styles.vet}>(Appointment)</Text>}
             {item.relatedPets && item.relatedPets.length > 0 && (
               <Text style={styles.petsText}>
                 Pets: {item.relatedPets.join(", ")}

@@ -107,13 +107,13 @@ const Home = ({ navigation }) => {
           style={styles.buttonBox}
           onPress={() =>
             navigation.push("Dashboard", {
-              initialScreen: "Vet",
+              initialScreen: "Booking",
               previousScreen: "Home",
             })
           }
         >
           <Image source={vet} style={styles.icon} />
-          <Text style={styles.exploreText}>Vet</Text>
+          <Text style={styles.exploreText}>Booking</Text>
         </TouchableOpacity>
       </View>
       <ReminderPage />

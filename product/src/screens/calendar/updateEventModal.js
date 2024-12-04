@@ -178,7 +178,7 @@ const EventModal = ({
                     selectedEvent?.appointment && styles.checkboxChecked,
                   ]}
                 />
-                <Text style={styles.checkboxLabel}>Vet Appointment</Text>
+                <Text style={styles.checkboxLabel}>Appointment</Text>
               </TouchableOpacity>
 
               {/* Buttons for Update, Delete, and Cancel */}

@@ -7,6 +7,7 @@ import {
   ScrollView,
   StyleSheet,
   FlatList,
+  Alert,
   ActivityIndicator,
 } from "react-native";
 import { firestore, auth } from "../../auth/firebaseConfig";
@@ -15,14 +16,17 @@ import nothing from "../../../assets/nothing.png";
 import dog from "../../../assets/dog.png";
 import { colors } from "../../styles/Theme";
 import { useNavigation } from "@react-navigation/native";
-
-const Vet = () => {
+import { updateEvent, deleteEvent } from "../calendar/firestoreService";
+import EventModal from "../calendar/updateEventModal";
+const Booking = () => {
   const [pets, setPets] = useState([]);
   const [selectedPetId, setSelectedPetId] = useState("all");
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [petsLoading, setPetsLoading] = useState(true); // New state
+  const [petsLoading, setPetsLoading] = useState(true);
   const navigation = useNavigation();
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState(null);
 
   // Fetch pets
   useEffect(() => {
@@ -37,7 +41,6 @@ const Vet = () => {
           ...doc.data(),
         }));
         setPets(fetchedPets);
-        // if (fetchedPets.length > 0) setSelectedPetId(fetchedPets[0].id);
       } catch (error) {
         console.error("Error fetching pets:", error);
       } finally {
@@ -48,21 +51,29 @@ const Vet = () => {
   }, []);
 
   // Fetch events for the selected pet
-  const fetchAppointments = async (petName) => {
+  const fetchAppointments = async (petIdentifier) => {
     try {
       setLoading(true);
       const userId = auth.currentUser.uid;
       const eventsRef = collection(firestore, `users/${userId}/events`);
       let q;
-      if (petName === "all") {
-        // Fetch all events regardless of the related pet
+
+      // Determine if the request is for "all" or a specific pet
+      if (petIdentifier === "all") {
+        // Fetch all appointments
         q = query(eventsRef, where("appointment", "==", true));
       } else {
-        q = query(
-          eventsRef,
-          where("relatedPets", "array-contains", petName),
-          where("appointment", "==", true)
-        );
+        // Fetch appointments for a specific pet
+        const selectedPet = pets.find((pet) => pet.id === petIdentifier);
+        if (selectedPet) {
+          q = query(
+            eventsRef,
+            where("relatedPets", "array-contains", selectedPet.name),
+            where("appointment", "==", true)
+          );
+        } else {
+          return; // If the selected pet doesn't exist, exit
+        }
       }
 
       const eventDocs = await getDocs(q);
@@ -71,9 +82,9 @@ const Vet = () => {
 
       const fetchedEvents = eventDocs.docs.map((doc) => {
         return {
-          id: doc.id, // Ensure ID is included
+          id: doc.id,
           ...doc.data(),
-          date: new Date(doc.data().date), // Ensure date is a Date object
+          date: new Date(doc.data().date),
           time: doc.data().time || { hours: 12, minutes: 0 },
         };
       });
@@ -92,16 +103,9 @@ const Vet = () => {
 
   useEffect(() => {
     if (selectedPetId) {
-      if (selectedPetId === "all") {
-        fetchAppointments("all");
-      } else {
-        const selectedPet = pets.find((pet) => pet.id === selectedPetId);
-        if (selectedPet) {
-          fetchAppointments(selectedPet.name);
-        }
-      }
+      fetchAppointments(selectedPetId);
     }
-  }, [selectedPetId]);
+  }, [selectedPetId, pets]);
 
   // Render pet profile
   const renderPetProfile = (pet) => {
@@ -129,40 +133,62 @@ const Vet = () => {
   const renderAppointment = (appointment) => {
     const formattedDate =
       appointment.date instanceof Date
-        ? appointment.date.toLocaleDateString("en-GB")
-        : new Date(appointment.date).toLocaleDateString("en-GB");
+        ? `${appointment.date.getDate()}/${
+            appointment.date.getMonth() + 1
+          }/${appointment.date.getFullYear().toString().slice(-2)}`
+        : `${new Date(appointment.date).getDate()}/${
+            new Date(appointment.date).getMonth() + 1
+          }/${new Date(appointment.date).getFullYear().toString().slice(-2)}`;
 
     const hours = appointment.time.hours;
     const minutes = appointment.time.minutes.toString().padStart(2, "0");
     const period = hours >= 12 ? "PM" : "AM";
-    const formattedHours = (((hours + 11) % 12) + 1)
-      .toString()
-      .padStart(2, "0");
+    const formattedHours = (((hours + 11) % 12) + 1).toString();
     const formattedTime = `${formattedHours}:${minutes} ${period}`;
 
     return (
-      <View key={appointment.id} style={styles.appointmentContainer}>
-        <View>
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-              width: "100%",
-            }}
-          >
+      <TouchableOpacity
+        key={appointment.id}
+        style={styles.appointmentContainer}
+        onPress={() => {
+          setSelectedEvent(appointment);
+          setIsModalVisible(true);
+        }}
+      >
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            width: "100%",
+          }}
+        >
+          <View>
             <Text style={styles.appointmentTitle}>{appointment.title}</Text>
 
+            {appointment.relatedPets && (
+              <Text style={styles.appointmentDetails}>
+                Pets: {appointment.relatedPets.join(", ")}
+              </Text>
+            )}
+            {appointment.notes && (
+              <Text style={styles.appointmentDetails}>
+                Notes: {appointment.notes}
+              </Text>
+            )}
+          </View>
+
+          <View
+            style={{
+              flexDirection: "column",
+              alignItems: "flex-end",
+            }}
+          >
             <Text style={styles.appointmentDetails}>
               {formattedDate}, {formattedTime}
             </Text>
           </View>
-          {appointment.notes && (
-            <Text style={styles.appointmentDetails}>
-              Notes: {appointment.notes}
-            </Text>
-          )}
         </View>
-      </View>
+      </TouchableOpacity>
     );
   };
 
@@ -237,6 +263,63 @@ const Vet = () => {
         </>
       )}
       {appointments.map(renderAppointment)}
+      <EventModal
+        isVisible={isModalVisible}
+        setIsVisible={setIsModalVisible}
+        selectedEvent={selectedEvent}
+        setSelectedEvent={setSelectedEvent}
+        petNames={pets.map((pet) => pet.name)} // Provide pet names for selection
+        updateEvent={async () => {
+          if (selectedEvent) {
+            try {
+              setLoading(true);
+              await updateEvent(selectedEvent); // Use the imported updateEvent function
+              setIsModalVisible(false); // Close the modal first to avoid intermediate issues
+              await fetchAppointments(selectedPetId); // Fetch appointments for selected pet or all
+            } catch (error) {
+              console.error("Error updating event:", error);
+            } finally {
+              setSelectedEvent(null); // Clear the selected event after fetching
+              setLoading(false);
+            }
+          }
+        }}
+        deleteEvent={() => {
+          if (selectedEvent && selectedEvent.id) {
+            Alert.alert(
+              "Confirm Deletion",
+              "Are you sure you want to delete this appointment?",
+              [
+                {
+                  text: "Cancel",
+                  style: "cancel",
+                  onPress: () => console.log("Delete cancelled"),
+                },
+                {
+                  text: "Delete",
+                  style: "destructive",
+                  onPress: async () => {
+                    try {
+                      setLoading(true);
+                      await deleteEvent(selectedEvent.id);
+                      setIsModalVisible(false);
+                      await fetchAppointments(selectedPetId);
+                    } catch (error) {
+                      console.error("Error deleting event:", error);
+                    } finally {
+                      setSelectedEvent(null);
+                      setLoading(false);
+                    }
+                  },
+                },
+              ],
+              { cancelable: true }
+            );
+          }
+        }}
+        updateLoading={loading}
+        deleteLoading={loading}
+      />
     </ScrollView>
   );
 };
@@ -289,14 +372,15 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   appointmentTitle: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: "bold",
     color: colors.primary,
     marginBottom: 5,
   },
   appointmentDetails: {
-    fontSize: 16,
+    fontSize: 14,
     color: colors.primary,
+    marginBottom: 3,
   },
   addButton: {
     backgroundColor: colors.accent,
@@ -325,4 +409,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Vet;
+export default Booking;

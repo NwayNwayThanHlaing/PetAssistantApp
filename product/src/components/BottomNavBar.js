@@ -8,7 +8,7 @@ const { width } = Dimensions.get("window");
 
 const BottomNavBar = ({ onNavigate, activeScreen }) => {
   // List of buttons for the Bottom Navigation Bar
-  const buttons = ["Home", "Calendar", "Pets", "Vet", "Profile"];
+  const buttons = ["Home", "Calendar", "Pets", "Booking", "Profile"];
 
   // Determine which button is currently selected based on the activeScreen prop
   const selectedIndex = buttons.indexOf(activeScreen);
@@ -63,7 +63,7 @@ const getIconName = (button) => {
       return "event";
     case "Pets":
       return "pets";
-    case "Vet":
+    case "Booking":
       return "local-hospital";
     case "Profile":
       return "person";

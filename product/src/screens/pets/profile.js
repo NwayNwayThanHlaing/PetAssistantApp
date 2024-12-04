@@ -36,8 +36,10 @@ const PetProfile = ({ route, navigation }) => {
   const { petId } = route.params;
   const [pet, setPet] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [isSaving, setIsSaving] = useState(false); // New state for saving
+  const [isSaving, setIsSaving] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
+
   const [formData, setFormData] = useState({
     name: "",
     breed: "",
@@ -182,20 +184,43 @@ const PetProfile = ({ route, navigation }) => {
 
   const renderField = (label, value, key, keyboardType = "default") => (
     <View>
-      <View style={styles.infoSection}>
-        <Text style={styles.infoLabel}>{label}:</Text>
+      <View
+        style={
+          !isEditing
+            ? styles.infoSection
+            : {
+                ...styles.infoSection,
+                paddingVertical: 5,
+              }
+        }
+      >
+        <Text style={styles.infoLabel}>{label}</Text>
         {isEditing ? (
           <TextInput
-            style={styles.input}
+            style={[
+              styles.input,
+              key === "description"
+                ? { maxHeight: 109, textAlignVertical: "top" }
+                : {},
+            ]}
             value={value}
             onChangeText={(text) => handleFieldChange(key, text)}
             keyboardType={keyboardType}
+            multiline={key === "description"}
           />
         ) : (
-          <Text style={styles.infoText}>{value}</Text>
+          <Text
+            style={[
+              styles.infoText,
+              {
+                maxHeight: key === "description" ? 109 : "auto",
+              },
+            ]}
+          >
+            {value.replace(/\n/g, "")}
+          </Text>
         )}
       </View>
-      {/* Display error message outside the infoSection */}
       {errors[key] && <Text style={styles.errorText}>*{errors[key]}</Text>}
     </View>
   );
@@ -220,20 +245,20 @@ const PetProfile = ({ route, navigation }) => {
             source={formData.imageUrl ? { uri: formData.imageUrl } : dog}
             style={styles.petImage}
           />
-          {isEditing && (
-            <Text style={styles.uploadText}>Tap to change profile photo</Text>
-          )}
+          {isEditing && <Text style={styles.uploadText}>Upload photo</Text>}
         </TouchableOpacity>
 
         <View style={styles.detailsContainer}>
-          {!isEditing && <Text style={styles.header}>Pet Profile</Text>}
-          {renderField("Name", formData.name, "name")}
-          {renderField("Breed", formData.breed, "breed")}
-          {renderField("Age", formData.age, "age", "numeric")}
-          {renderField("Color", formData.color, "color")}
-          {renderField("Gender", formData.gender, "gender")}
-          {renderField("Weight(kg)", formData.weight, "weight", "numeric")}
-          {renderField("Description", formData.description, "description")}
+          <View style={!isEditing ? styles.infoContainer : null}>
+            {!isEditing && <Text style={styles.header}>Pet Profile</Text>}
+            {renderField("Name", formData.name, "name")}
+            {renderField("Breed", formData.breed, "breed")}
+            {renderField("Age", formData.age, "age", "numeric")}
+            {renderField("Color", formData.color, "color")}
+            {renderField("Gender", formData.gender, "gender")}
+            {renderField("Weight(kg)", formData.weight, "weight", "numeric")}
+            {renderField("Description", formData.description, "description")}
+          </View>
 
           <TouchableOpacity
             style={[
@@ -359,18 +384,17 @@ const styles = StyleSheet.create({
   },
   image: {
     alignItems: "center",
-    marginTop: 20,
   },
   petImage: {
-    width: 130,
-    height: 130,
-    borderRadius: 75,
+    width: 150,
+    height: 150,
+    borderRadius: 45,
     backgroundColor: colors.accent,
   },
   uploadText: {
     color: colors.primary,
     textAlign: "center",
-    marginTop: 5,
+    marginTop: 10,
     textDecorationLine: "underline",
   },
   detailsContainer: {
@@ -379,19 +403,30 @@ const styles = StyleSheet.create({
     paddingTop: 20,
   },
   header: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: "bold",
-    marginBottom: 15,
+    marginVertical: 10,
+    textDecorationLine: "underline",
     textAlign: "center",
     color: colors.primary,
+  },
+  infoContainer: {
+    marginVertical: 10,
+    backgroundColor: colors.background,
+    padding: 10,
+    borderRadius: 10,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.3,
   },
   infoSection: {
     flexDirection: "row",
     alignItems: "center",
-    marginVertical: 5,
-    backgroundColor: colors.primaryLightest,
-    padding: 10,
-    borderRadius: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 10,
   },
   infoLabel: {
     fontSize: 16,
@@ -408,9 +443,16 @@ const styles = StyleSheet.create({
   input: {
     fontSize: 16,
     color: colors.primary,
-    padding: 8,
-    backgroundColor: colors.primaryLightest,
+    backgroundColor: "white",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
     borderRadius: 10,
+    padding: 10,
+    marginLeft: 5,
     flex: 1,
   },
   editButton: {

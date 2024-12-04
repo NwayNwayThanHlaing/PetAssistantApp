@@ -286,9 +286,9 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   petImage: {
-    width: 130,
-    height: 130,
-    borderRadius: 75,
+    width: 170,
+    height: 170,
+    borderRadius: 55,
     marginBottom: 8,
     alignItems: "center",
     backgroundColor: colors.background,

@@ -203,7 +203,7 @@ const AddEventModal = ({
                   newEvent.appointment && styles.checkboxChecked,
                 ]}
               />
-              <Text style={styles.checkboxLabel}>Vet Appointment</Text>
+              <Text style={styles.checkboxLabel}>Appointment</Text>
             </TouchableOpacity>
 
             {/* Action Buttons */}
