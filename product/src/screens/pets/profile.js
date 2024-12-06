@@ -38,7 +38,6 @@ const PetProfile = ({ route, navigation }) => {
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [isExpanded, setIsExpanded] = useState(false);
 
   const [formData, setFormData] = useState({
     name: "",
