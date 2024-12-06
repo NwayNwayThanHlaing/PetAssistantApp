@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import Modal from "react-native-modal";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import DropDownPicker from "react-native-dropdown-picker";
+// import DropDownPicker from "react-native-dropdown-picker";
 import { colors } from "../../styles/Theme";
 
 const AddEventModal = ({
@@ -27,8 +27,8 @@ const AddEventModal = ({
 }) => {
   const [recurrence, setRecurrence] = useState("none");
   const [endDate, setEndDate] = useState(null);
-  const [open, setOpen] = useState(false);
-  const [value, setValue] = useState(null);
+  // const [open, setOpen] = useState(false);
+  // const [value, setValue] = useState(null);
   const resetNewEvent = () => {
     setNewEvent((prev) => ({
       title: prev.title || "",
@@ -82,7 +82,6 @@ const AddEventModal = ({
         <View style={styles.modalContent}>
           <View style={styles.scrollViewContent}>
             <Text style={styles.modalHeader}>Add New Event</Text>
-
             {/* Event Title */}
             <TextInput
               style={styles.input}
@@ -91,7 +90,6 @@ const AddEventModal = ({
               value={newEvent.title}
               onChangeText={(text) => handleTextInputChange("title", text)}
             />
-
             {/* Event Date */}
             <View style={styles.datePickerContainer}>
               <Text style={{ color: colors.primaryLighter }}>Event Date</Text>
@@ -121,7 +119,6 @@ const AddEventModal = ({
                 }}
               />
             </View>
-
             {/* Event Time */}
             <View style={styles.datePickerContainer}>
               <Text style={{ color: colors.primaryLighter }}>Event Time</Text>
@@ -143,7 +140,6 @@ const AddEventModal = ({
                 is24Hour={false} // Use AM/PM format
               />
             </View>
-
             {/* Notes */}
             <TextInput
               style={[styles.input, styles.notesInput]}
@@ -154,7 +150,8 @@ const AddEventModal = ({
               multiline
             />
 
-            {/* Recurrence */}
+            {/* 
+            // Recurrence and End Date
             <View>
               <Text style={styles.label}>Repeat</Text>
               <DropDownPicker
@@ -177,7 +174,7 @@ const AddEventModal = ({
                 style={styles.picker} // Use the same picker style or customize it further
                 dropDownDirection="BOTTOM" // Open dropdown below
               />
-              {/* End Date */}
+
               {recurrence !== "none" && (
                 <View style={styles.datePickerContainer}>
                   <Text style={{ color: colors.primaryLighter }}>End Date</Text>
@@ -191,8 +188,9 @@ const AddEventModal = ({
                 </View>
               )}
             </View>
+            */}
 
-            {/* Pet Selection */}
+            {/* Select Pets */}
             <Text style={styles.petsSelectionHeader}>Select Pets</Text>
             <View style={styles.petButtonsContainer}>
               {petNames.map((item) => (
@@ -234,7 +232,6 @@ const AddEventModal = ({
               />
               <Text style={styles.checkboxLabel}>Appointment</Text>
             </TouchableOpacity>
-
             {/* Action Buttons */}
             <View style={styles.buttonContainer}>
               <TouchableOpacity
@@ -316,17 +313,17 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: colors.background,
   },
-  label: {
-    fontSize: 16,
-    color: colors.primary,
-    marginVertical: 10,
-  },
-  picker: {
-    width: "100%",
-    backgroundColor: colors.background,
-    borderRadius: 8,
-    marginBottom: 10,
-  },
+  // label: {
+  //   fontSize: 16,
+  //   color: colors.primary,
+  //   marginVertical: 10,
+  // },
+  // picker: {
+  //   width: "100%",
+  //   backgroundColor: colors.background,
+  //   borderRadius: 8,
+  //   marginBottom: 10,
+  // },
   buttonContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
