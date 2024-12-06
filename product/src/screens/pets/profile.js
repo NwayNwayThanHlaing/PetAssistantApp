@@ -147,6 +147,9 @@ const PetProfile = ({ route, navigation }) => {
         weight: parseFloat(formData.weight),
       };
 
+      // Store the old pet name for event updates
+      const oldPetName = pet.name;
+
       if (formData.imageUrl && formData.imageUrl !== pet.imageUrl) {
         const uploadedImageUrl = await uploadImage();
         if (uploadedImageUrl) {
@@ -154,8 +157,59 @@ const PetProfile = ({ route, navigation }) => {
         }
       }
 
+      // Update the pet document
       await updateDoc(petDocRef, updatedPet);
       setPet(updatedPet);
+
+      // Check if the pet name has changed
+      if (formData.name !== oldPetName) {
+        // Reference to the events collection
+        const eventsCollectionRef = collection(
+          firestore,
+          `users/${userId}/events`
+        );
+
+        // Query to find all events that contain the old pet name in relatedPets
+        const eventsQuery = query(
+          eventsCollectionRef,
+          where("relatedPets", "array-contains", oldPetName)
+        );
+
+        // Fetch all matching event documents
+        const querySnapshot = await getDocs(eventsQuery);
+
+        // Check if any events matched
+        if (querySnapshot.empty) {
+          console.log("No events found with the old pet name.");
+        }
+
+        // Loop through each event and manually update the relatedPets array
+        for (const docSnap of querySnapshot.docs) {
+          const eventDocRef = doc(
+            firestore,
+            `users/${userId}/events`,
+            docSnap.id
+          );
+
+          // Get the current relatedPets array
+          const eventData = docSnap.data();
+          const updatedRelatedPets = eventData.relatedPets.filter(
+            (petName) => petName !== oldPetName
+          );
+
+          // Add the new pet name
+          updatedRelatedPets.push(formData.name);
+
+          // Log the updated relatedPets array to verify
+          console.log("Updated relatedPets:", updatedRelatedPets);
+
+          // Update the event document with the modified relatedPets array
+          await updateDoc(eventDocRef, {
+            relatedPets: updatedRelatedPets,
+          });
+        }
+      }
+
       setIsEditing(false);
       Alert.alert("Success", "Pet profile updated successfully.");
     } catch (error) {
