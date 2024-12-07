@@ -12,6 +12,7 @@ Summary:
     - added month and year selectors for calendar
     - added flexible date selector for event creation on calendar
     - did preparation for presentation and video 
+    - made a release and tag for the minimum viable product first version
 Challenges:
     - No problem so far
 Next Step:
@@ -41,8 +42,7 @@ Summary:
 Challenges:
     - No challenges so far
 Next Step:
-    - To do testings and start working on interim report
-    - Release a version for term 1
+    - To do testings and refactoring
 
 ## Week 8 (11 November 2024)
 
