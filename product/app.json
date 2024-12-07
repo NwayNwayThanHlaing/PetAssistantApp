@@ -33,6 +33,14 @@
     "web": {
       "favicon": "./assets/logo.png"
     },
-    "plugins": ["expo-font"]
+    "plugins": [
+      "expo-font"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "13f8f296-9c92-47e8-95ac-7861f8c6c778"
+      }
+    },
+    "owner": "nwaynwaythanhlaing"
   }
 }

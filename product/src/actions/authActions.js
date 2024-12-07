@@ -9,15 +9,23 @@ import {
 import { auth } from "../auth/firebaseConfig";
 import { deleteDoc, doc } from "firebase/firestore";
 import { firestore } from "../auth/firebaseConfig";
+
 const reauthenticateUser = async (email, password) => {
   const credential = EmailAuthProvider.credential(email, password);
   await reauthenticateWithCredential(auth.currentUser, credential);
 };
 
 // Sign Out Function
-export const handleSignOut = async (navigation) => {
+export const handleSignOut = async (navigation, subId) => {
   try {
+    if (subId) {
+      await unregisterIndieDevice(subId, 25235, "rBDIqttve0mXsFAkpSkis7");
+      console.log("Device unregistered from Native Notify with Sub ID:", subId);
+    }
     await signOut(auth);
+    axios.delete(
+      `https://app.nativenotify.com/api/app/indie/sub/25248/wtOK6Mg9wWTJpjgjr1qH0v/${subId}`
+    );
     Alert.alert("Success", "You have been logged out.");
     navigation.navigate("Login");
   } catch (error) {

@@ -91,7 +91,7 @@ const Profile = ({ navigation }) => {
 
   const handleSettingPress = (title) => {
     if (title === "Log Out") {
-      handleSignOut(navigation);
+      handleSignOut(navigation, user.uid);
     } else if (title === "Delete Account") {
       handleDeleteAccount(navigation);
     } else if (title === "Change Password") {

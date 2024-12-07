@@ -24,45 +24,6 @@ export const fetchUserEvents = async (userId) => {
   }
 };
 
-// Fetch user vet appointments from Firestore
-export const fetchUserVetAppointments = async (userId) => {
-  try {
-    const appointmentsCollection = collection(
-      firestore,
-      `users/${userId}/appointments`
-    );
-
-    const appointmentsSnapshot = await getDocs(appointmentsCollection);
-    const appointments = await Promise.all(
-      appointmentsSnapshot.docs.map(async (appointmentDoc) => {
-        const data = appointmentDoc.data();
-        const petId = data.petId;
-        let petName = "Unknown pet";
-
-        if (petId) {
-          try {
-            const petDocRef = doc(firestore, `users/${userId}/pets/${petId}`);
-            const petDoc = await getDoc(petDocRef);
-            if (petDoc.exists()) {
-              petName = petDoc.data().name || "Unknown pet";
-            }
-          } catch (error) {
-            console.error("Error fetching pet name: ", error);
-          }
-        }
-
-        return { id: appointmentDoc.id, type: "vet", petName, ...data };
-      })
-    );
-
-    return appointments;
-  } catch (error) {
-    console.error("Error fetching vet appointments: ", error);
-    Alert.alert("Error fetching vet appointments", error.message);
-    return [];
-  }
-};
-
 // Fetch user data from Firestore
 export const fetchUserData = async (userId) => {
   if (!userId) {
