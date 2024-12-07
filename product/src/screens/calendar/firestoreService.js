@@ -41,7 +41,7 @@ export const fetchEvents = async () => {
     const eventsData = {};
     eventsSnapshot.forEach((doc) => {
       const data = doc.data();
-      const eventDate = data.date; // This should be in 'YYYY-MM-DD' format
+      const eventDate = data.date;
       if (!eventsData[eventDate]) {
         eventsData[eventDate] = [];
       }
@@ -52,7 +52,7 @@ export const fetchEvents = async () => {
         time: data.time ? `${data.time.hours}:${data.time.minutes}` : "00:00",
         notes: data.notes || "",
         pets: data.relatedPets || [],
-        appointment: data.appointment || false, // Include the appointment field
+        appointment: data.appointment || false,
       });
     });
 
@@ -82,12 +82,12 @@ export const addEvent = async (newEvent, selectedPets) => {
 
     // Add the new event to Firestore
     const docRef = await addDoc(eventRef, {
-      title: newEvent.title?.trim() || "Untitled Event", // Use title if provided, otherwise use default
-      time: { hours, minutes }, // Store time as hours and minutes
-      notes: newEvent.notes?.trim() || "", // Use notes if provided, otherwise use empty string
-      relatedPets: Array.isArray(selectedPets) ? selectedPets : [], // Ensure relatedPets is an array
-      date: newEvent.date, // Must be in 'YYYY-MM-DD' format
-      appointment: newEvent.appointment || false, // Add the appointment field (default false if undefined)
+      title: newEvent.title?.trim() || "Untitled Event",
+      time: { hours, minutes },
+      notes: newEvent.notes?.trim() || "",
+      relatedPets: Array.isArray(selectedPets) ? selectedPets : [],
+      date: newEvent.date,
+      appointment: newEvent.appointment || false,
       createdAt: Timestamp.now(),
       updatedAt: Timestamp.now(),
     });
@@ -144,7 +144,7 @@ export const updateEvent = async (selectedEvent) => {
       updatedAt: Timestamp.now(),
       time: { hours, minutes },
       date: updatedDate, // Update the date here to Firestore in 'YYYY-MM-DD' format
-      appointment: selectedEvent.appointment || false, // Add the appointment field (default false if undefined)
+      appointment: selectedEvent.appointment || false,
     };
 
     // Ensure all fields are updated correctly

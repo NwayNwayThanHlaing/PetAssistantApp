@@ -107,13 +107,13 @@ const AddEventModal = ({
                     const month = String(selectedDate.getMonth() + 1).padStart(
                       2,
                       "0"
-                    ); // Months are 0-based
+                    );
                     const day = String(selectedDate.getDate()).padStart(2, "0");
                     const formattedDate = `${year}-${month}-${day}`;
 
                     setNewEvent((prevEvent) => ({
                       ...prevEvent,
-                      date: formattedDate, // Store the formatted date
+                      date: formattedDate,
                     }));
                   }
                 }}
@@ -137,7 +137,7 @@ const AddEventModal = ({
                     }));
                   }
                 }}
-                is24Hour={false} // Use AM/PM format
+                is24Hour={false}
               />
             </View>
             {/* Notes */}
@@ -238,7 +238,7 @@ const AddEventModal = ({
                 style={[styles.modalButton, styles.cancelButton]}
                 onPress={() => {
                   setIsVisible(false);
-                  Keyboard.dismiss(); // Dismiss keyboard on cancel
+                  Keyboard.dismiss();
                 }}
               >
                 <Text style={styles.buttonText}>Cancel</Text>
@@ -246,12 +246,12 @@ const AddEventModal = ({
               <TouchableOpacity
                 style={[styles.modalButton, styles.saveButton]}
                 onPress={() => {
-                  Keyboard.dismiss(); // Dismiss keyboard on save
+                  Keyboard.dismiss();
                   addEvent({
                     ...newEvent,
                     recurrence,
                     endDate,
-                  }); // Pass recurrence data
+                  });
                 }}
                 disabled={loading}
               >

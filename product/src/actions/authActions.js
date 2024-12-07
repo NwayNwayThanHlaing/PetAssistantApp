@@ -1,4 +1,3 @@
-// authActions.js
 import { Alert } from "react-native";
 import {
   signOut,

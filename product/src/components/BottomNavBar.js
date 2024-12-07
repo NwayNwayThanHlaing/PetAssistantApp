@@ -9,8 +9,6 @@ const { width } = Dimensions.get("window");
 const BottomNavBar = ({ onNavigate, activeScreen }) => {
   // List of buttons for the Bottom Navigation Bar
   const buttons = ["Home", "Calendar", "Pets", "Booking", "Profile"];
-
-  // Determine which button is currently selected based on the activeScreen prop
   const selectedIndex = buttons.indexOf(activeScreen);
   const accentBarWidth = width / buttons.length;
 
@@ -23,7 +21,6 @@ const BottomNavBar = ({ onNavigate, activeScreen }) => {
 
   return (
     <View style={styles.container}>
-      {/* Accent bar that highlights the currently selected tab */}
       <View
         style={[
           styles.accentBar,

@@ -215,7 +215,7 @@ const PetProfile = ({ route, navigation }) => {
       console.error("Error updating pet data:", error);
       Alert.alert("Error", "Failed to update pet profile.");
     } finally {
-      setIsSaving(false); // Stop showing loading indicator
+      setIsSaving(false);
     }
   };
 

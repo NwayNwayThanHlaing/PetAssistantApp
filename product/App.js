@@ -42,7 +42,7 @@ const getUpcomingEvents = async (userId) => {
     const tomorrowDateOnly = tomorrow.toISOString().split("T")[0];
     const eventsRef = collection(firestore, `users/${userId}/events`);
 
-    // Query for events that are today or tomorrow (string comparison works for YYYY-MM-DD format)
+    // Query for events that are today or tomorrow (string comparison)
     const q = query(
       eventsRef,
       where("date", ">=", currentDateOnly),
@@ -56,8 +56,6 @@ const getUpcomingEvents = async (userId) => {
       const eventData = doc.data();
       events.push({ id: doc.id, ...eventData });
     });
-
-    // console.log("Upcoming events fetched:", events);
 
     // Log events to check
     if (events.length === 0) {
@@ -77,7 +75,7 @@ const getUpcomingEvents = async (userId) => {
       // Compare event timestamp with current time
       const timeDifference = eventDate - currentTime;
 
-      // If the event is within the next 10 minutes, send a notification
+      // If the event is within the next 1 second, send a notification
       if (timeDifference <= 1000 && timeDifference > 0) {
         console.log("Sending notification for event:", title);
         sendPushNotification(userId, title);
@@ -94,8 +92,7 @@ const App = () => {
   registerNNPushToken(25248, "wtOK6Mg9wWTJpjgjr1qH0v");
 
   const [fontsLoaded, setFontsLoaded] = useState(false);
-  const [userId, setUserId] = useState(null); // State for userId
-
+  const [userId, setUserId] = useState(null);
   const loadFonts = async () => {
     await Font.loadAsync({
       "NerkoOne-Regular": font,
@@ -110,7 +107,7 @@ const App = () => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       if (user) {
         setUserId(user.uid); // Set userId if authenticated
-        console.log("User authenticated, userId:", user.uid); // Log the authenticated userId
+        console.log("User authenticated, userId:", user.uid);
       } else {
         console.log("No user is logged in");
       }
@@ -124,8 +121,8 @@ const App = () => {
     // If userId is available, start checking for upcoming events
     if (userId) {
       const interval = setInterval(() => {
-        getUpcomingEvents(userId); // Fetch events and send notifications
-      }, 1000); // 10seconds 60000 ms = 1 minute
+        getUpcomingEvents(userId);
+      }, 1000); // 1 second or 1000 milliseconds interval
 
       // Clear the interval when the component is unmounted
       return () => clearInterval(interval);

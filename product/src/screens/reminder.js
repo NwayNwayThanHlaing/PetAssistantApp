@@ -25,10 +25,7 @@ const ReminderPage = () => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        // Fetch Events
         const eventsData = await fetchUserEvents(userId);
-
-        // Since relatedPets already contains pet names, directly use it
         const updatedEventsData = eventsData.map((event) => {
           event.relatedPetsNames = event.relatedPets || [];
           return event;
@@ -80,7 +77,7 @@ const ReminderPage = () => {
       date.setHours(hours, minutes, 0, 0);
     }
 
-    return date || new Date(); // Return the parsed date or the current date as a fallback
+    return date || new Date();
   };
 
   // Utility function to get only the date portion of a JavaScript Date object

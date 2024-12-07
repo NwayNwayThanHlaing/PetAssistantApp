@@ -2,7 +2,7 @@ import React, { createContext, useContext } from "react";
 import { colors } from "../styles/Theme";
 
 const ThemeContext = createContext({
-  textColor: colors.primary, // Default text color globally
+  textColor: colors.primary,
 });
 
 export const ThemeProvider = ({ children }) => {

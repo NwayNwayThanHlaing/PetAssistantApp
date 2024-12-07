@@ -213,7 +213,7 @@ const CalendarPage = () => {
 
       const updatedEvent = {
         ...newEvent,
-        date: selectedDate, // Make sure the date is the selected date or the one from the modal
+        date: selectedDate,
         pets: selectedPets,
         id: docId,
       };

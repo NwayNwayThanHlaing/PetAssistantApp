@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import {
   View,
@@ -17,8 +17,7 @@ import { auth } from "./firebaseConfig";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import logo from "../../assets/logo.png";
 import AuthStyles from "../styles/AuthStyles";
-import { registerIndieID, unregisterIndieDevice } from "native-notify";
-import axios from "axios";
+import { registerIndieID } from "native-notify";
 
 const Login = ({ navigation }) => {
   const [email, setEmail] = useState("");

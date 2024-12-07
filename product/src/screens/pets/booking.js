@@ -58,7 +58,7 @@ const Booking = () => {
       const eventsRef = collection(firestore, `users/${userId}/events`);
       let q;
 
-      // Determine if the request is for "all" or a specific pet
+      // Check if the request is for "all" or a specific pet
       if (petIdentifier === "all") {
         // Fetch all appointments
         q = query(eventsRef, where("appointment", "==", true));
