@@ -93,6 +93,8 @@ const App = () => {
 
   const [fontsLoaded, setFontsLoaded] = useState(false);
   const [userId, setUserId] = useState(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false); // Track login status
+
   const loadFonts = async () => {
     await Font.loadAsync({
       "NerkoOne-Regular": font,
@@ -107,8 +109,11 @@ const App = () => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       if (user) {
         setUserId(user.uid); // Set userId if authenticated
+        setIsLoggedIn(true); // Set login status to true
         console.log("User authenticated, userId:", user.uid);
       } else {
+        setUserId(null);
+        setIsLoggedIn(false); // Set login status to false
         console.log("No user is logged in");
       }
     });
@@ -118,16 +123,20 @@ const App = () => {
   }, []);
 
   useEffect(() => {
-    // If userId is available, start checking for upcoming events
-    if (userId) {
-      const interval = setInterval(() => {
+    let interval;
+
+    if (isLoggedIn && userId) {
+      // Start event checking when logged in
+      interval = setInterval(() => {
         getUpcomingEvents(userId);
       }, 1000); // 1 second or 1000 milliseconds interval
-
-      // Clear the interval when the component is unmounted
-      return () => clearInterval(interval);
     }
-  }, [userId]); // Re-run the effect when userId changes
+
+    // Cleanup the interval when user logs out or when the component unmounts
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [isLoggedIn, userId]); // Re-run the effect when isLoggedIn or userId changes
 
   if (!fontsLoaded) {
     return (

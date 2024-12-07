@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useRoute } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import {
   View,
   Text,
@@ -28,6 +28,7 @@ import { Picker } from "@react-native-picker/picker";
 import Svg, { Path } from "react-native-svg";
 
 const CalendarPage = () => {
+  const navigation = useNavigation();
   const route = useRoute();
   const [selectedDate, setSelectedDate] = useState("");
   const [events, setEvents] = useState({});
@@ -109,8 +110,9 @@ const CalendarPage = () => {
   useEffect(() => {
     if (route.params?.openAddEventModal) {
       setIsAddingEvent(true);
+      navigation.setParams({ openAddEventModal: false });
     }
-  }, [route.params]);
+  }, [route.params?.openAddEventModal, navigation]);
 
   // Update markedDates whenever events or selectedDate changes
   useEffect(() => {

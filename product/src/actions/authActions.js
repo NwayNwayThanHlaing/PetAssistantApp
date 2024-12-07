@@ -8,6 +8,8 @@ import {
 import { auth } from "../auth/firebaseConfig";
 import { deleteDoc, doc } from "firebase/firestore";
 import { firestore } from "../auth/firebaseConfig";
+import axios from "axios";
+import { unregisterIndieDevice } from "native-notify";
 
 const reauthenticateUser = async (email, password) => {
   const credential = EmailAuthProvider.credential(email, password);

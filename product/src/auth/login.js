@@ -17,7 +17,7 @@ import { auth } from "./firebaseConfig";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import logo from "../../assets/logo.png";
 import AuthStyles from "../styles/AuthStyles";
-import { registerIndieID } from "native-notify";
+import { registerIndieID, unregisterIndieDevice } from "native-notify";
 
 const Login = ({ navigation }) => {
   const [email, setEmail] = useState("");
