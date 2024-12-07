@@ -1,14 +1,26 @@
-## Week 11 (2 December 2024)
-
+## Week 12 (9 December 2024)
 Summary:
 Challenges:
 Next Step:
 
+## Week 11 (2 December 2024)
+
+Summary:
+    - tested NativeNotify in a different project for testing purpose
+    - implemented sending reminder notification feature
+    - created notification inbox 
+    - added month and year selectors for calendar
+    - added flexible date selector for event creation on calendar
+    - did preparation for presentation and video 
+Challenges:
+    - No problem so far
+Next Step:
+    - To continue on report
 
 ## Week 10 (24 November 2024)
 
 Summary:
-    - managed to make all features in the consistent ui
+    - managed to make sure all features have the consistent ui
     - improved features such as showing appointments in calendar for user experience
     - modified vet appointment database models for easy access
     - redesigned home page
@@ -17,7 +29,7 @@ Challenges:
     - Implementation of notification is challenging since firebase stopped providing functions for free.
 Next Step:
     - To test notification with NativeNotify
-    - To implement landscape mode as the mobile gets rotated
+    - To refactor all the layout and UI design
     - To start working on report and presentation
     
 ## Week 9 (18 November 2024)
