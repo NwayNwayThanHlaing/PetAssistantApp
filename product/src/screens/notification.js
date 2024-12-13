@@ -6,8 +6,6 @@ import {
   StyleSheet,
   Alert,
   SafeAreaView,
-  Modal,
-  TouchableWithoutFeedback,
   ScrollView,
 } from "react-native";
 import {
@@ -55,19 +53,35 @@ export default function IndieNotificationInbox({ navigation }) {
 
   // Function to delete a notification by ID
   const handleDeleteNotification = async (notificationId) => {
-    const notifications = await deleteIndieNotificationInbox(
-      userId,
-      notificationId,
-      25248,
-      "wtOK6Mg9wWTJpjgjr1qH0v"
-    );
-    setData(notifications);
-    setModalVisible(false);
+    try {
+      console.log("Deleting notification with ID:", notificationId); // Debugging
+      const notifications = await deleteIndieNotificationInbox(
+        userId,
+        notificationId,
+        25248,
+        "wtOK6Mg9wWTJpjgjr1qH0v"
+      );
+
+      // Log the updated notifications array
+      console.log("Updated notifications after deletion:", notifications);
+
+      // Only set the new data if it's not empty or undefined
+      if (notifications && notifications.length) {
+        setData(notifications);
+      } else {
+        console.log("No notifications returned after deletion");
+      }
+
+      setModalVisible(false);
+    } catch (error) {
+      console.error("Error deleting notification: ", error);
+      Alert.alert("Error", "Failed to delete notification.");
+    }
   };
 
   // Function to handle the modal confirmation
   const showDeleteAlert = (notificationId) => {
-    setSelectedNotificationId(notificationId);
+    setSelectedNotificationId(notificationId); // Set the selected notification ID
     Alert.alert(
       "Delete Notification",
       "Are you sure you want to delete this notification?",
@@ -86,7 +100,7 @@ export default function IndieNotificationInbox({ navigation }) {
     );
   };
 
-  const renderNotifications = data.map((item, index) => {
+  const renderNotifications = data.map((item) => {
     const dateParts = item.date.split("-");
     const [month, day, year] = dateParts;
     const formattedDate = `${day}-${month}-${year}`; // Convert to dd-mm-yyyy
@@ -103,7 +117,9 @@ export default function IndieNotificationInbox({ navigation }) {
           <Text style={styles.notificationTitle}>{item.title}</Text>
 
           {/* Three dots button */}
-          <TouchableOpacity onPress={() => setModalVisible(true)}>
+          <TouchableOpacity
+            onPress={() => showDeleteAlert(item.notification_id)} // Pass notification_id directly
+          >
             <MaterialIcons name="more-vert" size={24} color={colors.primary} />
           </TouchableOpacity>
         </View>
@@ -145,50 +161,6 @@ export default function IndieNotificationInbox({ navigation }) {
           )}
         </View>
       </ScrollView>
-
-      {/* Modal for delete confirmation */}
-      {modalVisible && (
-        <Modal
-          animationType="fade"
-          transparent={true}
-          visible={modalVisible}
-          onRequestClose={() => setModalVisible(false)}
-        >
-          <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
-            <View style={styles.modalBackground}>
-              <TouchableWithoutFeedback>
-                <View style={styles.modalContainer}>
-                  <Text style={styles.modalHeader}>Delete Notification</Text>
-                  <Text style={styles.modalText}>
-                    Are you sure you want to delete this notification?
-                  </Text>
-                  <View
-                    style={{
-                      flexDirection: "row",
-                      justifyContent: "space-evenly",
-                      alignItems: "center",
-                      width: "100%",
-                    }}
-                  >
-                    <TouchableOpacity
-                      style={styles.cancelButton}
-                      onPress={() => setModalVisible(false)}
-                    >
-                      <Text style={styles.cancelButtonText}>Cancel</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      style={styles.deleteButton}
-                      onPress={() => showDeleteAlert(selectedNotificationId)}
-                    >
-                      <Text style={styles.deleteButtonText}>Delete</Text>
-                    </TouchableOpacity>
-                  </View>
-                </View>
-              </TouchableWithoutFeedback>
-            </View>
-          </TouchableWithoutFeedback>
-        </Modal>
-      )}
     </SafeAreaView>
   );
 }
@@ -232,53 +204,5 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: colors.primaryLight,
     marginTop: 3,
-  },
-  deleteButton: {
-    backgroundColor: "#f00",
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 5,
-  },
-  cancelButton: {
-    backgroundColor: colors.primary,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 5,
-  },
-  deleteButtonText: {
-    color: "#fff",
-    fontWeight: "bold",
-    textAlign: "center",
-    fontSize: 16,
-  },
-  cancelButtonText: {
-    color: "#fff",
-    fontWeight: "bold",
-    textAlign: "center",
-    fontSize: 16,
-  },
-  modalBackground: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-  },
-  modalContainer: {
-    backgroundColor: colors.background,
-    padding: 20,
-    borderRadius: 10,
-    width: "80%",
-    alignItems: "center",
-  },
-  modalHeader: {
-    fontSize: 20,
-    fontWeight: "bold",
-    marginBottom: 10,
-    color: colors.primary,
-  },
-  modalText: {
-    fontSize: 18,
-    marginBottom: 20,
-    color: colors.primary,
   },
 });

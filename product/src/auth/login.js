@@ -24,6 +24,7 @@ const Login = ({ navigation }) => {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // Log in function
   const handleLogin = async () => {
     setLoading(true);
     try {

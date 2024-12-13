@@ -1,4 +1,3 @@
-// src/components/CustomText.js
 import React from "react";
 import { Text as RNText, StyleSheet } from "react-native";
 import { useTheme } from "../contexts/ThemeContext";

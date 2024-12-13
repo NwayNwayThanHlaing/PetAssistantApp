@@ -1,120 +1,125 @@
 ## Week 12 (9 December 2024)
 Summary:
+    - Refactored the app for improvements and fixed bugs.
+    - Completed the report, demonstration video, diary, and documentation.
+    - Conducted testing on the app to ensure stability.
+    - Completed the presentation for the project.
 Challenges:
+    - No issues encountered.
 Next Step:
+    - Continue work on Term 2, focusing on social networking features and backend integration.
 
 ## Week 11 (2 December 2024)
-
 Summary:
-    - tested NativeNotify in a different project for testing purpose
-    - implemented sending reminder notification feature
-    - created notification inbox 
-    - added month and year selectors for calendar
-    - added flexible date selector for event creation on calendar
-    - did preparation for presentation and video 
-    - made a release and tag for the minimum viable product first version
+    - Tested NativeNotify in a different project for testing purposes.
+    - Implemented the reminder notification feature.
+    - Created the notification inbox to manage reminders.
+    - Added month and year selectors for the calendar.
+    - Added a flexible date selector for event creation in the calendar.
+    - Completed preparations for the presentation and demonstration video.
+    - Made a release and tagged the first version of the Minimum Viable Product.
 Challenges:
-    - No problem so far
+    - No issues encountered.
 Next Step:
-    - To continue on report
+    - Continue with the report and refine the presentation.
 
 ## Week 10 (24 November 2024)
-
 Summary:
-    - managed to make sure all features have the consistent ui
-    - improved features such as showing appointments in calendar for user experience
-    - modified vet appointment database models for easy access
-    - redesigned home page
-    - tested each feature for functionality
+    - Ensured all features had a consistent UI design.
+    - Improved the calendar feature by displaying appointments for better user experience.
+    - Modified vet appointment database models for easier access.
+    - Refactored the home page for better navigation.
+    - Tested each feature for functionality and user experience.
 Challenges:
-    - Implementation of notification is challenging since firebase stopped providing functions for free.
+    - Encountered challenges with implementing notifications, as Firebase stopped providing certain features for free.
 Next Step:
-    - To test notification with NativeNotify
-    - To refactor all the layout and UI design
-    - To start working on report and presentation
+    - Test the notification system with NativeNotify.
+    - Refactor layouts and UI designs.
+    - Begin working on the report and presentation.
     
 ## Week 9 (18 November 2024)
-
 Summary:
-    - implemented reminder page
-    - fixed layout and did UI touch up for all pages 
-    - researched on notification system
+    - Implemented the reminder page to manage pet care reminders.
+    - Fixed layout issues and performed UI touch-ups for all pages.
+    - Researched notification systems to find a suitable solution.
 Challenges:
-    - No challenges so far
+    - No challenges encountered.
 Next Step:
-    - To do testings and refactoring
+    - Conduct testing and refactor as needed.
 
 ## Week 8 (11 November 2024)
-
 Summary:
-    - fixed bugs from previously implemented pages, calendar, and event to align with the updated code
-    - Implemented Calendar events with detailed functionalities such as DatePicker and EventPicker Display, event CRUD modals design
-    - Managed to update event marks on calendar to change instantly when there is update on event
-    - Created Reminder page and displayed data collected from database
+    - Fixed bugs from previously implemented pages (calendar and events) to align with the updated code.
+    - Implemented calendar events with features like DatePicker and EventPicker.
+    - Designed event CRUD modals for easier management.
+    - Updated calendar events to change instantly when updated in the database.
+    - Created the reminder page to display data from the database.
 Challenges:
-    - Everything worked well.
+    - Everything worked as expected.
 Next Step:
-    - To finish up with reminders and implement notification page
-    - Test all the pages and final code
+    - Finalize the reminder system and implement the notification page.
+    - Test all existing pages.
     
 ## Week 7 (4 November 2024)
-
 Summary:
-    - Implemented Pet Profile including Multi profiles availability
-    - Connected to Cloud image upload for user profiles and pet profiles photos
-    - Designed Calendar with basic CRUD functionalities for Event
-    - Displayed proper UI for dates with events on Calendar for UX
-    - Implemeted event display on press for specific dates
-    - Developed CRUD for events on calendar
+    - Implemented the pet profile feature, allowing for multiple profiles.
+    - Connected to cloud image upload for user and pet profile photos.
+    - Designed the calendar with basic CRUD functionalities for events.
+    - Displayed events on the calendar for better user interaction.
+    - Developed CRUD functionality for events on the calendar.
+    - Developed the vet appointment page and connected it to the database.
 Challenges:
-    - As I implemented yearly calendar view, I found yearly calendar view not quite functional since user can also see the monthly view.
-    - Decided to implement monthly view but user will be able to see all months by going left and right, which is better than implementing yearly view separately.
-    - Developed Vet appointment page and connected to database.  
+    - Initially implemented a yearly view for the calendar, but it was less effective than the monthly view.
+    - Opted to implement a monthly view with the ability to scroll left and right, which proved more user-friendly.
 Next Step:
-    - To implement reminders for the existing events in the calendar.
+    - Implement reminders for the events in the calendar.
 
 ## Week 6 (28 October 2024)
-
 Summary:
-    - Implemented User profile, Change password, Account deletion using Flutter.
-    - Changed framework to React Native since Flutter is not compatible for my project needs.
-    - Implemented Authentication features: Login, Signup
+    - Implemented user profile features including password change and account deletion using Flutter.
+    - Switched the framework to React Native, as Flutter was not compatible with the project’s requirements.
+    - Implemented authentication features: login and signup.
 Challenges: 
-    - I initially chose Flutter for its powerful widget library but found Firebase integration challenging. 
-    - Switching required redoing the setup and completed pages; however, it significantly improved the development process.
+    - Encountered difficulties with Firebase integration in Flutter, which led to the switch to React Native.
+    - Switching required redoing the setup and pages, but it improved the development process.
 Next Step: 
-    - Continue with the Pet profiles, and Calendar.
+    - Continue developing pet profiles and calendar functionality.
     
 ## Week 5 (21 October 2024)
-
 Summary:
-    - Created a structured layout, aligned with the GitLab rules.
-    - Implemented LogIn and SignUp Pagea with proper UI and authentication.
-    - Created Dashboard or landing page.
+    - Created a structured layout, aligned with GitLab guidelines.
+    - Implemented login and signup pages with authentication.
+    - Created the dashboard or landing page for user interaction.
 Challenges: 
-    - Took a good amount of time to implement authentication.
+    - Implementing authentication took a significant amount of time due to complexity.
 Next Step:
-    - Continue with dashboard implementation.
+    - Continue with the dashboard implementation.
 
 ## Week 4 (14 October 2024)
-
 Summary:
-    - Initialised small projects to test out appropriate technologies.
-    - Tested out Flutter and Firebase by creating mock projects like to-do list and counter.
+    - Initiated small projects to test the most suitable technologies.
+    - Tested Flutter and Firebase by creating mock projects like a to-do list and counter.
     - Researched Flutter Riverpod for state management.
-Challenges: not quite familiar with Flutter.
-Next Step: Start structuring the project layout and implement authentication.
+Challenges: 
+    - Lack of familiarity with Flutter.
+Next Step: 
+    - Start structuring the project layout and implement authentication.
 
 ## Week 3 (7 October 2024)
-
-- Summary: Designed the UI/UX of the app.
-- Next step: to test the technology, intended to use.
+Summary: 
+    - Designed the UI/UX of the app.
+Next step: 
+    - Test the intended technology stack for the project.
 
 ## Week 2 (1 October 2024)
-
-- Listed all the user requirements.
-- Drafted the project plan document.
+Summary:
+    - Listed all user requirements.
+    - Drafted the project plan document.
+Next Step:
+    - Begin structuring the project and researching technologies.
 
 ## Week 1 (23 September 2024)
-
-- Did research on similar apps.
+Summary:
+    - Conducted research on similar apps to understand the key features and competitive landscape.
+Next Step:
+    - Continue refining the project plan based on findings.

@@ -119,7 +119,7 @@ const Booking = () => {
     }
   }, [selectedPetId, pets]);
 
-  // Render pet profile
+  // Render pet profiles
   const renderPetProfile = (pet) => {
     const imageSource = pet.imageUrl ? { uri: pet.imageUrl } : dog;
 

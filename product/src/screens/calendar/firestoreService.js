@@ -146,8 +146,6 @@ export const updateEvent = async (selectedEvent) => {
       date: updatedDate, // Update the date here to Firestore in 'YYYY-MM-DD' format
       appointment: selectedEvent.appointment || false,
     };
-
-    // Ensure all fields are updated correctly
     await updateDoc(eventDocRef, updatedData);
   } catch (error) {
     console.error("Error updating event: ", error);

@@ -2,7 +2,7 @@ import { Alert } from "react-native";
 import { firestore } from "../auth/firebaseConfig";
 import { doc, getDoc, collection, getDocs } from "firebase/firestore";
 
-// Fetch user events from Firestore
+// Fetch events from Firestore
 export const fetchUserEvents = async (userId) => {
   try {
     const eventsCollection = collection(firestore, `users/${userId}/events`);

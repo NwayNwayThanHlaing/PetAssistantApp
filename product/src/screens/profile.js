@@ -47,6 +47,7 @@ const Profile = ({ navigation }) => {
     { id: "4", title: "Delete Account", icon: "delete" },
   ];
 
+  // Function to get profile image source and set fallback image if not available
   const getProfileImageSource = (imageUri) => {
     return imageUri && imageUri !== "default"
       ? { uri: imageUri }

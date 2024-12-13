@@ -135,7 +135,7 @@ const PetProfile = ({ route, navigation }) => {
   };
 
   const handleSave = async () => {
-    setIsSaving(true); // Start showing loading indicator
+    setIsSaving(true); // Disable the save button while saving
     try {
       const userId = auth.currentUser.uid;
       const petDocRef = doc(firestore, `users/${userId}/pets`, petId);
@@ -198,9 +198,6 @@ const PetProfile = ({ route, navigation }) => {
 
           // Add the new pet name
           updatedRelatedPets.push(formData.name);
-
-          // Log the updated relatedPets array to verify
-          console.log("Updated relatedPets:", updatedRelatedPets);
 
           // Update the event document with the modified relatedPets array
           await updateDoc(eventDocRef, {
@@ -373,7 +370,7 @@ const PetProfile = ({ route, navigation }) => {
                           throw new Error("Pet not found");
                         }
                         const petData = petDocSnap.data();
-                        const petName = petData.name; // Assuming the pet document contains a `name` field
+                        const petName = petData.name;
 
                         // Delete the pet document
                         await deleteDoc(petDocRef);
