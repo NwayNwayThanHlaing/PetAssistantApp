@@ -223,7 +223,6 @@ const EventModal = ({
 };
 
 const styles = StyleSheet.create({
-  // Include the styles from your existing component
   checkboxContainer: {
     flexDirection: "row",
     alignItems: "center",

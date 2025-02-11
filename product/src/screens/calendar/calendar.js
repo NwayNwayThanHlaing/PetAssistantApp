@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import {
   View,
   Text,
@@ -27,6 +28,8 @@ import { Picker } from "@react-native-picker/picker";
 import Svg, { Path } from "react-native-svg";
 
 const CalendarPage = () => {
+  const navigation = useNavigation();
+  const route = useRoute();
   const [selectedDate, setSelectedDate] = useState("");
   const [events, setEvents] = useState({});
   const [markedDates, setMarkedDates] = useState({});
@@ -102,6 +105,14 @@ const CalendarPage = () => {
     };
     fetchData();
   }, [newEvent]);
+
+  // Open Add Event Modal when the route params change from Home Page
+  useEffect(() => {
+    if (route.params?.openAddEventModal) {
+      setIsAddingEvent(true);
+      navigation.setParams({ openAddEventModal: false });
+    }
+  }, [route.params?.openAddEventModal, navigation]);
 
   // Update markedDates whenever events or selectedDate changes
   useEffect(() => {
@@ -204,7 +215,7 @@ const CalendarPage = () => {
 
       const updatedEvent = {
         ...newEvent,
-        date: selectedDate, // Make sure the date is the selected date or the one from the modal
+        date: selectedDate,
         pets: selectedPets,
         id: docId,
       };

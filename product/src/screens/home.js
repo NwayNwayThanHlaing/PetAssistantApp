@@ -34,8 +34,8 @@ const Home = ({ navigation }) => {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const userDocRef = doc(firestore, "users", currentUser.uid); // Reference to the document
-        const userDoc = await getDoc(userDocRef); // Fetch the document
+        const userDocRef = doc(firestore, "users", currentUser.uid);
+        const userDoc = await getDoc(userDocRef);
 
         if (userDoc.exists()) {
           setUserData(userDoc.data());
@@ -47,7 +47,7 @@ const Home = ({ navigation }) => {
         console.error("Error fetching user data:", error);
         Alert.alert("Error", "Failed to fetch user data.");
       } finally {
-        setLoading(false); // Stop loading
+        setLoading(false);
       }
     };
 
@@ -59,7 +59,7 @@ const Home = ({ navigation }) => {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.welcomeCard}>
-        {loading ? ( // Show loading indicator while fetching data
+        {loading ? (
           <ActivityIndicator size="large" color={colors.primary} />
         ) : (
           <>

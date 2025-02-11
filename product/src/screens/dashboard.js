@@ -9,8 +9,8 @@ import Booking from "./pets/booking";
 import Profile from "./profile";
 
 const Dashboard = ({ navigation, route }) => {
-  const { initialScreen } = route.params || {}; // Get the initialScreen parameter
-  const [activeScreen, setActiveScreen] = useState(initialScreen || "Home"); // Default to "Home"
+  const { initialScreen } = route.params || {};
+  const [activeScreen, setActiveScreen] = useState(initialScreen || "Home");
 
   // Update the activeScreen when the initialScreen changes
   useEffect(() => {
@@ -19,7 +19,6 @@ const Dashboard = ({ navigation, route }) => {
     }
   }, [initialScreen]);
 
-  // Function to handle screen changes from the BottomNavBar
   const handleNavigation = (screen) => {
     setActiveScreen(screen);
   };
@@ -44,14 +43,12 @@ const Dashboard = ({ navigation, route }) => {
 
   return (
     <View style={styles.container}>
-      {/* App Bar with dynamic title */}
       <AppBar
         title={activeScreen}
         onLogout={() => navigation.navigate("Login")}
       />
       {/* Render the selected screen */}
       <View style={styles.content}>{renderScreen()}</View>
-      {/* Bottom Navigation Bar */}
       <BottomNavBar
         navigation={navigation}
         activeScreen={activeScreen}

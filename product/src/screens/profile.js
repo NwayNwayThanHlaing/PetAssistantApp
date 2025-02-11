@@ -47,6 +47,7 @@ const Profile = ({ navigation }) => {
     { id: "4", title: "Delete Account", icon: "delete" },
   ];
 
+  // Function to get profile image source and set fallback image if not available
   const getProfileImageSource = (imageUri) => {
     return imageUri && imageUri !== "default"
       ? { uri: imageUri }
@@ -91,7 +92,7 @@ const Profile = ({ navigation }) => {
 
   const handleSettingPress = (title) => {
     if (title === "Log Out") {
-      handleSignOut(navigation);
+      handleSignOut(navigation, user.uid);
     } else if (title === "Delete Account") {
       handleDeleteAccount(navigation);
     } else if (title === "Change Password") {

@@ -38,7 +38,6 @@ const PetProfile = ({ route, navigation }) => {
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [isExpanded, setIsExpanded] = useState(false);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -136,7 +135,7 @@ const PetProfile = ({ route, navigation }) => {
   };
 
   const handleSave = async () => {
-    setIsSaving(true); // Start showing loading indicator
+    setIsSaving(true); // Disable the save button while saving
     try {
       const userId = auth.currentUser.uid;
       const petDocRef = doc(firestore, `users/${userId}/pets`, petId);
@@ -147,6 +146,9 @@ const PetProfile = ({ route, navigation }) => {
         weight: parseFloat(formData.weight),
       };
 
+      // Store the old pet name for event updates
+      const oldPetName = pet.name;
+
       if (formData.imageUrl && formData.imageUrl !== pet.imageUrl) {
         const uploadedImageUrl = await uploadImage();
         if (uploadedImageUrl) {
@@ -154,15 +156,63 @@ const PetProfile = ({ route, navigation }) => {
         }
       }
 
+      // Update the pet document
       await updateDoc(petDocRef, updatedPet);
       setPet(updatedPet);
+
+      // Check if the pet name has changed
+      if (formData.name !== oldPetName) {
+        // Reference to the events collection
+        const eventsCollectionRef = collection(
+          firestore,
+          `users/${userId}/events`
+        );
+
+        // Query to find all events that contain the old pet name in relatedPets
+        const eventsQuery = query(
+          eventsCollectionRef,
+          where("relatedPets", "array-contains", oldPetName)
+        );
+
+        // Fetch all matching event documents
+        const querySnapshot = await getDocs(eventsQuery);
+
+        // Check if any events matched
+        if (querySnapshot.empty) {
+          console.log("No events found with the old pet name.");
+        }
+
+        // Loop through each event and manually update the relatedPets array
+        for (const docSnap of querySnapshot.docs) {
+          const eventDocRef = doc(
+            firestore,
+            `users/${userId}/events`,
+            docSnap.id
+          );
+
+          // Get the current relatedPets array
+          const eventData = docSnap.data();
+          const updatedRelatedPets = eventData.relatedPets.filter(
+            (petName) => petName !== oldPetName
+          );
+
+          // Add the new pet name
+          updatedRelatedPets.push(formData.name);
+
+          // Update the event document with the modified relatedPets array
+          await updateDoc(eventDocRef, {
+            relatedPets: updatedRelatedPets,
+          });
+        }
+      }
+
       setIsEditing(false);
       Alert.alert("Success", "Pet profile updated successfully.");
     } catch (error) {
       console.error("Error updating pet data:", error);
       Alert.alert("Error", "Failed to update pet profile.");
     } finally {
-      setIsSaving(false); // Stop showing loading indicator
+      setIsSaving(false);
     }
   };
 
@@ -320,7 +370,7 @@ const PetProfile = ({ route, navigation }) => {
                           throw new Error("Pet not found");
                         }
                         const petData = petDocSnap.data();
-                        const petName = petData.name; // Assuming the pet document contains a `name` field
+                        const petName = petData.name;
 
                         // Delete the pet document
                         await deleteDoc(petDocRef);

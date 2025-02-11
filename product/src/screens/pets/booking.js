@@ -58,7 +58,7 @@ const Booking = () => {
       const eventsRef = collection(firestore, `users/${userId}/events`);
       let q;
 
-      // Determine if the request is for "all" or a specific pet
+      // Check if the request is for "all" or a specific pet
       if (petIdentifier === "all") {
         // Fetch all appointments
         q = query(eventsRef, where("appointment", "==", true));
@@ -91,7 +91,19 @@ const Booking = () => {
 
       const upcomingEvents = fetchedEvents
         .filter((event) => event.date >= today)
-        .sort((a, b) => a.date - b.date);
+        .sort((a, b) => {
+          // Compare dates first
+          const dateComparison = a.date - b.date; // Compare the date part first
+          if (dateComparison !== 0) {
+            return dateComparison; // If dates are different, sort by date
+          }
+
+          // If the dates are the same, compare the time
+          const aTimeInMinutes = a.time.hours * 60 + a.time.minutes;
+          const bTimeInMinutes = b.time.hours * 60 + b.time.minutes;
+
+          return aTimeInMinutes - bTimeInMinutes; // Sort by time within the same date
+        });
 
       setAppointments(upcomingEvents);
     } catch (error) {
@@ -107,7 +119,7 @@ const Booking = () => {
     }
   }, [selectedPetId, pets]);
 
-  // Render pet profile
+  // Render pet profiles
   const renderPetProfile = (pet) => {
     const imageSource = pet.imageUrl ? { uri: pet.imageUrl } : dog;
 

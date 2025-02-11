@@ -25,6 +25,7 @@ const Signup = ({ navigation }) => {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // sign up function
   const handleSignup = async () => {
     if (!email || !password || !name) {
       Alert.alert("Error", "Please fill in all fields.");

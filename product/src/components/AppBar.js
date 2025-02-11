@@ -1,4 +1,5 @@
 import React from "react";
+import { useNavigation } from "@react-navigation/native";
 import {
   View,
   Text,
@@ -11,7 +12,8 @@ import { AppBarStyles } from "../styles/GlobalStyles";
 import { colors } from "../styles/Theme";
 import logo from "../../assets/logo.png";
 
-const AppBar = ({ title, onLogout }) => {
+const AppBar = ({ title, onLogOut }) => {
+  const navigation = useNavigation();
   return (
     <SafeAreaView style={AppBarStyles.safeArea}>
       <View style={AppBarStyles.container}>
@@ -21,7 +23,10 @@ const AppBar = ({ title, onLogout }) => {
             {title == "Home" ? "Purrnote" : title}
           </Text>
         </View>
-        <TouchableOpacity style={AppBarStyles.logoutButton} onPress={onLogout}>
+        <TouchableOpacity
+          style={AppBarStyles.logoutButton}
+          onPress={() => navigation.navigate("Notification")}
+        >
           <MaterialIcons
             name="notifications"
             size={24}

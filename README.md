@@ -1,111 +1,77 @@
-# Final Year Project
+# Final Year Project - Pet Assistant App, Purrnote
 
-This repository has been created to store your final year project.
+# Project Directory Structure
 
-You may edit it as you like, but please do not remove the default topics or the project members list. These need to stay as currently defined in order for your supervisor to be able to find your project.
+This directory contains all the necessary files for the project. Below is a description of the structure and the contents of each directory and file. Once you have cloned the repository, it will contain these files in the folder.
 
-# Pet Assistant
+/PROJECT
+    ├── diary.md              # A Markdown file that logs your weekly progress with summary, challenges and next step
+    ├── /documents/           # Contains submitted documents such as reports and planning files
+    │   ├── NwayNwayThanHlaing-plan.pdf  # Submitted project plan
+    │   ├── NwayNwayThanHlaing.Interim.pdf  # Interim report of the project
+    ├── /product/             # This is the app’s main folder, the actual source code to run
+    ├── README.md             # This file, which explains the structure of the project
 
-**Pet Assistant** is an application designed to help pet owners manage their pets' health, appointments, and daily activities. This app aims to provide a convenient platform for users to keep track of their pets' needs and schedules.
 
-## Table of Contents
+## Project Source Code Folder
+The folder product in the PROJECT folder contains the main source code of the app with the following structure:
 
-- [Project Overview](#project-overview)
-- [Features](#features)
-- [Technologies Used](#technologies-used)
-- [Getting Started](#getting-started)
-  - [Prerequisites](#prerequisites)
-  - [Installation](#installation)
-- [Usage](#usage)
-- [Project Structure](#project-structure)
-- [Contributing](#contributing)
-- [License](#license)
-- [Acknowledgments](#acknowledgments)
-
-## Project Overview
-
-The **Pet Assistant** app allows users to:
-
-- Create and manage pet profiles
-- Schedule appointments and reminders
-- Keep track of vaccinations and health records
-- Access the calendar to view and schedule daily tasks for pets
-- Connect with veterinarians and pet services
-
-## Features
-
-- User authentication with Firebase Auth
-- Cloud Firestore integration for data storage
-- Intuitive user interface for managing pet information
-- Notifications for important pet-related events
-
-## Technologies Used
-
-- **React Native**: UI toolkit for building natively compiled applications
-- **Firebase**: Backend services for authentication and database
-- **React Context API**: Simple state management solution for React Native
-
-## Getting Started
-
-### Prerequisites
-
-Make sure you have the following installed on your machine:
-
-Expo - a developer tool for creating experiences with interactive gestures and graphics using JavaScript and React.
-
-- Download Expo Go app on your android or ios device
-
-### Installation
-
-1. Clone the repository:
-
-   ```bash
-   git clone https://gitlab.cim.rhul.ac.uk/wlis130/PROJECT.git
-   cd PROJECT/product
-   ```
-
-2. Install the dependencies:
-
-   ```bash
-   npm install
-   ```
-
-## Running the App
-
-To run the React Native app on an iOS simulator, follow these steps:
-
-1. **Open Xcode**:
-
-   - Launch Xcode and open the iOS Simulator from **Xcode > Open Developer Tool > Simulator** if you would like to use simulator.
-
-2. **Run the App**:
-
-   - Open your terminal and navigate to the root of the project directory.
-   - Use the following command to run the app:
-
-     ```bash
-     npm expo start
-     ```
-
-     or
-
-     ```bash
-     npm start
-     ```
-
-   - Scan the QR code shown on the terminal with your camera, it will then lead to Expo Go app and then will display the app.
-
-   - You can also refer to README.md in product folder in PROJECT folder directory for more details.
-
-## Usage
-
-Once the app is launched, you can:
-
-- **Sign Up / Log In**: Create a new account or log in with existing credentials.
-- **Manage Pet Profiles**: Add and edit information about your pets, including health records and vaccination history.
-- **Schedule Appointments**: Use the calendar feature to set reminders for vet visits or grooming sessions.
-- **Notifications**: Receive alerts for important events related to your pets.
-
-## License
-
-This project is an individual project and is not licensed for redistribution. All rights reserved.
+/product
+    ├── .expo/                # Contains Expo related files and build data
+    ├── /assets/              # Contains static files such as images, fonts, and icons
+    │   ├── /fonts/           # Custom fonts used in the app 
+    |   |   ├── NerkoOne-Regular.ttf    # NerkoOne-Regular font file to set the custom font globally   
+    │   ├── adaptive-icon.png 
+    │   ├── calendar.png      
+    │   ├── dog.png           
+    │   ├── favicon.png       
+    │   ├── home.jpg          
+    │   ├── icon.png          
+    │   ├── logo.png          
+    │   ├── nothing.png       
+    │   ├── profile.jpg       
+    │   ├── splash.png        
+    │   ├── vet.png           
+    ├── /node_modules/        # Contains installed npm dependencies
+    ├── /src/                 # Source code folder for the application
+    │   ├── /actions/         # Contains authentication and user action-related files
+    │   │   ├── authActions.js  # Handles authentication actions
+    │   │   ├── userActions.js  # Handles user-related actions
+    │   ├── /auth/            # Handles authentication logic and Firebase integration
+    │   │   ├── firebaseConfig.js  # Firebase configuration settings
+    │   │   ├── login.js         # Login screen and logic
+    │   │   ├── signup.js        # Signup screen and logic
+    │   ├── /components/       # Reusable components used across screens
+    │   │   ├── AppBar.js      # AppBar component
+    │   │   ├── BottomNavBar.js  # Bottom navigation bar component
+    │   │   ├── CustomText.js  # Custom text component for setting up global theme
+    │   ├── /contexts/         # Contains context providers for state management
+    │   │   ├── ThemeContext.js  # Manages theme-related context
+    │   ├── /screens/          # Contains screen components
+    │   │   ├── /calendar/     # Calendar-related components and screens
+    │   │   │   ├── addEventModal.js  # Modal to add events to the calendar
+    │   │   │   ├── calendar.js      # Main calendar Screen
+    │   │   │   ├── eventList.js     # Event listing component used in calendar page
+    │   │   │   ├── firestoreService.js  # Service for interacting with Firestore
+    │   │   │   ├── updateEventModal.js  # Modal for updating events
+    │   │   ├── /pets/          # Pet-related components and screens
+    │   │   │   ├── addPet.js   # Modal to add pet
+    │   │   │   ├── booking.js  # Booking Screen
+    │   │   │   ├── pets.js     # All pets Screen
+    │   │   │   ├── profile.js  # Individual pet profile Screen
+    │   │   ├── dashboard.js  # Main dashboard Screen
+    │   │   ├── home.js     # Home Screen
+    │   │   ├── notification.js  # notification inbox Screen
+    │   │   ├── reminder.js    # reminder component used in home page
+    │   ├── /styles/           # Contains global styles for the app
+    │   │   ├── AuthStyles.js  # Styles for authentication screens
+    │   │   ├── GlobalStyles.js  # General app-wide styles
+    │   │   ├── ProfileStyles.js  # Styles for user profile-related screens
+    │   │   ├── Theme.js       # App theme configuration
+    │   │   ├── MyStack.js     # Navigation stack configuration
+    ├── .gitignore             # Specifies which files should not be tracked by Git
+    ├── App.js                 # Main entry point of the app
+    ├── app.json               # Configuration file for Expo
+    ├── babel.config.js        # Babel configuration for React Native
+    ├── package-lock.json      # Locks the dependencies versions
+    ├── package.json           # Defines project dependencies and scripts
