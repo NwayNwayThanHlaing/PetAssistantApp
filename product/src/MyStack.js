@@ -12,7 +12,6 @@ import CalendarPage from "./screens/calendar/calendar";
 import Pets from "./screens/pets/pets";
 import AddPet from "./screens/pets/addPet";
 import PetProfile from "./screens/pets/profile";
-import Notification from "./screens/notification";
 
 const Stack = createNativeStackNavigator();
 
@@ -39,7 +38,6 @@ const MyStack = () => {
         <Stack.Screen name="Home" component={Home} />
         <Stack.Screen name="ReminderPage" component={ReminderPage} />
         <Stack.Screen name="Dashboard" component={Dashboard} />
-        <Stack.Screen name="Notification" component={Notification} />
         <Stack.Screen name="Booking" component={Booking} />
         <Stack.Screen name="Profile" component={Profile} />
         <Stack.Screen name="CalendarPage" component={CalendarPage} />

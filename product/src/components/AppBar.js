@@ -23,10 +23,7 @@ const AppBar = ({ title, onLogOut }) => {
             {title == "Home" ? "Purrnote" : title}
           </Text>
         </View>
-        <TouchableOpacity
-          style={AppBarStyles.logoutButton}
-          onPress={() => navigation.navigate("Notification")}
-        >
+        <TouchableOpacity style={AppBarStyles.logoutButton}>
           <MaterialIcons
             name="notifications"
             size={24}
