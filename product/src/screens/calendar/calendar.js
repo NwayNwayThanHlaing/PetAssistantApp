@@ -211,19 +211,22 @@ const CalendarPage = () => {
 
     setLoading(true);
     try {
-      const docId = await addEvent(newEvent, selectedPets);
+      // Ensure selectedDate is properly formatted
+      const formattedDate = new Date(selectedDate).toISOString().split("T")[0];
 
       const updatedEvent = {
         ...newEvent,
-        date: selectedDate,
+        date: formattedDate, // ✅ Ensures correct 'YYYY-MM-DD' format
         pets: selectedPets,
-        id: docId,
       };
+
+      const docId = await addEvent(updatedEvent, selectedPets);
+      updatedEvent.id = docId; // Assign the document ID after Firestore insertion
 
       setEvents((prevEvents) => {
         const newEvents = {
           ...prevEvents,
-          [selectedDate]: [...(prevEvents[selectedDate] || []), updatedEvent],
+          [formattedDate]: [...(prevEvents[formattedDate] || []), updatedEvent],
         };
         return newEvents;
       });

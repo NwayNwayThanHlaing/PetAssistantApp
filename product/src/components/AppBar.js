@@ -12,7 +12,7 @@ import { AppBarStyles } from "../styles/GlobalStyles";
 import { colors } from "../styles/Theme";
 import logo from "../../assets/logo.png";
 
-const AppBar = ({ title, onLogOut }) => {
+const AppBar = ({ title }) => {
   const navigation = useNavigation();
   return (
     <SafeAreaView style={AppBarStyles.safeArea}>
@@ -23,7 +23,9 @@ const AppBar = ({ title, onLogOut }) => {
             {title == "Home" ? "Purrnote" : title}
           </Text>
         </View>
-        <TouchableOpacity style={AppBarStyles.logoutButton}>
+        <TouchableOpacity
+          onPress={() => navigation.navigate("NotificationsInbox")}
+        >
           <MaterialIcons
             name="notifications"
             size={24}
