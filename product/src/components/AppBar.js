@@ -11,6 +11,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { AppBarStyles } from "../styles/GlobalStyles";
 import { colors } from "../styles/Theme";
 import logo from "../../assets/logo.png";
+import * as Notifications from "expo-notifications";
 
 const AppBar = ({ title }) => {
   const navigation = useNavigation();
