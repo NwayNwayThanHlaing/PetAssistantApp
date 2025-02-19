@@ -74,31 +74,6 @@ const NotificationsInbox = ({ navigation }) => {
     });
   };
 
-  const scheduleEventNotification = async (event) => {
-    const eventTime = new Date(
-      event.date.split("-").join("/") +
-        " " +
-        `${event.time.hours}:${event.time.minutes}`
-    );
-    const currentTime = new Date();
-    const timeDifference = eventTime - currentTime;
-
-    if (timeDifference > 0) {
-      await Notifications.scheduleNotificationAsync({
-        content: {
-          title: event.title,
-          body: event.notes || "Reminder for your event",
-          sound: "default",
-          data: { eventId: event.id }, // Include event ID for navigation
-        },
-        trigger: {
-          date: eventTime, // Trigger at the event time
-        },
-      });
-      console.log("Notification scheduled for:", event.title, "at", eventTime);
-    }
-  };
-
   useEffect(() => {
     const fetchNotifications = async () => {
       try {
@@ -120,16 +95,6 @@ const NotificationsInbox = ({ navigation }) => {
 
         // Set the filtered and sorted notifications
         setNotifications(sortedNotifications);
-
-        // Schedule notifications for each event
-        sortedNotifications.forEach((event) => {
-          scheduleEventNotification(event);
-        });
-
-        console.log(
-          "Notifications fetched and scheduled:",
-          sortedNotifications
-        );
       } catch (error) {
         console.error("Error fetching notifications:", error);
         Alert.alert(

@@ -216,7 +216,7 @@ const CalendarPage = () => {
 
       const updatedEvent = {
         ...newEvent,
-        date: formattedDate, // ✅ Ensures correct 'YYYY-MM-DD' format
+        date: formattedDate, // Ensures correct 'YYYY-MM-DD' format
         pets: selectedPets,
       };
 
