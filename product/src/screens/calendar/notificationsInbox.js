@@ -18,12 +18,6 @@ import {
   updateEventReadStatus,
 } from "../../actions/userActions";
 import * as Notifications from "expo-notifications";
-import {
-  RollInLeft,
-  RollInRight,
-  RollOutLeft,
-  RollOutRight,
-} from "react-native-reanimated";
 
 const NotificationsInbox = ({ navigation }) => {
   const [notifications, setNotifications] = useState([]);
@@ -105,13 +99,11 @@ const NotificationsInbox = ({ navigation }) => {
     const subscription = Notifications.addNotificationResponseReceivedListener(
       async (response) => {
         const eventId = response.notification.request.content.data.eventId;
-
         if (eventId) {
           await markNotificationAsRead(eventId);
         }
       }
     );
-
     return () => subscription.remove();
   }, []);
 
@@ -134,7 +126,6 @@ const NotificationsInbox = ({ navigation }) => {
             : notification
         )
       );
-
       // Update Firestore field
       await updateEventReadStatus(userId, eventId, true);
     } catch (error) {

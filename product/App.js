@@ -5,6 +5,7 @@ import { auth } from "./src/auth/firebaseConfig";
 import * as Notifications from "expo-notifications";
 import { collection, query, onSnapshot } from "firebase/firestore";
 import { firestore } from "./src/auth/firebaseConfig";
+
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldShowAlert: true,
@@ -17,7 +18,7 @@ const App = () => {
   const [permissionsGranted, setPermissionsGranted] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [userId, setUserId] = useState(null);
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // Track login status
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   // Request notification permissions
   useEffect(() => {
@@ -92,8 +93,8 @@ const App = () => {
     if (eventDate > new Date()) {
       await Notifications.scheduleNotificationAsync({
         content: {
-          title: "Event Reminder",
-          body: `Your event is happening now!`,
+          title: "PurrNote",
+          body: `You have a new reminder: ${event.title}`,
           sound: "default",
         },
         trigger: {
