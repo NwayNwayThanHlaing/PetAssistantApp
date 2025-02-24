@@ -1,41 +1,3 @@
-// import React, { useState, useEffect } from "react";
-// import {
-//   View,
-//   Text,
-//   FlatList,
-//   TouchableOpacity,
-//   StyleSheet,
-//   ActivityIndicator,
-//   Image,
-// } from "react-native";
-// import { colors } from "../../styles/Theme";
-// import nothing from "../../../assets/nothing.png";
-// import { SafeAreaView } from "react-native-safe-area-context";
-// import { auth } from "../../auth/firebaseConfig";
-// import { fetchUserEvents } from "../../actions/userActions";
-// import * as Notifications from "expo-notifications";
-
-// const NotificationsInbox = ({ navigation }) => {
-//   const [notifications, setNotifications] = useState([]);
-//   const [loading, setLoading] = useState(true);
-
-//   useEffect(() => {
-//     // Listen for notification clicks
-//     const subscription = Notifications.addNotificationResponseReceivedListener(
-//       (response) => {
-//         const eventId = response.notification.request.content.data.eventId;
-//         if (eventId) {
-//           navigation.navigate("Calendar", {
-//             screen: "EventDetails",
-//             params: { eventId },
-//           });
-//         }
-//       }
-//     );
-
-//     return () => subscription.remove(); // Cleanup on unmount
-//   }, [navigation]);
-
 import React, { useState, useEffect } from "react";
 import {
   View,
@@ -52,44 +14,10 @@ import nothing from "../../../assets/nothing.png";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { auth } from "../../auth/firebaseConfig";
 import { fetchUserEvents } from "../../actions/userActions";
-import * as Notifications from "expo-notifications";
 
 const NotificationsInbox = ({ navigation }) => {
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  // // Request notification permissions
-  // useEffect(() => {
-  //   const requestPermissions = async () => {
-  //     const { status } = await Notifications.requestPermissionsAsync();
-  //     if (status !== "granted") {
-  //       alert("You need to enable notifications for this feature to work.");
-  //     }
-  //   };
-
-  //   requestPermissions();
-  // }, []);
-
-  // Listen for notification clicks
-  // useEffect(() => {
-  //   const subscription = Notifications.addNotificationResponseReceivedListener(
-  //     (response) => {
-  //       console.log("Notification clicked:", response);
-  //       const eventId = response.notification.request.content.data.eventId;
-  //       console.log("Extracted eventId:", eventId);
-  //       if (eventId) {
-  //         navigation.navigate("Calendar", {
-  //           screen: "EventDetails",
-  //           params: { eventId },
-  //         });
-  //       } else {
-  //         console.log("No eventId found in notification data");
-  //       }
-  //     }
-  //   );
-
-  //   return () => subscription.remove(); // Cleanup on unmount
-  // }, [navigation]);
 
   const isWithinLastTwoWeeks = (dateString, time) => {
     if (!dateString || !time) return false;
@@ -118,14 +46,15 @@ const NotificationsInbox = ({ navigation }) => {
     return notifications.sort((a, b) => {
       // Convert date and time to JavaScript Date objects for comparison
       const dateA = new Date(
-        a.date.split("-").join("/") + " " + `${a.time.hours}:${a.time.minutes}`
+        `${a.date}T${a.time.hours.toString().padStart(2, "0")}:
+         ${a.time.minutes.toString().padStart(2, "0")}: 00`
       );
       const dateB = new Date(
-        b.date.split("-").join("/") + " " + `${b.time.hours}:${b.time.minutes}`
+        `${b.date}T${b.time.hours.toString().padStart(2, "0")}:
+         ${b.time.minutes.toString().padStart(2, "0")}: 00`
       );
 
-      // Sort in descending order (most recent first)
-      return dateB - dateA;
+      return dateB - dateA; // Sort in descending order
     });
   };
 
@@ -172,50 +101,6 @@ const NotificationsInbox = ({ navigation }) => {
     );
   }
 
-  const scheduleNotification = async (event) => {
-    // Get the current date and time
-    const now = new Date();
-
-    // Parse the event date and time
-    const [day, month, year] = event.date.split("-");
-    const eventDate = new Date(
-      year,
-      month - 1,
-      day,
-      event.time.hour,
-      event.time.minute
-    );
-
-    // Check if the current date and time match the event's date and time
-    if (now.getTime() === eventDate.getTime()) {
-      await Notifications.scheduleNotificationAsync({
-        content: {
-          title: "Event Reminder",
-          body: `Your event is happening now!`,
-          sound: "default",
-        },
-        trigger: null, // Trigger immediately
-      });
-      console.log(
-        `Notification sent for event: ${event.date} ${event.time.hour}:${event.time.minute}`
-      );
-    } else {
-      console.log(
-        `Event date and time do not match the current time for event: ${event.date} ${event.time.hour}:${event.time.minute}`
-      );
-    }
-  };
-
-  // Function to check all events in the notifications list
-  const checkAllNotifications = async () => {
-    for (const event of notifications) {
-      await scheduleNotification(event);
-    }
-  };
-
-  // Example usage
-  checkAllNotifications();
-
   // Helper function to format date & time as "DD/MM/YYYY HH:MM AM/PM"
   const formatDateTime = (dateString, time) => {
     if (!dateString || !time) return "No Date Provided";
@@ -242,6 +127,7 @@ const NotificationsInbox = ({ navigation }) => {
         styles.notificationCard,
         item.read ? styles.readNotification : styles.unreadNotification,
       ]}
+      onPress={() => navigation.navigate("CalendarPage", { id: item.id })}
     >
       <View style={styles.notificationContent}>
         <Text style={styles.notificationTitle}>{item.title}</Text>

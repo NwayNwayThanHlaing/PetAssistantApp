@@ -1,13 +1,10 @@
 import React, { useState, useEffect } from "react";
-import * as Font from "expo-font";
-import { View, ActivityIndicator, Alert } from "react-native";
-import * as Notifications from "expo-notifications";
 import MyStack from "./src/MyStack";
 import { ThemeProvider } from "./src/contexts/ThemeContext";
-import font from "./assets/fonts/NerkoOne-Regular.ttf";
 import { auth } from "./src/auth/firebaseConfig";
-import Device from "expo-device";
-
+import * as Notifications from "expo-notifications";
+import { collection, query, onSnapshot } from "firebase/firestore";
+import { firestore } from "./src/auth/firebaseConfig";
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldShowAlert: true,
@@ -17,31 +14,31 @@ Notifications.setNotificationHandler({
 });
 
 const App = () => {
-  const [fontsLoaded, setFontsLoaded] = useState(false);
+  const [permissionsGranted, setPermissionsGranted] = useState(false);
+  const [notifications, setNotifications] = useState([]);
   const [userId, setUserId] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false); // Track login status
-  const [permissionsGranted, setPermissionsGranted] = useState(false);
 
-  const loadFonts = async () => {
-    await Font.loadAsync({
-      "NerkoOne-Regular": font,
-    });
-    setFontsLoaded(true);
-  };
+  // Request notification permissions
+  useEffect(() => {
+    const requestPermissions = async () => {
+      const { status } = await Notifications.requestPermissionsAsync();
+      setPermissionsGranted(status === "granted");
+    };
+    requestPermissions();
+  }, []);
 
   useEffect(() => {
-    loadFonts();
-
     // Check authentication status and fetch userId
     const unsubscribe = auth.onAuthStateChanged((user) => {
       if (user) {
         setUserId(user.uid); // Set userId if authenticated
         setIsLoggedIn(true); // Set login status to true
-        console.log("User authenticated, userId:", user.uid);
+        //console.log("User authenticated, userId:", user.uid);
       } else {
         setUserId(null);
         setIsLoggedIn(false); // Set login status to false
-        console.log("No user is logged in");
+        //console.log("No user is logged in");
       }
     });
 
@@ -49,13 +46,72 @@ const App = () => {
     return () => unsubscribe();
   }, []);
 
-  if (!fontsLoaded) {
-    return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <ActivityIndicator size="large" color="#0000ff" />
-      </View>
+  useEffect(() => {
+    if (!userId) return;
+
+    // Reference to the user's events collection
+    const eventsRef = collection(firestore, "users", userId, "events");
+    const eventsQuery = query(eventsRef);
+
+    // Real-time listener for Firestore changes
+    const unsubscribe = onSnapshot(eventsQuery, (querySnapshot) => {
+      const events = [];
+      querySnapshot.forEach((doc) => {
+        events.push({ id: doc.id, ...doc.data() });
+      });
+      setNotifications(events); // Update state with new events
+    });
+
+    return () => unsubscribe(); // Cleanup listener when component unmounts
+  }, [userId]); // Only runs when `userId` changes
+
+  // Schedule notifications when the component mounts
+  useEffect(() => {
+    if (permissionsGranted) {
+      checkAllNotifications();
+    }
+  }, [permissionsGranted, notifications]);
+
+  const scheduleNoti = async (event) => {
+    if (!permissionsGranted) {
+      //console.log("Permissions not granted");
+      return;
+    }
+
+    // Parse the event date and time
+    const [year, month, day] = event.date.split("-");
+    const eventDate = new Date(
+      year,
+      month - 1,
+      day,
+      event.time.hours,
+      event.time.minutes
     );
-  }
+
+    // Check if the current date and time match the event's date and time
+    if (eventDate > new Date()) {
+      await Notifications.scheduleNotificationAsync({
+        content: {
+          title: "Event Reminder",
+          body: `Your event is happening now!`,
+          sound: "default",
+        },
+        trigger: {
+          type: "date",
+          date: eventDate,
+        }, // Schedule for the event date and time
+      });
+    }
+  };
+
+  // Function to check all events in the notifications list
+  const checkAllNotifications = async () => {
+    // Clear all existing notifications
+    await Notifications.cancelAllScheduledNotificationsAsync();
+    for (const event of notifications) {
+      await scheduleNoti(event);
+    }
+  };
 
   return (
     <ThemeProvider>
