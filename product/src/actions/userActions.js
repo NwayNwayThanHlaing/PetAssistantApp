@@ -1,6 +1,13 @@
 import { Alert } from "react-native";
 import { firestore } from "../auth/firebaseConfig";
-import { doc, getDoc, collection, getDocs } from "firebase/firestore";
+import {
+  doc,
+  getDoc,
+  collection,
+  getDocs,
+  updateDoc,
+  getFirestore,
+} from "firebase/firestore";
 
 // Fetch events from Firestore
 export const fetchUserEvents = async (userId) => {
@@ -45,5 +52,16 @@ export const fetchUserData = async (userId) => {
     console.error("Error fetching user data: ", error);
     Alert.alert("Error fetching user data", error.message);
     return null;
+  }
+};
+
+const db = getFirestore();
+
+export const updateEventReadStatus = async (userId, eventId, readStatus) => {
+  try {
+    const eventRef = doc(db, "users", userId, "events", eventId);
+    await updateDoc(eventRef, { read: readStatus });
+  } catch (error) {
+    console.error("Error updating read status:", error);
   }
 };

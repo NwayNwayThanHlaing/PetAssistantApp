@@ -134,6 +134,17 @@ const CalendarPage = () => {
     }
   }, [selectedDate]);
 
+  useEffect(() => {
+    // Check if navigation came from Notifications and set the selected date
+    if (route.params?.selectedDate) {
+      setSelectedDate(route.params.selectedDate);
+    } else {
+      // Default to today's date if no selectedDate is provided
+      const today = new Date().toISOString().split("T")[0];
+      setSelectedDate(today);
+    }
+  }, [route.params?.selectedDate]);
+
   // Prepare marked dates for the calendar
   const prepareMarkedDates = () => {
     const newMarkedDates = {};

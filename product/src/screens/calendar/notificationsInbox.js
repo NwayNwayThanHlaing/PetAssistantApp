@@ -13,11 +13,22 @@ import { colors } from "../../styles/Theme";
 import nothing from "../../../assets/nothing.png";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { auth } from "../../auth/firebaseConfig";
-import { fetchUserEvents } from "../../actions/userActions";
+import {
+  fetchUserEvents,
+  updateEventReadStatus,
+} from "../../actions/userActions";
+import * as Notifications from "expo-notifications";
+import {
+  RollInLeft,
+  RollInRight,
+  RollOutLeft,
+  RollOutRight,
+} from "react-native-reanimated";
 
 const NotificationsInbox = ({ navigation }) => {
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
+  const userId = auth.currentUser?.uid;
 
   const isWithinLastTwoWeeks = (dateString, time) => {
     if (!dateString || !time) return false;
@@ -31,14 +42,10 @@ const NotificationsInbox = ({ navigation }) => {
       time.hours,
       time.minutes
     );
-
-    // Get the current date and time
     const currentDate = new Date();
+    const differenceInMs = currentDate - notificationDate; // calculate difference in milliseconds
 
-    // Calculate the difference in milliseconds
-    const differenceInMs = currentDate - notificationDate;
-
-    // Check if the notification is in the past and within the last two weeks (14 days)
+    // Check if the notification is in the past and within the last two weeks
     return differenceInMs > 0 && differenceInMs <= 14 * 24 * 60 * 60 * 1000;
   };
 
@@ -93,6 +100,21 @@ const NotificationsInbox = ({ navigation }) => {
     fetchNotifications();
   }, [notifications]);
 
+  // Listen for notification clicks
+  useEffect(() => {
+    const subscription = Notifications.addNotificationResponseReceivedListener(
+      async (response) => {
+        const eventId = response.notification.request.content.data.eventId;
+
+        if (eventId) {
+          await markNotificationAsRead(eventId);
+        }
+      }
+    );
+
+    return () => subscription.remove();
+  }, []);
+
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
@@ -100,6 +122,25 @@ const NotificationsInbox = ({ navigation }) => {
       </View>
     );
   }
+
+  // Mark notification as read when clicked
+  const markNotificationAsRead = async (eventId) => {
+    try {
+      // Update the local state first for instant UI change
+      setNotifications((prevNotifications) =>
+        prevNotifications.map((notification) =>
+          notification.id === eventId
+            ? { ...notification, read: true }
+            : notification
+        )
+      );
+
+      // Update Firestore field
+      await updateEventReadStatus(userId, eventId, true);
+    } catch (error) {
+      console.error("Error updating read status:", error);
+    }
+  };
 
   // Helper function to format date & time as "DD/MM/YYYY HH:MM AM/PM"
   const formatDateTime = (dateString, time) => {
@@ -127,7 +168,15 @@ const NotificationsInbox = ({ navigation }) => {
         styles.notificationCard,
         item.read ? styles.readNotification : styles.unreadNotification,
       ]}
-      onPress={() => navigation.navigate("CalendarPage", { id: item.id })}
+      onPress={async () => {
+        markNotificationAsRead(item.id);
+        // Navigate to Calendar showing the event
+        navigation.push("Dashboard", {
+          initialScreen: "Calendar",
+          previousScreen: "Notifications",
+          selectedDate: item.date,
+        });
+      }}
     >
       <View style={styles.notificationContent}>
         <Text style={styles.notificationTitle}>{item.title}</Text>
@@ -197,15 +246,15 @@ const styles = StyleSheet.create({
   header: {
     fontSize: 20,
     fontWeight: "bold",
-    paddingHorizontal: 20,
+    paddingHorizontal: 10,
     textAlign: "center",
     paddingTop: 10,
     paddingBottom: 20,
     color: colors.primary,
   },
   listContainer: {
-    paddingBottom: 20,
-    paddingHorizontal: 15,
+    paddingBottom: 5,
+    paddingHorizontal: 10,
   },
   notificationCard: {
     flexDirection: "row",
