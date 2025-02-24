@@ -211,25 +211,22 @@ const CalendarPage = () => {
 
     setLoading(true);
     try {
-      // Ensure selectedDate is properly formatted
       const formattedDate = new Date(selectedDate).toISOString().split("T")[0];
 
       const updatedEvent = {
         ...newEvent,
-        date: formattedDate, // Ensures correct 'YYYY-MM-DD' format
+        date: formattedDate,
         pets: selectedPets,
+        read: false,
       };
 
       const docId = await addEvent(updatedEvent, selectedPets);
-      updatedEvent.id = docId; // Assign the document ID after Firestore insertion
+      updatedEvent.id = docId;
 
-      setEvents((prevEvents) => {
-        const newEvents = {
-          ...prevEvents,
-          [formattedDate]: [...(prevEvents[formattedDate] || []), updatedEvent],
-        };
-        return newEvents;
-      });
+      setEvents((prevEvents) => ({
+        ...prevEvents,
+        [formattedDate]: [...(prevEvents[formattedDate] || []), updatedEvent],
+      }));
     } catch (error) {
       console.error("Error adding event:", error);
     } finally {
@@ -239,11 +236,58 @@ const CalendarPage = () => {
         title: "",
         time: { hours: 0, minutes: 0 },
         notes: "",
+        read: false,
         pets: [],
       });
       setSelectedPets([]);
     }
   };
+
+  // const handleAddEvent = async () => {
+  //   if (!newEvent.title.trim()) {
+  //     alert("Event title is required.");
+  //     return;
+  //   }
+  //   if (!newEvent.time) {
+  //     alert("Event time is required.");
+  //     return;
+  //   }
+
+  //   setLoading(true);
+  //   try {
+  //     // Ensure selectedDate is properly formatted
+  //     const formattedDate = new Date(selectedDate).toISOString().split("T")[0];
+
+  //     const updatedEvent = {
+  //       ...newEvent,
+  //       date: formattedDate, // Ensures correct 'YYYY-MM-DD' format
+  //       pets: selectedPets,
+  //     };
+
+  //     const docId = await addEvent(updatedEvent, selectedPets);
+  //     updatedEvent.id = docId; // Assign the document ID after Firestore insertion
+
+  //     setEvents((prevEvents) => {
+  //       const newEvents = {
+  //         ...prevEvents,
+  //         [formattedDate]: [...(prevEvents[formattedDate] || []), updatedEvent],
+  //       };
+  //       return newEvents;
+  //     });
+  //   } catch (error) {
+  //     console.error("Error adding event:", error);
+  //   } finally {
+  //     setLoading(false);
+  //     setIsAddingEvent(false);
+  //     setNewEvent({
+  //       title: "",
+  //       time: { hours: 0, minutes: 0 },
+  //       notes: "",
+  //       pets: [],
+  //     });
+  //     setSelectedPets([]);
+  //   }
+  // };
 
   // Update Event
   const handleUpdateEvent = async () => {
