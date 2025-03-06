@@ -8,7 +8,7 @@ const { width } = Dimensions.get("window");
 
 const BottomNavBar = ({ onNavigate, activeScreen }) => {
   // List of buttons for the Bottom Navigation Bar
-  const buttons = ["Maps", "Calendar", "Pets", "Booking", "Profile"];
+  const buttons = ["Calendar", "Booking", "Pets", "Maps", "Profile"];
   const selectedIndex = buttons.indexOf(activeScreen);
   const accentBarWidth = width / buttons.length;
 

@@ -10,7 +10,7 @@ import Profile from "./profile";
 
 const Dashboard = ({ navigation, route }) => {
   const { initialScreen } = route.params || {};
-  const [activeScreen, setActiveScreen] = useState(initialScreen || "Maps");
+  const [activeScreen, setActiveScreen] = useState(initialScreen || "Calendar");
 
   // Update the activeScreen when the initialScreen changes
   useEffect(() => {
@@ -37,7 +37,7 @@ const Dashboard = ({ navigation, route }) => {
       case "Profile":
         return <Profile navigation={navigation} />;
       default:
-        return <Home navigation={navigation} />;
+        return <Calendar navigation={navigation} />;
     }
   };
 
