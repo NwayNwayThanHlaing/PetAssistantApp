@@ -8,7 +8,7 @@ const { width } = Dimensions.get("window");
 
 const BottomNavBar = ({ onNavigate, activeScreen }) => {
   // List of buttons for the Bottom Navigation Bar
-  const buttons = ["Home", "Calendar", "Pets", "Booking", "Profile"];
+  const buttons = ["Maps", "Calendar", "Pets", "Booking", "Profile"];
   const selectedIndex = buttons.indexOf(activeScreen);
   const accentBarWidth = width / buttons.length;
 
@@ -54,8 +54,8 @@ const BottomNavBar = ({ onNavigate, activeScreen }) => {
 // Function to map button names to MaterialIcons icons
 const getIconName = (button) => {
   switch (button) {
-    case "Home":
-      return "home";
+    case "Maps":
+      return "map";
     case "Calendar":
       return "event";
     case "Pets":
