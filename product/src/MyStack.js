@@ -37,6 +37,7 @@ const MyStack = () => {
         />
         <Stack.Screen name="SignUp" component={Signup} />
         <Stack.Screen name="Home" component={Home} />
+        <Stack.Screen name="Locator" component={Locator} />
         <Stack.Screen name="ReminderPage" component={ReminderPage} />
         <Stack.Screen name="Dashboard" component={Dashboard} />
         <Stack.Screen name="Booking" component={Booking} />
