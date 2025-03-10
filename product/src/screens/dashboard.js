@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useCallback } from "react";
+import { useFocusEffect } from "@react-navigation/native";
 import { View, StyleSheet } from "react-native";
 import AppBar from "../components/AppBar";
 import BottomNavBar from "../components/BottomNavBar";
-import Maps from "./maps";
 import Calendar from "./calendar/calendar";
 import Pets from "./pets/pets";
 import Booking from "./pets/booking";
@@ -12,12 +12,13 @@ const Dashboard = ({ navigation, route }) => {
   const { initialScreen } = route.params || {};
   const [activeScreen, setActiveScreen] = useState(initialScreen || "Calendar");
 
-  // Update the activeScreen when the initialScreen changes
-  useEffect(() => {
-    if (initialScreen) {
-      setActiveScreen(initialScreen);
-    }
-  }, [initialScreen]);
+  useFocusEffect(
+    useCallback(() => {
+      if (initialScreen) {
+        setActiveScreen(initialScreen);
+      }
+    }, [initialScreen])
+  );
 
   const handleNavigation = (screen) => {
     setActiveScreen(screen);
@@ -28,8 +29,6 @@ const Dashboard = ({ navigation, route }) => {
     switch (activeScreen) {
       case "Calendar":
         return <Calendar navigation={navigation} />;
-      case "Maps":
-        return <Maps navigation={navigation} />;
       case "Pets":
         return <Pets navigation={navigation} />;
       case "Booking":
@@ -43,21 +42,17 @@ const Dashboard = ({ navigation, route }) => {
 
   return (
     <View style={styles.container}>
-      {activeScreen !== "Maps" && (
-        <AppBar
-          title={activeScreen}
-          onLogout={() => navigation.navigate("Login")}
-        />
-      )}
+      <AppBar
+        title={activeScreen}
+        onLogout={() => navigation.navigate("Login")}
+      />
       {/* Render the selected screen */}
       <View style={styles.content}>{renderScreen()}</View>
-      {activeScreen !== "Maps" && (
-        <BottomNavBar
-          navigation={navigation}
-          activeScreen={activeScreen}
-          onNavigate={handleNavigation}
-        />
-      )}
+      <BottomNavBar
+        navigation={navigation}
+        activeScreen={activeScreen}
+        onNavigate={handleNavigation}
+      />
     </View>
   );
 };

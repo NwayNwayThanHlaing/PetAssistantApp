@@ -6,7 +6,7 @@ import { BottomNavBarStyles as styles } from "../styles/GlobalStyles";
 
 const { width } = Dimensions.get("window");
 
-const BottomNavBar = ({ onNavigate, activeScreen }) => {
+const BottomNavBar = ({ navigation, onNavigate, activeScreen }) => {
   // List of buttons for the Bottom Navigation Bar
   const buttons = ["Calendar", "Booking", "Pets", "Maps", "Profile"];
   const selectedIndex = buttons.indexOf(activeScreen);
@@ -14,8 +14,12 @@ const BottomNavBar = ({ onNavigate, activeScreen }) => {
 
   // Handle the navigation and call the parent onNavigate function
   const handleNavigation = (screen) => {
-    if (screen !== activeScreen) {
-      onNavigate(screen);
+    if (screen === "Maps") {
+      navigation.navigate("Maps");
+    } else {
+      if (screen !== activeScreen) {
+        onNavigate(screen);
+      }
     }
   };
 

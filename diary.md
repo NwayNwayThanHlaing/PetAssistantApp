@@ -1,10 +1,20 @@
 ## Term 2
 
-### Week 6 (24 February 2025)
+### Week 6 - 7 (24 February 2025)
 
-Summary:
-Challenges:
-Next Step:
+Summary: 
+
+- The veterinary locator feature has been successfully implemented. 
+- It displays markers representing each veterinary clinic within the user’s current town, enhancing accessibility to local veterinary services.
+
+Challenges: 
+
+- To ensure indicators are correctly positioned based on real-time geolocation inputs.
+
+
+Next Step: 
+
+- To show users location on the map. This allows users to view their own positions and other pet owners nearby.
 
 ### Week 5 (17 February 2025)
 

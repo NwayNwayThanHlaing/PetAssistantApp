@@ -8,6 +8,7 @@ import {
   StyleSheet,
   ActivityIndicator,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { colors } from "../../styles/Theme";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import { firestore, auth } from "../../auth/firebaseConfig";
@@ -93,7 +94,10 @@ const Pets = ({ navigation }) => {
   }
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
+      <TouchableOpacity onPress={() => navigation.goBack()}>
+        <MaterialIcons name="arrow-back" size={24} color="black" />
+      </TouchableOpacity>
       {pets.length === 0 ? (
         <>
           <Image
@@ -115,35 +119,12 @@ const Pets = ({ navigation }) => {
           >
             No pets found! {"\n"} Add a pet to get started.
           </Text>
-          <TouchableOpacity
-            style={[
-              styles.addButton,
-              {
-                paddingVertical: 15,
-                marginTop: 40,
-              },
-            ]}
-            onPress={() => navigation.navigate("AddPet")}
-          >
+          <TouchableOpacity onPress={() => navigation.navigate("AddPet")}>
             <Text style={styles.addButtonText}>Add a Pet</Text>
           </TouchableOpacity>
         </>
       ) : (
-        <View
-          style={{
-            flexDirection: "row",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-        >
-          <Text style={styles.header}>My Pets</Text>
-          <TouchableOpacity
-            style={styles.addButton}
-            onPress={() => navigation.navigate("AddPet")}
-          >
-            <Text style={styles.addButtonText}>+ Add</Text>
-          </TouchableOpacity>
-        </View>
+        <Text style={styles.header}>My Pets</Text>
       )}
       <FlatList
         data={pets}
@@ -152,7 +133,13 @@ const Pets = ({ navigation }) => {
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.listContainer}
       />
-    </View>
+      <TouchableOpacity
+        style={styles.addButton}
+        onPress={() => navigation.navigate("AddPet")}
+      >
+        <Text style={styles.addButtonText}>+ Add</Text>
+      </TouchableOpacity>
+    </SafeAreaView>
   );
 };
 
@@ -167,11 +154,13 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
+
   header: {
     fontSize: 20,
     fontWeight: "bold",
-    paddingVertical: 10,
+    paddingVertical: 2,
     color: colors.primary,
+    textAlign: "center",
   },
   listContainer: {
     paddingBottom: 20,
@@ -217,8 +206,8 @@ const styles = StyleSheet.create({
   },
   addButton: {
     backgroundColor: colors.accent,
-    padding: 5,
-    borderRadius: 10,
+    padding: 10,
+    borderRadius: 15,
     alignItems: "center",
     paddingHorizontal: 15,
   },

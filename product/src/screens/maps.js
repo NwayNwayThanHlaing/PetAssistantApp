@@ -107,12 +107,7 @@ const Maps = ({ navigation }) => {
           />
         ))}
       </MapView>
-      <TouchableOpacity
-        style={styles.back}
-        onPress={() =>
-          navigation.navigate("Dashboard", { initialScreen: "CalendarPage" })
-        }
-      >
+      <TouchableOpacity style={styles.back} onPress={() => navigation.goBack()}>
         <MaterialIcons name="arrow-back" size={24} color="black" />
       </TouchableOpacity>
       <TouchableOpacity

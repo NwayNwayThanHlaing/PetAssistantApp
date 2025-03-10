@@ -42,9 +42,10 @@ const Profile = ({ navigation }) => {
 
   const settingsOptions = [
     { id: "1", title: "Edit Profile", icon: "image" },
-    { id: "2", title: "Change Password", icon: "lock" },
-    { id: "3", title: "Log Out", icon: "logout" },
-    { id: "4", title: "Delete Account", icon: "delete" },
+    { id: "2", title: "Your Pets", icon: "pets" },
+    { id: "3", title: "Change Password", icon: "lock" },
+    { id: "4", title: "Log Out", icon: "logout" },
+    { id: "5", title: "Delete Account", icon: "delete" },
   ];
 
   // Function to get profile image source and set fallback image if not available
@@ -99,6 +100,8 @@ const Profile = ({ navigation }) => {
       setModalVisible(true);
     } else if (title === "Edit Profile") {
       setEditModalVisible(true);
+    } else if (title === "Your Pets") {
+      navigation.push("Pets");
     }
   };
 
