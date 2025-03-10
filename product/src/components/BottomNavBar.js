@@ -8,7 +8,7 @@ const { width } = Dimensions.get("window");
 
 const BottomNavBar = ({ navigation, onNavigate, activeScreen }) => {
   // List of buttons for the Bottom Navigation Bar
-  const buttons = ["Calendar", "Booking", "Pets", "Maps", "Profile"];
+  const buttons = ["Calendar", "Booking", "ChatInbox", "Maps", "Profile"];
   const selectedIndex = buttons.indexOf(activeScreen);
   const accentBarWidth = width / buttons.length;
 
@@ -16,6 +16,8 @@ const BottomNavBar = ({ navigation, onNavigate, activeScreen }) => {
   const handleNavigation = (screen) => {
     if (screen === "Maps") {
       navigation.navigate("Maps");
+    } else if (screen === "ChatInbox") {
+      navigation.navigate("ChatInbox");
     } else {
       if (screen !== activeScreen) {
         onNavigate(screen);
@@ -43,10 +45,10 @@ const BottomNavBar = ({ navigation, onNavigate, activeScreen }) => {
         >
           <MaterialIcons
             name={getIconName(button)}
-            size={button === "Pets" ? 40 : 24}
+            size={button === "ChatInbox" ? 40 : 24}
             color={colors.primary}
           />
-          {button === "Pets" ? null : (
+          {button === "ChatInbox" ? null : (
             <Text style={styles.iconText}>{button}</Text>
           )}
         </TouchableOpacity>
@@ -62,8 +64,8 @@ const getIconName = (button) => {
       return "map";
     case "Calendar":
       return "event";
-    case "Pets":
-      return "pets";
+    case "ChatInbox":
+      return "sms";
     case "Booking":
       return "local-hospital";
     case "Profile":

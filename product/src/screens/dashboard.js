@@ -4,7 +4,6 @@ import { View, StyleSheet } from "react-native";
 import AppBar from "../components/AppBar";
 import BottomNavBar from "../components/BottomNavBar";
 import Calendar from "./calendar/calendar";
-import Pets from "./pets/pets";
 import Booking from "./pets/booking";
 import Profile from "./profile";
 
@@ -29,8 +28,6 @@ const Dashboard = ({ navigation, route }) => {
     switch (activeScreen) {
       case "Calendar":
         return <Calendar navigation={navigation} />;
-      case "Pets":
-        return <Pets navigation={navigation} />;
       case "Booking":
         return <Booking navigation={navigation} />;
       case "Profile":
