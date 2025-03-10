@@ -9,26 +9,28 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { MaterialIcons } from "@expo/vector-icons";
+import profile from "../../assets/profile.jpg";
+import logo from "../../assets/logo.png";
+import { colors } from "../styles/Theme";
 
-// Mock data for chats
 const chatInbox = [
   {
     id: "1",
-    name: "Alice Johnson",
-    lastMessage: "Hey! How's it going?",
-    avatar: "https://randomuser.me/api/portraits/women/1.jpg",
+    name: "KW bel",
+    lastMessage: "How you doing? mate",
+    avatar: profile,
   },
   {
     id: "2",
-    name: "Bob Smith",
-    lastMessage: "Let me know when you're free.",
-    avatar: "https://randomuser.me/api/portraits/men/2.jpg",
+    name: "Toe naing lin",
+    lastMessage: "How you doing? mate",
+    avatar: profile,
   },
   {
     id: "3",
-    name: "Charlie Brown",
-    lastMessage: "Awesome, thanks!",
-    avatar: "https://randomuser.me/api/portraits/men/3.jpg",
+    name: "Cherry",
+    lastMessage: "How you doing? mate",
+    avatar: profile,
   },
 ];
 
@@ -43,7 +45,7 @@ const ChatInbox = ({ navigation }) => {
         })
       }
     >
-      <Image source={{ uri: item.avatar }} style={styles.avatar} />
+      <Image source={item.avatar} style={styles.avatar} />
       <View style={styles.chatInfo}>
         <Text style={styles.chatName}>{item.name}</Text>
         <Text style={styles.lastMessage}>{item.lastMessage}</Text>
@@ -55,13 +57,13 @@ const ChatInbox = ({ navigation }) => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
+        <Image source={logo} style={styles.logo} />
         <Text style={styles.headerTitle}>Chats</Text>
       </View>
       <FlatList
         data={chatInbox}
         keyExtractor={(item) => item.id}
         renderItem={renderItem}
-        contentContainerStyle={styles.listContent}
       />
     </SafeAreaView>
   );
@@ -70,28 +72,32 @@ const ChatInbox = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f5f5f5",
+    backgroundColor: "white",
   },
   header: {
-    padding: 16,
-    backgroundColor: "#6200ee",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 7,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f0f0f0",
+  },
+  logo: {
+    width: 40,
+    height: 40,
+    marginRight: 5,
   },
   headerTitle: {
-    color: "#fff",
-    fontSize: 24,
+    color: colors.primary,
+    fontSize: 20,
     fontWeight: "bold",
-  },
-  listContent: {
-    padding: 8,
   },
   chatItem: {
     flexDirection: "row",
     alignItems: "center",
     padding: 12,
-    backgroundColor: "#fff",
-    marginBottom: 8,
-    borderRadius: 8,
-    elevation: 2,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f0f0f0",
   },
   avatar: {
     width: 50,
@@ -105,11 +111,12 @@ const styles = StyleSheet.create({
   chatName: {
     fontSize: 16,
     fontWeight: "bold",
+    color: colors.primary,
     marginBottom: 4,
   },
   lastMessage: {
     fontSize: 14,
-    color: "#666",
+    color: colors.primaryLight,
   },
 });
 export default ChatInbox;

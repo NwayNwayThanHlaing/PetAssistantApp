@@ -11,6 +11,7 @@ import * as Location from "expo-location";
 import axios from "axios";
 import { GOOGLE_MAPS_API_KEY } from "@env";
 import { MaterialIcons } from "@expo/vector-icons";
+import { colors } from "../styles/Theme";
 
 const Maps = ({ navigation }) => {
   const [location, setLocation] = useState(null);
@@ -108,13 +109,21 @@ const Maps = ({ navigation }) => {
         ))}
       </MapView>
       <TouchableOpacity style={styles.back} onPress={() => navigation.goBack()}>
-        <MaterialIcons name="arrow-back" size={24} color="black" />
+        <MaterialIcons name="arrow-back" size={20} color="white" />
       </TouchableOpacity>
+
       <TouchableOpacity
         style={styles.locationButton}
         onPress={centerMapOnUserLocation}
       >
-        <MaterialIcons name="my-location" size={24} color="white" />
+        <MaterialIcons name="my-location" size={25} color="white" />
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={styles.chatButton}
+        onPress={() => navigation.navigate("ChatInbox")}
+      >
+        <MaterialIcons name="chat" size={25} color="white" />
       </TouchableOpacity>
     </View>
   );
@@ -130,9 +139,22 @@ const styles = StyleSheet.create({
   },
   locationButton: {
     position: "absolute",
+    bottom: 100,
+    right: 20,
+    backgroundColor: colors.primary,
+    borderRadius: 30,
+    padding: 12,
+    elevation: 5,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.5,
+    shadowRadius: 2,
+  },
+  chatButton: {
+    position: "absolute",
     bottom: 40,
     right: 20,
-    backgroundColor: "blue",
+    backgroundColor: colors.accent,
     borderRadius: 30,
     padding: 12,
     elevation: 5,
@@ -145,11 +167,11 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 60,
     left: 20,
-    backgroundColor: "white",
+    backgroundColor: colors.primary,
     borderRadius: 30,
-    padding: 12,
+    padding: 7,
     elevation: 5,
-    shadowColor: "#000",
+    shadowColor: colors.primary,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.5,
     shadowRadius: 2,

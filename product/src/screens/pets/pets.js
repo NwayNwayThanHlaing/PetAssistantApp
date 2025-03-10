@@ -95,7 +95,10 @@ const Pets = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <TouchableOpacity onPress={() => navigation.goBack()}>
+      <TouchableOpacity
+        style={styles.goBack}
+        onPress={() => navigation.goBack()}
+      >
         <MaterialIcons name="arrow-back" size={24} color="black" />
       </TouchableOpacity>
       {pets.length === 0 ? (
@@ -124,7 +127,15 @@ const Pets = ({ navigation }) => {
           </TouchableOpacity>
         </>
       ) : (
-        <Text style={styles.header}>My Pets</Text>
+        <View style={styles.headContainer}>
+          <Text style={styles.header}>My Pets</Text>
+          <TouchableOpacity
+            style={styles.addButton}
+            onPress={() => navigation.navigate("AddPet")}
+          >
+            <Text style={styles.addButtonText}>+ Add</Text>
+          </TouchableOpacity>
+        </View>
       )}
       <FlatList
         data={pets}
@@ -133,12 +144,6 @@ const Pets = ({ navigation }) => {
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.listContainer}
       />
-      <TouchableOpacity
-        style={styles.addButton}
-        onPress={() => navigation.navigate("AddPet")}
-      >
-        <Text style={styles.addButtonText}>+ Add</Text>
-      </TouchableOpacity>
     </SafeAreaView>
   );
 };
@@ -146,15 +151,24 @@ const Pets = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingHorizontal: 15,
     paddingVertical: 10,
+  },
+  goBack: {
+    marginHorizontal: 10,
   },
   loadingContainer: {
     flex: 1,
+    marginHorizontal: 10,
     justifyContent: "center",
     alignItems: "center",
   },
-
+  headContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginVertical: 10,
+    marginHorizontal: 15,
+  },
   header: {
     fontSize: 20,
     fontWeight: "bold",
@@ -164,6 +178,7 @@ const styles = StyleSheet.create({
   },
   listContainer: {
     paddingBottom: 20,
+    marginHorizontal: 10,
   },
   petCard: {
     flexDirection: "row",
@@ -178,7 +193,7 @@ const styles = StyleSheet.create({
     padding: 10,
     marginHorizontal: 5,
     borderRadius: 15,
-    marginBottom: 15,
+    marginBottom: 10,
     justifyContent: "space-between",
   },
   petInfo: {
@@ -186,8 +201,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   avatar: {
-    width: 70,
-    height: 70,
+    width: 60,
+    height: 65,
     borderRadius: 15,
     marginRight: 15,
   },
@@ -202,12 +217,12 @@ const styles = StyleSheet.create({
   petBreed: {
     fontSize: 16,
     marginTop: 5,
-    color: colors.primary,
+    color: colors.primaryLight,
   },
   addButton: {
     backgroundColor: colors.accent,
-    padding: 10,
-    borderRadius: 15,
+    paddingVertical: 5,
+    borderRadius: 10,
     alignItems: "center",
     paddingHorizontal: 15,
   },

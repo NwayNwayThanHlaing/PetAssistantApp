@@ -18,7 +18,7 @@ const AppBar = ({ title }) => {
     <SafeAreaView style={AppBarStyles.safeArea}>
       <View style={AppBarStyles.container}>
         <View style={{ flexDirection: "row", alignItems: "center" }}>
-          <Image source={logo} style={{ width: 70, height: 70 }} />
+          <Image source={logo} style={{ width: 50, height: 50 }} />
           <Text style={AppBarStyles.title}>
             {title == "Home" ? "Purrnote" : title}
           </Text>
