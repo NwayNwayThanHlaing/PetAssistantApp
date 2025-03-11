@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import {
   View,
   Text,
+  Image,
   ActivityIndicator,
   StyleSheet,
   TouchableOpacity,
@@ -9,6 +10,8 @@ import {
 import MapView, { Marker } from "react-native-maps";
 import * as Location from "expo-location";
 import axios from "axios";
+import { collection, onSnapshot, doc, setDoc } from "firebase/firestore";
+import { auth, firestore } from "../auth/firebaseConfig";
 import { GOOGLE_MAPS_API_KEY } from "@env";
 import { MaterialIcons } from "@expo/vector-icons";
 import { colors } from "../styles/Theme";
@@ -16,8 +19,39 @@ import { colors } from "../styles/Theme";
 const Maps = ({ navigation }) => {
   const [location, setLocation] = useState(null);
   const [vets, setVets] = useState([]);
+  const [userMarkers, setUserMarkers] = useState([]);
   const [loading, setLoading] = useState(true);
   const mapRef = useRef(null);
+
+  useEffect(() => {
+    const usersRef = collection(firestore, "users");
+
+    const unsubscribe = onSnapshot(usersRef, (snapshot) => {
+      const locations = snapshot.docs
+        .map((doc) => {
+          const data = doc.data();
+          if (
+            data.location &&
+            data.location.latitude &&
+            data.location.longitude
+          ) {
+            return {
+              id: doc.id,
+              name: data.name,
+              latitude: data.location.latitude,
+              longitude: data.location.longitude,
+              profileImage: data.profileImage || "default",
+            };
+          }
+          return null;
+        })
+        .filter((user) => user !== null); // Remove null entries
+
+      setUserMarkers(locations);
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   useEffect(() => {
     (async () => {
@@ -31,6 +65,60 @@ const Maps = ({ navigation }) => {
       fetchVets(userLocation.coords);
     })();
   }, []);
+
+  useEffect(() => {
+    let subscriber = null;
+
+    const startLocationTracking = async () => {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        alert("Permission to access location was denied.");
+        return;
+      }
+
+      subscriber = await Location.watchPositionAsync(
+        {
+          accuracy: Location.Accuracy.High,
+          timeInterval: 5000, // Update every 5 seconds
+          distanceInterval: 10, // Or every 10 meters
+        },
+        async (location) => {
+          const coords = location.coords;
+          setLocation(coords); // Update local state for your map
+          await updateMyLocationInFirestore(coords); // Push location to Firestore
+        }
+      );
+    };
+
+    startLocationTracking();
+
+    return () => {
+      if (subscriber) {
+        subscriber.remove(); // Clean up on unmount
+      }
+    };
+  }, []);
+
+  const updateMyLocationInFirestore = async (coords) => {
+    try {
+      const userId = auth.currentUser.uid;
+      const userRef = doc(firestore, "users", userId);
+
+      await setDoc(
+        userRef,
+        {
+          location: {
+            latitude: coords.latitude,
+            longitude: coords.longitude,
+          },
+          updatedAt: new Date(),
+        },
+        { merge: true }
+      );
+    } catch (error) {
+      console.error("Error updating location in Firestore:", error);
+    }
+  };
 
   const fetchVets = async (coords) => {
     try {
@@ -56,8 +144,8 @@ const Maps = ({ navigation }) => {
         mapRef.current.animateToRegion({
           latitude: userLocation.coords.latitude,
           longitude: userLocation.coords.longitude,
-          latitudeDelta: 0.003,
-          longitudeDelta: 0.003,
+          latitudeDelta: 0.001,
+          longitudeDelta: 0.001,
         });
       }
     } catch (error) {
@@ -86,15 +174,6 @@ const Maps = ({ navigation }) => {
           longitudeDelta: 0.05,
         }}
       >
-        <Marker
-          coordinate={{
-            latitude: location.latitude,
-            longitude: location.longitude,
-          }}
-          title="You"
-          pinColor="blue"
-        />
-
         {vets.map((vet, index) => (
           <Marker
             key={index}
@@ -107,7 +186,29 @@ const Maps = ({ navigation }) => {
             pinColor="green"
           />
         ))}
+
+        {userMarkers.map((user) => (
+          <Marker
+            key={user.id}
+            coordinate={{
+              latitude: user.latitude,
+              longitude: user.longitude,
+            }}
+            title={user.name}
+            pinColor="red"
+          >
+            <Image
+              source={
+                user.profileImage === "default"
+                  ? require("../../assets/dog.png")
+                  : { uri: user.profileImage }
+              }
+              style={{ width: 40, height: 40, borderRadius: 20 }}
+            />
+          </Marker>
+        ))}
       </MapView>
+
       <TouchableOpacity style={styles.back} onPress={() => navigation.goBack()}>
         <MaterialIcons name="arrow-back" size={20} color="white" />
       </TouchableOpacity>
