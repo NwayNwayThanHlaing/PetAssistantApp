@@ -16,6 +16,7 @@ import NotificationsInbox from "./screens/calendar/notificationsInbox";
 import Maps from "./screens/maps";
 import Chat from "./screens/chat";
 import ChatInbox from "./screens/chatInbox";
+import FriendProfile from "./screens/friendProfile";
 
 const Stack = createNativeStackNavigator();
 
@@ -41,6 +42,7 @@ const MyStack = () => {
         <Stack.Screen name="SignUp" component={Signup} />
         <Stack.Screen name="Home" component={Home} />
         <Stack.Screen name="Maps" component={Maps} />
+        <Stack.Screen name="FriendProfile" component={FriendProfile} />
         <Stack.Screen name="ChatInbox" component={ChatInbox} />
         <Stack.Screen name="Chat" component={Chat} />
         <Stack.Screen name="ReminderPage" component={ReminderPage} />
