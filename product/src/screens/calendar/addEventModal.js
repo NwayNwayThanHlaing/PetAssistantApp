@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import Modal from "react-native-modal";
 import DateTimePicker from "@react-native-community/datetimepicker";
-// import DropDownPicker from "react-native-dropdown-picker";
+import DropDownPicker from "react-native-dropdown-picker";
 import { colors } from "../../styles/Theme";
 
 const AddEventModal = ({
@@ -25,10 +25,7 @@ const AddEventModal = ({
   addEvent,
   loading,
 }) => {
-  const [recurrence, setRecurrence] = useState("none");
-  const [endDate, setEndDate] = useState(null);
-  // const [open, setOpen] = useState(false);
-  // const [value, setValue] = useState(null);
+  const [open, setOpen] = useState(false);
   const resetNewEvent = () => {
     setNewEvent((prev) => ({
       title: prev.title || "",
@@ -99,7 +96,6 @@ const AddEventModal = ({
               onChangeText={(text) => handleTextInputChange("notes", text)}
               multiline
             />
-
             {/* Event Date */}
             <View style={styles.datePickerContainer}>
               <Text style={{ color: colors.primary }}>Event Date</Text>
@@ -151,6 +147,52 @@ const AddEventModal = ({
               />
             </View>
 
+            <Text style={styles.label}>Repeat</Text>
+            <DropDownPicker
+              open={open}
+              value={recurrence} // This reflects the current state
+              items={[
+                { label: "None", value: "none" },
+                { label: "Daily", value: "daily" },
+                { label: "Weekly", value: "weekly" },
+                { label: "Monthly", value: "monthly" },
+                { label: "Yearly", value: "yearly" },
+              ]}
+              setOpen={setOpen}
+              setValue={(val) => {
+                setRecurrence(val);
+                if (val === "none") {
+                  setEndDate(null);
+                }
+              }}
+              onChangeValue={(val) => {
+                setRecurrence(val);
+                if (val === "none") {
+                  setEndDate(null); // Optionally reset end date
+                }
+              }}
+              placeholder="Repeat"
+              style={styles.picker}
+              dropDownContainerStyle={styles.dropdownContainer}
+            />
+            {recurrence !== "none" && (
+              <Text style={{ color: colors.primaryLight, marginTop: 5 }}>
+                Repeats {recurrence}
+                {endDate ? ` until ${endDate.toDateString()}` : ""}
+              </Text>
+            )}
+            {recurrence !== "none" && (
+              <View style={styles.datePickerContainer}>
+                <Text style={{ color: colors.primary }}>End Date</Text>
+                <DateTimePicker
+                  mode="date"
+                  value={endDate || new Date()}
+                  onChange={(event, selectedDate) => {
+                    if (selectedDate) setEndDate(selectedDate);
+                  }}
+                />
+              </View>
+            )}
             {/* 
             // Recurrence and End Date
             <View>
@@ -190,7 +232,6 @@ const AddEventModal = ({
               )}
             </View>
             */}
-
             {/* Select Pets */}
             <Text style={styles.petsSelectionHeader}>Select Pets</Text>
             <View style={styles.petButtonsContainer}>
@@ -214,7 +255,6 @@ const AddEventModal = ({
                 </TouchableOpacity>
               ))}
             </View>
-
             {/* Appointment Checkbox */}
             <TouchableOpacity
               style={styles.checkboxContainer}
@@ -326,6 +366,19 @@ const styles = StyleSheet.create({
   //   borderRadius: 8,
   //   marginBottom: 10,
   // },
+  picker: {
+    backgroundColor: colors.background,
+    borderColor: colors.primaryLightest,
+    borderRadius: 8,
+    marginBottom: 10,
+    zIndex: 1000,
+  },
+  dropdownContainer: {
+    backgroundColor: colors.background,
+    borderColor: colors.primaryLightest,
+    borderRadius: 8,
+    zIndex: 1000,
+  },
   buttonContainer: {
     flexDirection: "row",
     justifyContent: "space-between",

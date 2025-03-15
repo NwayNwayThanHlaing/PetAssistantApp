@@ -26,6 +26,7 @@ import EventModal from "./updateEventModal";
 import AddEventModal from "./addEventModal";
 import { Picker } from "@react-native-picker/picker";
 import Svg, { Path } from "react-native-svg";
+import { end } from "@cloudinary/url-gen/qualifiers/textAlignment";
 
 const CalendarPage = () => {
   const navigation = useNavigation();
@@ -229,6 +230,8 @@ const CalendarPage = () => {
         date: formattedDate,
         pets: selectedPets,
         read: false,
+        recurrence: newEvent.recurrence || "none",
+        endDate: newEvent.endDate || null,
       };
 
       const docId = await addEvent(updatedEvent, selectedPets);
@@ -249,6 +252,8 @@ const CalendarPage = () => {
         notes: "",
         read: false,
         pets: [],
+        recurrence: "none",
+        endDate: null,
       });
       setSelectedPets([]);
     }

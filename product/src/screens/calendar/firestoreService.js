@@ -63,13 +63,50 @@ export const fetchEvents = async () => {
   }
 };
 
+// export const addEvent = async (newEvent, selectedPets) => {
+//   try {
+//     // Get the user ID
+//     const userId = getUserId();
+//     const eventRef = collection(firestore, "users", userId, "events");
+
+//     // Ensure date and time values are properly provided
+//     const dateTime = newEvent.time instanceof Date ? newEvent.time : new Date();
+
+//     const hours = dateTime.getHours();
+//     const minutes = dateTime.getMinutes();
+
+//     // Validate the selectedDate format (ensure it's 'YYYY-MM-DD')
+//     if (!/^\d{4}-\d{2}-\d{2}$/.test(newEvent.date)) {
+//       throw new Error("Invalid date format. Expected 'YYYY-MM-DD'.");
+//     }
+
+//     // Add the new event to Firestore
+//     const docRef = await addDoc(eventRef, {
+//       title: newEvent.title?.trim() || "Untitled Event",
+//       time: { hours, minutes },
+//       notes: newEvent.notes?.trim() || "",
+//       relatedPets: Array.isArray(selectedPets) ? selectedPets : [],
+//       date: newEvent.date,
+//       appointment: newEvent.appointment || false,
+//       createdAt: Timestamp.now(),
+//       updatedAt: Timestamp.now(),
+//       read: false,
+//     });
+
+//     return docRef.id; // Return the document ID for further use
+//   } catch (error) {
+//     console.error("Error adding event to Firestore: ", error);
+//     throw error;
+//   }
+// };
+
 export const addEvent = async (newEvent, selectedPets) => {
   try {
     // Get the user ID
     const userId = getUserId();
     const eventRef = collection(firestore, "users", userId, "events");
 
-    // Ensure date and time values are properly provided
+    // Ensure time values are properly provided
     const dateTime = newEvent.time instanceof Date ? newEvent.time : new Date();
 
     const hours = dateTime.getHours();
@@ -80,22 +117,33 @@ export const addEvent = async (newEvent, selectedPets) => {
       throw new Error("Invalid date format. Expected 'YYYY-MM-DD'.");
     }
 
+    // Prepare recurrence and endDate
+    const recurrence = newEvent.recurrence || "none";
+    const endDate = newEvent.endDate
+      ? newEvent.endDate instanceof Date
+        ? Timestamp.fromDate(newEvent.endDate)
+        : Timestamp.fromDate(new Date(newEvent.endDate)) // handles string date
+      : null;
+
     // Add the new event to Firestore
     const docRef = await addDoc(eventRef, {
       title: newEvent.title?.trim() || "Untitled Event",
+      date: newEvent.date,
       time: { hours, minutes },
       notes: newEvent.notes?.trim() || "",
       relatedPets: Array.isArray(selectedPets) ? selectedPets : [],
-      date: newEvent.date,
       appointment: newEvent.appointment || false,
+      recurrence: newEvent.recurrence || "none",
+      endDate: newEvent.endDate || null,
       createdAt: Timestamp.now(),
       updatedAt: Timestamp.now(),
       read: false,
     });
 
-    return docRef.id; // Return the document ID for further use
+    console.log("Event added successfully with ID:", docRef.id);
+    return docRef.id;
   } catch (error) {
-    console.error("Error adding event to Firestore: ", error);
+    console.error("Error adding event to Firestore:", error);
     throw error;
   }
 };
