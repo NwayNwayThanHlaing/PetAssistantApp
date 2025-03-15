@@ -208,6 +208,12 @@ const NotificationsInbox = ({ navigation }) => {
         </>
       ) : (
         <>
+          <TouchableOpacity
+            style={styles.back}
+            onPress={() => navigation.goBack()}
+          >
+            <Text style={styles.backText}>Back</Text>
+          </TouchableOpacity>
           <Text style={styles.header}>Notifications</Text>
           <FlatList
             data={notifications}
@@ -288,6 +294,13 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     backgroundColor: colors.accent,
     marginLeft: 10,
+  },
+  back: {
+    paddingLeft: 15,
+    paddingVertical: 5,
+  },
+  backText: {
+    color: colors.accent,
   },
 });
 
