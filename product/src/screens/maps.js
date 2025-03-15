@@ -197,7 +197,7 @@ const Maps = ({ navigation }) => {
             title={user.name}
             pinColor="red"
             onPress={() =>
-              navigation.navigate("FriendProfile", {
+              navigation.navigate("Wall", {
                 userId: user.id,
                 userName: user.name,
                 userImage: user.profileImage,

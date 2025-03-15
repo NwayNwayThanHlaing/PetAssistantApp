@@ -10,12 +10,15 @@ import {
   ActivityIndicator,
   Alert,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import * as ImagePicker from "expo-image-picker";
 import { firestore, auth } from "../auth/firebaseConfig";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
+import { colors } from "../styles/Theme";
+import { MaterialIcons } from "@expo/vector-icons";
 
 const MAX_IMAGES = 9;
-const MAX_STATUS_LENGTH = 300;
+const MAX_STATUS_LENGTH = 100;
 
 const CreatePost = ({ navigation }) => {
   const [status, setStatus] = useState("");
@@ -138,9 +141,11 @@ const CreatePost = ({ navigation }) => {
   };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
+      <TouchableOpacity style={styles.back} onPress={() => navigation.goBack()}>
+        <Text style={{ color: colors.accent }}>Back</Text>
+      </TouchableOpacity>
       <Text style={styles.title}>Create New Post</Text>
-
       <TextInput
         style={styles.input}
         placeholder="What's on your mind?"
@@ -155,13 +160,11 @@ const CreatePost = ({ navigation }) => {
       <Text style={styles.counter}>
         {status.length} / {MAX_STATUS_LENGTH}
       </Text>
-
       <TouchableOpacity style={styles.imagePickerButton} onPress={pickImages}>
         <Text style={styles.imagePickerText}>
           Pick Images ({images.length}/{MAX_IMAGES})
         </Text>
       </TouchableOpacity>
-
       <FlatList
         data={images}
         keyExtractor={(item, index) => index.toString()}
@@ -179,15 +182,14 @@ const CreatePost = ({ navigation }) => {
         )}
         contentContainerStyle={styles.previewList}
       />
-
       {uploading ? (
-        <ActivityIndicator size="large" color="#6200ee" />
+        <ActivityIndicator size="large" color={colors.accent} />
       ) : (
         <TouchableOpacity style={styles.postButton} onPress={handlePost}>
           <Text style={styles.postButtonText}>Post</Text>
         </TouchableOpacity>
       )}
-    </View>
+    </SafeAreaView>
   );
 };
 
@@ -197,10 +199,14 @@ const styles = StyleSheet.create({
     padding: 20,
     backgroundColor: "#f5f5f5",
   },
+  back: {
+    marginBottom: 20,
+  },
   title: {
-    fontSize: 24,
+    fontSize: 18,
     fontWeight: "bold",
     marginBottom: 16,
+    color: colors.primary,
   },
   input: {
     backgroundColor: "#fff",
@@ -216,15 +222,18 @@ const styles = StyleSheet.create({
     color: "#777",
   },
   imagePickerButton: {
-    backgroundColor: "#6200ee",
+    borderColor: colors.accent,
+    borderWidth: 2,
+    backgroundColor: colors.background,
     padding: 12,
     borderRadius: 8,
     alignItems: "center",
     marginBottom: 16,
   },
   imagePickerText: {
-    color: "#fff",
+    color: colors.accent,
     fontSize: 16,
+    fontWeight: "bold",
   },
   previewList: {
     marginBottom: 16,
@@ -254,14 +263,14 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   postButton: {
-    backgroundColor: "#03dac5",
+    backgroundColor: colors.accent,
     padding: 16,
-    borderRadius: 8,
+    borderRadius: 10,
     alignItems: "center",
   },
   postButtonText: {
     color: "#fff",
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: "bold",
   },
 });

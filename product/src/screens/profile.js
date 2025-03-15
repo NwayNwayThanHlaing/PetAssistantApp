@@ -103,6 +103,12 @@ const Profile = ({ navigation }) => {
       setEditModalVisible(true);
     } else if (title === "Your Pets") {
       navigation.push("Pets");
+    } else if (title === "Your Posts") {
+      navigation.push("Wall", {
+        userId: user.uid,
+        userName: user.name,
+        userImage: user.profileImage,
+      });
     }
   };
 
