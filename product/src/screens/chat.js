@@ -221,6 +221,16 @@ const Chat = ({ route, navigation }) => {
               {item.text}
             </Text>
             {item.editedAt && <Text style={styles.editedLabel}>(edited)</Text>}
+
+            {/* Time */}
+            {item.createdAt && (
+              <Text style={isMe ? styles.myTimeLabel : styles.theirTimeLabel}>
+                {item.createdAt.toDate().toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+              </Text>
+            )}
           </>
         )}
       </TouchableOpacity>
@@ -282,7 +292,11 @@ const Chat = ({ route, navigation }) => {
                     setEditedMessageText("");
                   }}
                 >
-                  <MaterialIcons name="close" size={20} color="#999" />
+                  <MaterialIcons
+                    name="close"
+                    size={20}
+                    color={colors.primary}
+                  />
                 </TouchableOpacity>
               </View>
 
@@ -447,7 +461,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 8,
     borderRadius: 20,
-    color: "#333",
+    color: colors.primaryLight,
+  },
+  myTimeLabel: {
+    fontSize: 9,
+    color: colors.background,
+    marginTop: 2,
+    alignSelf: "flex-end",
+  },
+  theirTimeLabel: {
+    fontSize: 9,
+    color: colors.primaryLight,
+    marginTop: 2,
+    alignSelf: "flex-start",
   },
   saveButton: {
     backgroundColor: colors.accent,
