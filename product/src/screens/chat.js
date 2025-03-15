@@ -410,8 +410,7 @@ const styles = StyleSheet.create({
   },
   friendName: {
     color: colors.primary,
-    fontSize: 18,
-    fontWeight: "bold",
+    fontSize: 16,
   },
   editingInputContainer: {
     padding: 10,

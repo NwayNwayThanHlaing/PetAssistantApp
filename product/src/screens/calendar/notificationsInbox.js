@@ -18,6 +18,7 @@ import {
   updateEventReadStatus,
 } from "../../actions/userActions";
 import * as Notifications from "expo-notifications";
+import { MaterialIcons } from "@expo/vector-icons";
 
 const NotificationsInbox = ({ navigation }) => {
   const [notifications, setNotifications] = useState([]);
@@ -212,7 +213,11 @@ const NotificationsInbox = ({ navigation }) => {
             style={styles.back}
             onPress={() => navigation.goBack()}
           >
-            <Text style={styles.backText}>Back</Text>
+            <MaterialIcons
+              name="arrow-back-ios"
+              size={16}
+              color={colors.primary}
+            />
           </TouchableOpacity>
           <Text style={styles.header}>Notifications</Text>
           <FlatList
@@ -298,9 +303,6 @@ const styles = StyleSheet.create({
   back: {
     paddingLeft: 15,
     paddingVertical: 5,
-  },
-  backText: {
-    color: colors.accent,
   },
 });
 
