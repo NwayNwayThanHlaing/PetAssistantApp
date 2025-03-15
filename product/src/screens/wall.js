@@ -74,7 +74,11 @@ const Wall = ({ navigation, route }) => {
   };
 
   const startChat = () => {
-    navigation.navigate("ChatInbox", { chatId: userId, chatName: userName });
+    navigation.navigate("ChatInbox", {
+      chatId: userId,
+      chatName: userName,
+      userImage: userImage,
+    });
   };
 
   const handleDeletePost = (postId) => {
