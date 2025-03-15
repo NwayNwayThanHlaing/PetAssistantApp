@@ -41,10 +41,12 @@ const Profile = ({ navigation }) => {
   const defaultProfileImage = profile;
 
   const settingsOptions = [
-    { id: "1", title: "Edit Profile", icon: "image" },
-    { id: "2", title: "Change Password", icon: "lock" },
-    { id: "3", title: "Log Out", icon: "logout" },
-    { id: "4", title: "Delete Account", icon: "delete" },
+    { id: "1", title: "Your Posts", icon: "photo" },
+    { id: "2", title: "Your Pets", icon: "pets" },
+    { id: "3", title: "Edit Profile", icon: "person" },
+    { id: "4", title: "Reset Password", icon: "lock" },
+    { id: "5", title: "Delete Account", icon: "delete" },
+    { id: "6", title: "Log Out", icon: "logout" },
   ];
 
   // Function to get profile image source and set fallback image if not available
@@ -95,10 +97,18 @@ const Profile = ({ navigation }) => {
       handleSignOut(navigation, user.uid);
     } else if (title === "Delete Account") {
       handleDeleteAccount(navigation);
-    } else if (title === "Change Password") {
+    } else if (title === "Reset Password") {
       setModalVisible(true);
     } else if (title === "Edit Profile") {
       setEditModalVisible(true);
+    } else if (title === "Your Pets") {
+      navigation.push("Pets");
+    } else if (title === "Your Posts") {
+      navigation.push("Wall", {
+        userId: user.uid,
+        userName: user.name,
+        userImage: user.profileImage,
+      });
     }
   };
 
@@ -246,12 +256,13 @@ const Profile = ({ navigation }) => {
             style={styles.settingItem}
             onPress={() => handleSettingPress(item.title)}
           >
-            <MaterialIcons name={item.icon} size={24} color={colors.primary} />
+            <MaterialIcons name={item.icon} size={28} color={colors.primary} />
             <Text style={styles.settingText}>{item.title}</Text>
           </TouchableOpacity>
         )}
         keyExtractor={(item) => item.id}
-        style={styles.settingsList}
+        numColumns={2}
+        alignItems="center"
         scrollEnabled={false}
       />
 
@@ -264,7 +275,7 @@ const Profile = ({ navigation }) => {
       >
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Change Password</Text>
+            <Text style={styles.modalTitle}>Reset Password</Text>
             <TextInput
               style={styles.input}
               placeholder="Current Password"
@@ -378,7 +389,8 @@ const Profile = ({ navigation }) => {
 const styles = StyleSheet.create({
   scrollContainer: {
     flexGrow: 1,
-    padding: 20,
+    padding: 15,
+    paddingBottom: 90,
   },
   loadingContainer: {
     flex: 1,
@@ -408,24 +420,24 @@ const styles = StyleSheet.create({
   email: {
     fontSize: 18,
     textAlign: "center",
-    color: colors.secondary,
+    color: colors.primaryLight,
     marginBottom: 30,
   },
-  settingsList: {
-    marginTop: 10,
-  },
+
   settingItem: {
-    flexDirection: "row",
+    width: "48%",
+    marginHorizontal: 5,
+    flexDirection: "column",
     alignItems: "center",
-    paddingVertical: 15,
+    paddingVertical: 20,
     paddingHorizontal: 10,
     backgroundColor: colors.primaryLightest,
     borderRadius: 10,
-    marginBottom: 10,
+    marginBottom: 15,
   },
   settingText: {
-    marginLeft: 10,
-    fontSize: 18,
+    marginTop: 10,
+    fontSize: 16,
     color: colors.primary,
   },
   modalContainer: {

@@ -6,16 +6,22 @@ import { BottomNavBarStyles as styles } from "../styles/GlobalStyles";
 
 const { width } = Dimensions.get("window");
 
-const BottomNavBar = ({ onNavigate, activeScreen }) => {
+const BottomNavBar = ({ navigation, onNavigate, activeScreen }) => {
   // List of buttons for the Bottom Navigation Bar
-  const buttons = ["Home", "Calendar", "Pets", "Booking", "Profile"];
+  const buttons = ["Calendar", "Booking", "ChatInbox", "Maps", "Profile"];
   const selectedIndex = buttons.indexOf(activeScreen);
   const accentBarWidth = width / buttons.length;
 
   // Handle the navigation and call the parent onNavigate function
   const handleNavigation = (screen) => {
-    if (screen !== activeScreen) {
-      onNavigate(screen);
+    if (screen === "Maps") {
+      navigation.navigate("Maps");
+    } else if (screen === "ChatInbox") {
+      navigation.navigate("ChatInbox");
+    } else {
+      if (screen !== activeScreen) {
+        onNavigate(screen);
+      }
     }
   };
 
@@ -39,10 +45,10 @@ const BottomNavBar = ({ onNavigate, activeScreen }) => {
         >
           <MaterialIcons
             name={getIconName(button)}
-            size={button === "Pets" ? 40 : 24}
+            size={button === "ChatInbox" ? 40 : 24}
             color={colors.primary}
           />
-          {button === "Pets" ? null : (
+          {button === "ChatInbox" ? null : (
             <Text style={styles.iconText}>{button}</Text>
           )}
         </TouchableOpacity>
@@ -54,12 +60,12 @@ const BottomNavBar = ({ onNavigate, activeScreen }) => {
 // Function to map button names to MaterialIcons icons
 const getIconName = (button) => {
   switch (button) {
-    case "Home":
-      return "home";
+    case "Maps":
+      return "map";
     case "Calendar":
       return "event";
-    case "Pets":
-      return "pets";
+    case "ChatInbox":
+      return "sms";
     case "Booking":
       return "local-hospital";
     case "Profile":

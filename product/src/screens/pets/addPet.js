@@ -126,10 +126,10 @@ const AddPet = ({ navigation }) => {
 
   return (
     <KeyboardAvoidingView
-      style={{ flex: 1 }}
+      style={styles.container}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
-      <ScrollView contentContainerStyle={styles.container}>
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
         <TouchableOpacity
           style={styles.back}
           onPress={() => navigation.goBack()}
@@ -182,7 +182,6 @@ const AddPet = ({ navigation }) => {
           }}
         />
         {ageError ? <Text style={styles.errorText}>{ageError}</Text> : null}
-
         <TextInput
           style={styles.input}
           placeholder="Weight (kg)"
@@ -202,7 +201,6 @@ const AddPet = ({ navigation }) => {
         {weightError ? (
           <Text style={styles.errorText}>{weightError}</Text>
         ) : null}
-
         <TextInput
           style={styles.input}
           placeholder="Color"

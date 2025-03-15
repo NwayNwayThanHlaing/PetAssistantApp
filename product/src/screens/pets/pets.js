@@ -8,6 +8,7 @@ import {
   StyleSheet,
   ActivityIndicator,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { colors } from "../../styles/Theme";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import { firestore, auth } from "../../auth/firebaseConfig";
@@ -93,7 +94,13 @@ const Pets = ({ navigation }) => {
   }
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
+      <TouchableOpacity
+        style={styles.goBack}
+        onPress={() => navigation.goBack()}
+      >
+        <MaterialIcons name="arrow-back-ios" size={24} color={colors.primary} />
+      </TouchableOpacity>
       {pets.length === 0 ? (
         <>
           <Image
@@ -115,27 +122,12 @@ const Pets = ({ navigation }) => {
           >
             No pets found! {"\n"} Add a pet to get started.
           </Text>
-          <TouchableOpacity
-            style={[
-              styles.addButton,
-              {
-                paddingVertical: 15,
-                marginTop: 40,
-              },
-            ]}
-            onPress={() => navigation.navigate("AddPet")}
-          >
+          <TouchableOpacity onPress={() => navigation.navigate("AddPet")}>
             <Text style={styles.addButtonText}>Add a Pet</Text>
           </TouchableOpacity>
         </>
       ) : (
-        <View
-          style={{
-            flexDirection: "row",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-        >
+        <View style={styles.headContainer}>
           <Text style={styles.header}>My Pets</Text>
           <TouchableOpacity
             style={styles.addButton}
@@ -152,29 +144,41 @@ const Pets = ({ navigation }) => {
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.listContainer}
       />
-    </View>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingHorizontal: 15,
     paddingVertical: 10,
+  },
+  goBack: {
+    paddingLeft: 15,
   },
   loadingContainer: {
     flex: 1,
+    marginHorizontal: 10,
     justifyContent: "center",
     alignItems: "center",
+  },
+  headContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginVertical: 10,
+    marginHorizontal: 15,
   },
   header: {
     fontSize: 20,
     fontWeight: "bold",
-    paddingVertical: 10,
+    paddingVertical: 2,
     color: colors.primary,
+    textAlign: "center",
   },
   listContainer: {
     paddingBottom: 20,
+    marginHorizontal: 10,
   },
   petCard: {
     flexDirection: "row",
@@ -189,7 +193,7 @@ const styles = StyleSheet.create({
     padding: 10,
     marginHorizontal: 5,
     borderRadius: 15,
-    marginBottom: 15,
+    marginBottom: 10,
     justifyContent: "space-between",
   },
   petInfo: {
@@ -197,8 +201,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   avatar: {
-    width: 70,
-    height: 70,
+    width: 60,
+    height: 65,
     borderRadius: 15,
     marginRight: 15,
   },
@@ -213,11 +217,11 @@ const styles = StyleSheet.create({
   petBreed: {
     fontSize: 16,
     marginTop: 5,
-    color: colors.primary,
+    color: colors.primaryLight,
   },
   addButton: {
     backgroundColor: colors.accent,
-    padding: 5,
+    paddingVertical: 5,
     borderRadius: 10,
     alignItems: "center",
     paddingHorizontal: 15,

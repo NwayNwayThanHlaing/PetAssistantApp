@@ -12,20 +12,19 @@ import { AppBarStyles } from "../styles/GlobalStyles";
 import { colors } from "../styles/Theme";
 import logo from "../../assets/logo.png";
 
-const AppBar = ({ title, onLogOut }) => {
+const AppBar = ({ title }) => {
   const navigation = useNavigation();
   return (
     <SafeAreaView style={AppBarStyles.safeArea}>
       <View style={AppBarStyles.container}>
         <View style={{ flexDirection: "row", alignItems: "center" }}>
-          <Image source={logo} style={{ width: 70, height: 70 }} />
+          <Image source={logo} style={{ width: 50, height: 50 }} />
           <Text style={AppBarStyles.title}>
             {title == "Home" ? "Purrnote" : title}
           </Text>
         </View>
         <TouchableOpacity
-          style={AppBarStyles.logoutButton}
-          onPress={() => navigation.navigate("Notification")}
+          onPress={() => navigation.navigate("NotificationsInbox")}
         >
           <MaterialIcons
             name="notifications"

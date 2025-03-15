@@ -90,6 +90,7 @@ export const addEvent = async (newEvent, selectedPets) => {
       appointment: newEvent.appointment || false,
       createdAt: Timestamp.now(),
       updatedAt: Timestamp.now(),
+      read: false,
     });
 
     return docRef.id; // Return the document ID for further use

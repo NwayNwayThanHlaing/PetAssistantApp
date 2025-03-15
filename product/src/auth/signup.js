@@ -45,6 +45,10 @@ const Signup = ({ navigation }) => {
         name: name,
         email: email,
         profileImage: "default",
+        location: {
+          latitude: 0,
+          longitude: 0,
+        },
       };
 
       await setDoc(doc(firestore, "users", user.uid), userData);

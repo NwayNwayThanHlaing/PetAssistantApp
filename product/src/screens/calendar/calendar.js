@@ -134,6 +134,17 @@ const CalendarPage = () => {
     }
   }, [selectedDate]);
 
+  useEffect(() => {
+    // Check if navigation came from Notifications and set the selected date
+    if (route.params?.selectedDate) {
+      setSelectedDate(route.params.selectedDate);
+    } else {
+      // Default to today's date if no selectedDate is provided
+      const today = new Date().toISOString().split("T")[0];
+      setSelectedDate(today);
+    }
+  }, [route.params?.selectedDate]);
+
   // Prepare marked dates for the calendar
   const prepareMarkedDates = () => {
     const newMarkedDates = {};
@@ -211,22 +222,22 @@ const CalendarPage = () => {
 
     setLoading(true);
     try {
-      const docId = await addEvent(newEvent, selectedPets);
+      const formattedDate = new Date(selectedDate).toISOString().split("T")[0];
 
       const updatedEvent = {
         ...newEvent,
-        date: selectedDate,
+        date: formattedDate,
         pets: selectedPets,
-        id: docId,
+        read: false,
       };
 
-      setEvents((prevEvents) => {
-        const newEvents = {
-          ...prevEvents,
-          [selectedDate]: [...(prevEvents[selectedDate] || []), updatedEvent],
-        };
-        return newEvents;
-      });
+      const docId = await addEvent(updatedEvent, selectedPets);
+      updatedEvent.id = docId;
+
+      setEvents((prevEvents) => ({
+        ...prevEvents,
+        [formattedDate]: [...(prevEvents[formattedDate] || []), updatedEvent],
+      }));
     } catch (error) {
       console.error("Error adding event:", error);
     } finally {
@@ -236,6 +247,7 @@ const CalendarPage = () => {
         title: "",
         time: { hours: 0, minutes: 0 },
         notes: "",
+        read: false,
         pets: [],
       });
       setSelectedPets([]);

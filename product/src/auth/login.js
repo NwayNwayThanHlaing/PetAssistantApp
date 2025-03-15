@@ -17,7 +17,6 @@ import { auth } from "./firebaseConfig";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import logo from "../../assets/logo.png";
 import AuthStyles from "../styles/AuthStyles";
-import { registerIndieID, unregisterIndieDevice } from "native-notify";
 
 const Login = ({ navigation }) => {
   const [email, setEmail] = useState("");
@@ -30,11 +29,6 @@ const Login = ({ navigation }) => {
     try {
       await signInWithEmailAndPassword(auth, email, password);
       Alert.alert("Success", "You have successfully logged in!");
-      await registerIndieID(
-        auth.currentUser.uid,
-        25248,
-        "wtOK6Mg9wWTJpjgjr1qH0v"
-      );
 
       navigation.reset({
         index: 0,

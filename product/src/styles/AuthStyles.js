@@ -5,7 +5,7 @@ const AuthStyles = StyleSheet.create({
   // logo image
   container: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: "white",
   },
   logoContainer: {
     backgroundColor: colors.primaryLightest,
@@ -17,16 +17,15 @@ const AuthStyles = StyleSheet.create({
     paddingTop: 30,
   },
   logo: {
-    width: 90,
-    height: 90,
+    width: 110,
+    height: 110,
     resizeMode: "contain",
   },
   // logo title
   title: {
-    fontSize: 24,
+    fontSize: 18,
     fontWeight: "bold",
     color: colors.primary,
-    fontFamily: "NerkoOne-Regular",
   },
   // form container
   formContainer: {
@@ -49,7 +48,7 @@ const AuthStyles = StyleSheet.create({
     borderRadius: 10,
     paddingHorizontal: 15,
     marginBottom: 20,
-    backgroundColor: colors.primaryLightest,
+    backgroundColor: colors.light,
     fontSize: 18,
   },
   button: {

@@ -1,23 +1,23 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useCallback } from "react";
+import { useFocusEffect } from "@react-navigation/native";
 import { View, StyleSheet } from "react-native";
 import AppBar from "../components/AppBar";
 import BottomNavBar from "../components/BottomNavBar";
-import Home from "./home";
 import Calendar from "./calendar/calendar";
-import Pets from "./pets/pets";
 import Booking from "./pets/booking";
 import Profile from "./profile";
 
 const Dashboard = ({ navigation, route }) => {
   const { initialScreen } = route.params || {};
-  const [activeScreen, setActiveScreen] = useState(initialScreen || "Home");
+  const [activeScreen, setActiveScreen] = useState(initialScreen || "Calendar");
 
-  // Update the activeScreen when the initialScreen changes
-  useEffect(() => {
-    if (initialScreen) {
-      setActiveScreen(initialScreen);
-    }
-  }, [initialScreen]);
+  useFocusEffect(
+    useCallback(() => {
+      if (initialScreen) {
+        setActiveScreen(initialScreen);
+      }
+    }, [initialScreen])
+  );
 
   const handleNavigation = (screen) => {
     setActiveScreen(screen);
@@ -26,18 +26,14 @@ const Dashboard = ({ navigation, route }) => {
   // Render the active screen dynamically
   const renderScreen = () => {
     switch (activeScreen) {
-      case "Home":
-        return <Home navigation={navigation} />;
       case "Calendar":
         return <Calendar navigation={navigation} />;
-      case "Pets":
-        return <Pets navigation={navigation} />;
       case "Booking":
         return <Booking navigation={navigation} />;
       case "Profile":
         return <Profile navigation={navigation} />;
       default:
-        return <Home navigation={navigation} />;
+        return <Calendar navigation={navigation} />;
     }
   };
 
