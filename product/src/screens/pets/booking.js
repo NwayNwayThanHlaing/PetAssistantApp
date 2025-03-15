@@ -375,7 +375,7 @@ const styles = StyleSheet.create({
   },
   appointmentContainer: {
     padding: 15,
-    backgroundColor: "white",
+    backgroundColor: colors.light,
     borderWidth: 1,
     borderColor: colors.primaryLightest,
     flexDirection: "row",

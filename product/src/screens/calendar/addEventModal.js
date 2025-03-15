@@ -294,7 +294,8 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   input: {
-    backgroundColor: colors.background,
+    borderColor: colors.primaryLightest,
+    borderWidth: 1,
     padding: 12,
     borderRadius: 8,
     marginBottom: 10,

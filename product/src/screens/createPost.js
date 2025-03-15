@@ -219,11 +219,11 @@ const styles = StyleSheet.create({
   counter: {
     textAlign: "right",
     marginBottom: 16,
-    color: "#777",
+    color: colors.primaryLight,
   },
   imagePickerButton: {
     borderColor: colors.accent,
-    borderWidth: 2,
+    borderWidth: 1,
     backgroundColor: colors.background,
     padding: 12,
     borderRadius: 8,
@@ -233,7 +233,6 @@ const styles = StyleSheet.create({
   imagePickerText: {
     color: colors.accent,
     fontSize: 16,
-    fontWeight: "bold",
   },
   previewList: {
     marginBottom: 16,

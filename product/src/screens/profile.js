@@ -420,7 +420,7 @@ const styles = StyleSheet.create({
   email: {
     fontSize: 18,
     textAlign: "center",
-    color: colors.secondary,
+    color: colors.primaryLight,
     marginBottom: 30,
   },
 

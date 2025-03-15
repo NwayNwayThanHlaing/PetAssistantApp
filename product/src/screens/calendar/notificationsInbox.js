@@ -183,42 +183,40 @@ const NotificationsInbox = ({ navigation }) => {
   );
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
-      <View style={styles.container}>
-        {notifications.length === 0 ? (
-          <>
-            <Image
-              source={nothing}
-              style={{
-                width: 150,
-                height: 150,
-                alignSelf: "center",
-                marginTop: 100,
-                marginBottom: 30,
-              }}
-            />
-            <Text
-              style={{
-                fontSize: 18,
-                color: colors.secondary,
-                textAlign: "center",
-              }}
-            >
-              No notifications found! {"\n"} You're all caught up.
-            </Text>
-          </>
-        ) : (
-          <>
-            <Text style={styles.header}>Notifications</Text>
-            <FlatList
-              data={notifications}
-              renderItem={renderNotificationItem}
-              keyExtractor={(item) => item.id}
-              contentContainerStyle={styles.listContainer}
-            />
-          </>
-        )}
-      </View>
+    <SafeAreaView style={styles.container}>
+      {notifications.length === 0 ? (
+        <>
+          <Image
+            source={nothing}
+            style={{
+              width: 150,
+              height: 150,
+              alignSelf: "center",
+              marginTop: 100,
+              marginBottom: 30,
+            }}
+          />
+          <Text
+            style={{
+              fontSize: 18,
+              color: colors.secondary,
+              textAlign: "center",
+            }}
+          >
+            No notifications found! {"\n"} You're all caught up.
+          </Text>
+        </>
+      ) : (
+        <>
+          <Text style={styles.header}>Notifications</Text>
+          <FlatList
+            data={notifications}
+            renderItem={renderNotificationItem}
+            keyExtractor={(item) => item.id}
+            contentContainerStyle={styles.listContainer}
+          />
+        </>
+      )}
     </SafeAreaView>
   );
 };
@@ -264,6 +262,8 @@ const styles = StyleSheet.create({
   },
   readNotification: {
     opacity: 0.7,
+    borderWidth: 1,
+    borderColor: colors.primaryLightest,
   },
   unreadNotification: {
     borderLeftWidth: 5,

@@ -3,7 +3,8 @@ export const colors = {
   primaryLight: "#4B4947A1",
   primaryLighter: "#888888",
   primaryLightest: "#E0E0E0",
-  background: "#F4F3F3", // Light background color
+  background: "#fff",
+  light: "#f2f2f2",
   accent: "#EC7A5C",
   error: "#f44336", // Error color
   success: "#4CAF50", // Success color
