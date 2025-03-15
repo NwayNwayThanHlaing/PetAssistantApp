@@ -122,6 +122,9 @@ const ChatInbox = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.container}>
+      <TouchableOpacity style={styles.back} onPress={() => navigation.goBack()}>
+        <Text style={styles.backText}>Back</Text>
+      </TouchableOpacity>
       <View style={styles.header}>
         <Image source={require("../../assets/logo.png")} style={styles.logo} />
         <Text style={styles.headerTitle}>Chats</Text>
@@ -151,10 +154,15 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 10,
+    paddingBottom: 10,
     borderBottomWidth: 1,
     borderBottomColor: colors.primaryLightest,
   },
+  back: {
+    paddingLeft: 20,
+    paddingBottom: 10,
+  },
+  backText: { color: colors.accent },
   logo: { width: 45, height: 45, marginRight: 5 },
   listContainer: {
     padding: 12,
