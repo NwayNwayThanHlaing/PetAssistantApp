@@ -99,7 +99,7 @@ const Pets = ({ navigation }) => {
         style={styles.goBack}
         onPress={() => navigation.goBack()}
       >
-        <MaterialIcons name="arrow-back" size={24} color="black" />
+        <MaterialIcons name="arrow-back-ios" size={24} color={colors.primary} />
       </TouchableOpacity>
       {pets.length === 0 ? (
         <>
@@ -154,7 +154,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   goBack: {
-    marginHorizontal: 10,
+    paddingLeft: 15,
   },
   loadingContainer: {
     flex: 1,

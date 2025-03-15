@@ -19,6 +19,7 @@ import {
   doc,
 } from "firebase/firestore";
 import { colors } from "../styles/Theme";
+import { MaterialIcons } from "@expo/vector-icons";
 
 const ChatInbox = ({ navigation }) => {
   const currentUser = auth.currentUser;
@@ -123,7 +124,7 @@ const ChatInbox = ({ navigation }) => {
   return (
     <SafeAreaView style={styles.container}>
       <TouchableOpacity style={styles.back} onPress={() => navigation.goBack()}>
-        <Text style={styles.backText}>Back</Text>
+        <MaterialIcons name="arrow-back-ios" color={colors.primary} size={16} />
       </TouchableOpacity>
       <View style={styles.header}>
         <Image source={require("../../assets/logo.png")} style={styles.logo} />
@@ -162,7 +163,6 @@ const styles = StyleSheet.create({
     paddingLeft: 20,
     paddingBottom: 10,
   },
-  backText: { color: colors.accent },
   logo: { width: 45, height: 45, marginRight: 5 },
   listContainer: {
     padding: 12,

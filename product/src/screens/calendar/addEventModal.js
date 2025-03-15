@@ -90,9 +90,19 @@ const AddEventModal = ({
               value={newEvent.title}
               onChangeText={(text) => handleTextInputChange("title", text)}
             />
+            {/* Notes */}
+            <TextInput
+              style={[styles.input, styles.notesInput]}
+              placeholder="Notes"
+              placeholderTextColor={colors.primaryLighter}
+              value={newEvent.notes}
+              onChangeText={(text) => handleTextInputChange("notes", text)}
+              multiline
+            />
+
             {/* Event Date */}
             <View style={styles.datePickerContainer}>
-              <Text style={{ color: colors.primaryLighter }}>Event Date</Text>
+              <Text style={{ color: colors.primary }}>Event Date</Text>
               <DateTimePicker
                 mode="date"
                 value={
@@ -121,7 +131,7 @@ const AddEventModal = ({
             </View>
             {/* Event Time */}
             <View style={styles.datePickerContainer}>
-              <Text style={{ color: colors.primaryLighter }}>Event Time</Text>
+              <Text style={{ color: colors.primary }}>Event Time</Text>
               <DateTimePicker
                 mode="time"
                 value={
@@ -140,15 +150,6 @@ const AddEventModal = ({
                 is24Hour={false}
               />
             </View>
-            {/* Notes */}
-            <TextInput
-              style={[styles.input, styles.notesInput]}
-              placeholder="Notes"
-              placeholderTextColor={colors.primaryLighter}
-              value={newEvent.notes}
-              onChangeText={(text) => handleTextInputChange("notes", text)}
-              multiline
-            />
 
             {/* 
             // Recurrence and End Date
