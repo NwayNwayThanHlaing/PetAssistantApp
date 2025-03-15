@@ -30,14 +30,15 @@ import { SafeAreaView } from "react-native-safe-area-context";
 const Chat = ({ route, navigation }) => {
   const { chatId, friendId } = route.params;
   const currentUser = auth.currentUser;
+
   const [friend, setFriend] = useState(null);
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
-  const flatListRef = useRef(null);
-  const [selectedMessage, setSelectedMessage] = useState(null);
   const [editingMessageId, setEditingMessageId] = useState(null);
   const [editedMessageText, setEditedMessageText] = useState("");
   const [hiddenMessages, setHiddenMessages] = useState([]);
+  const flatListRef = useRef(null);
+
   const deleteForMe = async (messageId) => {
     setHiddenMessages((prev) => [...prev, messageId]);
   };
@@ -46,16 +47,14 @@ const Chat = ({ route, navigation }) => {
     (msg) => !hiddenMessages.includes(msg.id)
   );
 
+  // Fetch Friend Info
   useEffect(() => {
     const fetchFriendInfo = async () => {
       try {
         const friendRef = doc(firestore, "users", friendId);
         const friendSnap = await getDoc(friendRef);
-
         if (friendSnap.exists()) {
           setFriend(friendSnap.data());
-        } else {
-          console.log("Friend not found");
         }
       } catch (error) {
         console.error("Error fetching friend info:", error);
@@ -65,6 +64,7 @@ const Chat = ({ route, navigation }) => {
     fetchFriendInfo();
   }, [friendId]);
 
+  // Subscribe to Messages
   useEffect(() => {
     const messagesRef = collection(firestore, "chats", chatId, "messages");
     const q = query(messagesRef, orderBy("createdAt", "asc"));
@@ -77,6 +77,7 @@ const Chat = ({ route, navigation }) => {
     return () => unsubscribe();
   }, [chatId]);
 
+  // Send New Message
   const sendMessage = async () => {
     if (!input.trim()) return;
 
@@ -101,72 +102,37 @@ const Chat = ({ route, navigation }) => {
     flatListRef.current.scrollToEnd({ animated: true });
   };
 
-  const handleLongPress = (message) => {
-    const isMe = message.senderId === currentUser.uid;
-    if (!isMe) return;
-
-    const messageTime = message.createdAt?.toDate();
-    const now = new Date();
-    const diffInMinutes = (now - messageTime) / 60000;
-
-    const options = [
-      ...(diffInMinutes <= 3 ? ["Edit", "Delete for Everyone"] : []),
-      "Delete for Me",
-      "Cancel",
-    ];
-
-    Alert.alert(
-      "Message Options",
-      "Choose an action",
-      options.map((option) => ({
-        text: option,
-        onPress: () => handleOptionSelect(option, message),
-      })),
-      { cancelable: true }
-    );
-  };
-
-  const handleOptionSelect = async (option, message) => {
-    if (option === "Edit") {
-      setEditingMessageId(message.id);
-      setEditedMessageText(message.text);
-    } else if (option === "Delete for Everyone") {
-      await deleteForEveryone(message.id);
-    } else if (option === "Delete for Me") {
-      await deleteForMe(message.id);
-    }
-  };
-
+  // Save Edited Message
   const saveEditedMessage = async () => {
     if (!editedMessageText.trim()) return;
 
-    const messageRef = doc(
-      firestore,
-      "chats",
-      chatId,
-      "messages",
-      editingMessageId
-    );
-
     try {
+      const messageRef = doc(
+        firestore,
+        "chats",
+        chatId,
+        "messages",
+        editingMessageId
+      );
       await updateDoc(messageRef, {
-        text: editedMessageText,
+        text: editedMessageText.trim(),
         editedAt: serverTimestamp(),
       });
 
       setEditingMessageId(null);
       setEditedMessageText("");
     } catch (error) {
-      console.error("Error editing message:", error);
+      console.error("Error saving edited message:", error);
     }
   };
 
+  // Delete For Everyone
   const deleteForEveryone = async (messageId) => {
-    const messageRef = doc(firestore, "chats", chatId, "messages", messageId);
-
     try {
+      const messageRef = doc(firestore, "chats", chatId, "messages", messageId);
       await updateDoc(messageRef, {
         text: "This message was deleted.",
+        deletedForEveryone: true,
         deletedAt: serverTimestamp(),
       });
     } catch (error) {
@@ -174,43 +140,88 @@ const Chat = ({ route, navigation }) => {
     }
   };
 
+  // Message Options On Long Press
+  const handleLongPress = (message) => {
+    const isMe = message.senderId === currentUser.uid;
+    const isDeleted = message.deletedForEveryone === true;
+
+    const messageTime = message.createdAt?.toDate();
+    const now = new Date();
+    const diffInMinutes = (now - messageTime) / 60000;
+
+    let options = [];
+
+    if (isMe) {
+      // Sent by me
+      if (!isDeleted && diffInMinutes <= 3) {
+        options.push("Edit", "Delete for Everyone");
+      }
+    }
+
+    // "Delete for Me" should always be shown, no matter if it's my message or not
+    options.push("Delete for Me", "Cancel");
+
+    Alert.alert(
+      "Message Options",
+      "Choose an action:",
+      options.map((option) => ({
+        text: option,
+        onPress: () => handleOptionSelect(option, message),
+        style:
+          option === "Delete for Everyone" || option === "Delete for Me"
+            ? "destructive"
+            : "default",
+      })),
+      { cancelable: true }
+    );
+  };
+
+  const handleOptionSelect = (option, message) => {
+    switch (option) {
+      case "Edit":
+        setEditingMessageId(message.id);
+        setEditedMessageText(message.text);
+        break;
+      case "Delete for Everyone":
+        deleteForEveryone(message.id);
+        break;
+      case "Delete for Me":
+        deleteForMe(message.id);
+        break;
+      default:
+        break;
+    }
+  };
+
+  // Render Each Message
   const renderItem = ({ item }) => {
     const isMe = item.senderId === currentUser.uid;
-    const isEditing = editingMessageId === item.id;
+    const isDeleted = item.deletedForEveryone === true;
 
     return (
       <TouchableOpacity
-        onLongPress={() => handleLongPress(item)}
+        onLongPress={() => !isDeleted && handleLongPress(item)}
         activeOpacity={0.8}
         style={[
           styles.messageContainer,
-          isMe ? styles.myMessage : styles.theirMessage,
+          isDeleted
+            ? isMe
+              ? styles.myDeletedMessage
+              : styles.theirDeletedMessage
+            : isMe
+            ? styles.myMessage
+            : styles.theirMessage,
         ]}
       >
-        {isEditing ? (
-          <View style={styles.editingContainer}>
-            <TextInput
-              value={editedMessageText}
-              onChangeText={setEditedMessageText}
-              multiline
-              placeholder="Edit your message..."
-              style={styles.editInput}
-            />
-            <TouchableOpacity
-              onPress={saveEditedMessage}
-              style={styles.saveButton}
-            >
-              <MaterialIcons name="check" size={20} color={colors.background} />
-            </TouchableOpacity>
-          </View>
+        {isDeleted ? (
+          <Text style={styles.deletedText}>This message was deleted.</Text>
         ) : (
-          <Text style={isMe ? styles.myText : styles.messageText}>
-            {item.text}
-          </Text>
-        )}
-
-        {item.editedAt && !item.deletedAt && (
-          <Text style={styles.editedLabel}>(edited)</Text>
+          <>
+            <Text style={isMe ? styles.myText : styles.messageText}>
+              {item.text}
+            </Text>
+            {item.editedAt && <Text style={styles.editedLabel}>(edited)</Text>}
+          </>
         )}
       </TouchableOpacity>
     );
@@ -222,6 +233,7 @@ const Chat = ({ route, navigation }) => {
         style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
+        {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity onPress={() => navigation.goBack()}>
             <MaterialIcons name="arrow-back-ios" style={styles.backButton} />
@@ -240,6 +252,7 @@ const Chat = ({ route, navigation }) => {
           </View>
         </View>
 
+        {/* Messages List */}
         <FlatList
           ref={flatListRef}
           data={filteredMessages}
@@ -251,16 +264,60 @@ const Chat = ({ route, navigation }) => {
           }
         />
 
-        <View style={styles.inputContainer}>
-          <TextInput
-            style={styles.input}
-            placeholder="Type a message..."
-            value={input}
-            onChangeText={setInput}
-          />
-          <TouchableOpacity style={styles.sendButton} onPress={sendMessage}>
-            <MaterialIcons name="send" size={18} color={colors.background} />
-          </TouchableOpacity>
+        {/* Input Area */}
+        <View
+          style={
+            editingMessageId
+              ? styles.editingInputContainer
+              : styles.inputContainer
+          }
+        >
+          {editingMessageId ? (
+            <>
+              <View style={styles.editingHeader}>
+                <Text style={styles.editingTitle}>Edit message</Text>
+                <TouchableOpacity
+                  onPress={() => {
+                    setEditingMessageId(null);
+                    setEditedMessageText("");
+                  }}
+                >
+                  <MaterialIcons name="close" size={20} color="#999" />
+                </TouchableOpacity>
+              </View>
+
+              <View style={styles.editingInputRow}>
+                <TextInput
+                  style={styles.editInputField}
+                  placeholder="Edit your message..."
+                  value={editedMessageText}
+                  onChangeText={setEditedMessageText}
+                />
+                <TouchableOpacity
+                  style={styles.saveButton}
+                  onPress={saveEditedMessage}
+                >
+                  <MaterialIcons name="check" size={20} color="#fff" />
+                </TouchableOpacity>
+              </View>
+            </>
+          ) : (
+            <>
+              <TextInput
+                style={styles.input}
+                placeholder="Type a message..."
+                value={input}
+                onChangeText={setInput}
+              />
+              <TouchableOpacity style={styles.sendButton} onPress={sendMessage}>
+                <MaterialIcons
+                  name="send"
+                  size={18}
+                  color={colors.background}
+                />
+              </TouchableOpacity>
+            </>
+          )}
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -288,31 +345,32 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 20,
     borderBottomLeftRadius: 0,
   },
+  myDeletedMessage: {
+    borderColor: colors.primaryLightest,
+    borderWidth: 1,
+    alignSelf: "flex-end",
+  },
+  theirDeletedMessage: {
+    borderColor: colors.primaryLightest,
+    borderWidth: 1,
+    alignSelf: "flex-start",
+  },
+  deletedText: {
+    color: colors.primaryLighter,
+    fontStyle: "italic",
+  },
+  theirDeletedText: {
+    color: colors.primary,
+    fontStyle: "italic",
+    flex: "start",
+  },
   messageText: { color: colors.primary },
   myText: { color: colors.background },
-  inputContainer: {
-    flexDirection: "row",
-    padding: 10,
-    borderTopWidth: 1,
-    borderColor: "#ddd",
-    backgroundColor: "#fff",
+  editedLabel: {
+    fontSize: 10,
+    color: colors.primaryLight,
+    marginTop: 2,
   },
-  input: {
-    flex: 1,
-    paddingHorizontal: 15,
-    paddingVertical: 10,
-    borderRadius: 20,
-    backgroundColor: colors.light,
-    marginRight: 10,
-  },
-  sendButton: {
-    backgroundColor: colors.accent,
-    paddingHorizontal: 10,
-    paddingVertical: 10,
-    borderRadius: 20,
-    justifyContent: "center",
-  },
-  sendButtonText: { color: colors.background, fontWeight: "bold" },
   header: {
     flexDirection: "row",
     alignItems: "center",
@@ -323,10 +381,8 @@ const styles = StyleSheet.create({
   },
   backButton: {
     color: colors.primary,
-    fontSize: 24,
-    marginRight: 15,
-    marginLeft: 5,
     fontSize: 16,
+    marginRight: 15,
   },
   friendInfo: {
     flexDirection: "row",
@@ -343,10 +399,61 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
   },
-  editedLabel: {
-    fontSize: 10,
+  editingInputContainer: {
+    padding: 10,
+    borderTopWidth: 1,
+    borderColor: "#ddd",
+    backgroundColor: "#fff",
+  },
+  inputContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 10,
+    borderTopWidth: 1,
+    borderColor: "#ddd",
+    backgroundColor: "#fff",
+  },
+  input: {
+    flex: 1,
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+    borderRadius: 20,
+    backgroundColor: colors.light,
+    marginRight: 10,
+  },
+  sendButton: {
+    backgroundColor: colors.accent,
+    padding: 10,
+    borderRadius: 20,
+    alignSelf: "center",
+  },
+  editingHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 5,
+  },
+  editingTitle: {
+    fontSize: 14,
     color: colors.primaryLight,
-    marginTop: 2,
+  },
+  editingInputRow: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  editInputField: {
+    flex: 1,
+    backgroundColor: "#f0f0f0",
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    borderRadius: 20,
+    color: "#333",
+  },
+  saveButton: {
+    backgroundColor: colors.accent,
+    padding: 10,
+    borderRadius: 20,
+    marginLeft: 10,
   },
 });
 
