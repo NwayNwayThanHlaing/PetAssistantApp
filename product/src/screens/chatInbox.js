@@ -166,7 +166,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: colors.accent,
   },
-  chatItem: { flexDirection: "row", alignItems: "center", marginBottom: 16 },
+  chatItem: { flexDirection: "row", alignItems: "center" },
   avatar: { width: 50, height: 50, borderRadius: 25, marginRight: 12 },
   textContainer: { flex: 1 },
   friendName: { fontSize: 14 },
