@@ -123,13 +123,26 @@ const ChatInbox = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <TouchableOpacity style={styles.back} onPress={() => navigation.goBack()}>
-        <MaterialIcons name="arrow-back-ios" color={colors.primary} size={16} />
-      </TouchableOpacity>
       <View style={styles.header}>
-        <Image source={require("../../assets/logo.png")} style={styles.logo} />
-        <Text style={styles.headerTitle}>Chats</Text>
+        <TouchableOpacity
+          style={styles.back}
+          onPress={() => navigation.goBack()}
+        >
+          <MaterialIcons
+            name="arrow-back-ios"
+            color={colors.primary}
+            size={16}
+          />
+        </TouchableOpacity>
+        <View style={{ flexDirection: "row", alignItems: "center" }}>
+          <Image
+            source={require("../../assets/logo.png")}
+            style={styles.logo}
+          />
+          <Text style={styles.headerTitle}>Chats</Text>
+        </View>
       </View>
+
       <FlatList
         data={chats}
         keyExtractor={(item) => item.id}
@@ -153,15 +166,17 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   header: {
     flexDirection: "row",
-    alignItems: "center",
     justifyContent: "center",
+    alignItems: "center",
+    height: 60,
     paddingBottom: 10,
     borderBottomWidth: 1,
     borderBottomColor: colors.primaryLightest,
   },
   back: {
-    paddingLeft: 20,
-    paddingBottom: 10,
+    position: "absolute",
+    left: 20,
+    top: 17,
   },
   logo: { width: 45, height: 45, marginRight: 5 },
   listContainer: {
