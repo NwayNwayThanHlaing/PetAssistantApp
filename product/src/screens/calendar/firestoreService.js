@@ -251,6 +251,7 @@ export const updateEvent = async (selectedEvent) => {
   }
 };
 
+
 export const updateOneOccurrence = async (
   event,
   occurrenceDate,

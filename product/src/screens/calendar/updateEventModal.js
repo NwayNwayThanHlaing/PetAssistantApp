@@ -13,7 +13,6 @@ import {
 import Modal from "react-native-modal";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { colors } from "../../styles/Theme";
-
 const EventModal = ({
   isVisible,
   setIsVisible,
@@ -212,7 +211,20 @@ const EventModal = ({
 
                 <TouchableOpacity
                   style={[styles.modalButton, styles.saveButton]}
-                  onPress={updateEvent}
+                  onPress={() => {
+                    const updatedFields = {
+                      title: selectedEvent.title,
+                      notes: selectedEvent.notes,
+                      time: selectedEvent.time,
+                      date: selectedEvent.date,
+                      recurrence: selectedEvent.recurrence,
+                      endDate: selectedEvent.endDate,
+                      relatedPets: selectedEvent.relatedPets,
+                      appointment: selectedEvent.appointment,
+                    };
+
+                    updateEvent(updatedFields);
+                  }}
                   disabled={updateLoading}
                 >
                   {updateLoading ? (

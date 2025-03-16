@@ -215,8 +215,22 @@ const CalendarPage = () => {
     setSelectedPets([]);
   };
 
-  // HANDLE UPDATE EVENT ==========================================================
-  const handleUpdateEvent = async () => {
+  const updateNonRecurringEvent = async () => {
+    setUpdateLoading(true);
+    try {
+      await updateEvent({
+        ...selectedEvent,
+        ...updatedFields,
+      });
+      await fetchAndSetEvents();
+      setIsEventModalVisible(false);
+    } catch (error) {
+      console.error("Error updating event:", error);
+    } finally {
+      setUpdateLoading(false);
+    }
+  };
+  const handleUpdateEvent = (updatedFields) => {
     if (!selectedEvent || !selectedEvent.id) {
       alert("No event selected!");
       return;
@@ -226,23 +240,18 @@ const CalendarPage = () => {
       selectedEvent.recurrence && selectedEvent.recurrence !== "none";
 
     if (!isRecurring) {
-      // Directly update non-recurring events
-      setUpdateLoading(true);
-      try {
-        await updateEvent(selectedEvent);
-        await fetchAndSetEvents();
+      // Non-recurring events can be updated directly
+      updateEvent({
+        ...selectedEvent,
+        ...updatedFields,
+      }).then(() => {
+        fetchAndSetEvents();
         setIsEventModalVisible(false);
-        console.log("Non-recurring event updated successfully.");
-      } catch (error) {
-        console.error("Error updating non-recurring event:", error);
-      } finally {
-        setUpdateLoading(false);
-      }
+      });
       return;
     }
 
-    // Recurring events get the Alert options
-    Alert.alert("Update Recurring Event", "What would you like to update?", [
+    Alert.alert("Update Event", "What would you like to update?", [
       { text: "Cancel", style: "cancel" },
 
       {
@@ -250,15 +259,13 @@ const CalendarPage = () => {
         onPress: async () => {
           setUpdateLoading(true);
           try {
-            // You can pass additional fields if needed, e.g. edited fields
-            await updateOneOccurrence(selectedEvent, selectedDate, {
-              title: selectedEvent.title,
-              notes: selectedEvent.notes,
-              // Add other fields if needed
-            });
+            await updateOneOccurrence(
+              selectedEvent,
+              selectedDate,
+              updatedFields
+            );
             await fetchAndSetEvents();
             setIsEventModalVisible(false);
-            console.log("Occurrence updated successfully.");
           } catch (error) {
             console.error("Error updating one occurrence:", error);
           } finally {
@@ -272,14 +279,13 @@ const CalendarPage = () => {
         onPress: async () => {
           setUpdateLoading(true);
           try {
-            await updateFutureOccurrences(selectedEvent, selectedDate, {
-              title: selectedEvent.title,
-              notes: selectedEvent.notes,
-              // Add other fields if needed
-            });
+            await updateFutureOccurrences(
+              selectedEvent,
+              selectedDate,
+              updatedFields
+            );
             await fetchAndSetEvents();
             setIsEventModalVisible(false);
-            console.log("Future occurrences updated successfully.");
           } catch (error) {
             console.error("Error updating future occurrences:", error);
           } finally {
@@ -293,10 +299,12 @@ const CalendarPage = () => {
         onPress: async () => {
           setUpdateLoading(true);
           try {
-            await updateEvent(selectedEvent);
+            await updateEvent({
+              ...selectedEvent,
+              ...updatedFields,
+            });
             await fetchAndSetEvents();
             setIsEventModalVisible(false);
-            console.log("Entire series updated successfully.");
           } catch (error) {
             console.error("Error updating entire series:", error);
           } finally {
@@ -625,3 +633,95 @@ const styles = StyleSheet.create({
 });
 
 export default CalendarPage;
+
+// HANDLE UPDATE EVENT ==========================================================
+// const handleUpdateEvent = async () => {
+//   if (!selectedEvent || !selectedEvent.id) {
+//     alert("No event selected!");
+//     return;
+//   }
+
+//   const isRecurring =
+//     selectedEvent.recurrence && selectedEvent.recurrence !== "none";
+
+//   if (!isRecurring) {
+//     // Directly update non-recurring events
+//     setUpdateLoading(true);
+//     try {
+//       await updateEvent(selectedEvent);
+//       await fetchAndSetEvents();
+//       setIsEventModalVisible(false);
+//       console.log("Non-recurring event updated successfully.");
+//     } catch (error) {
+//       console.error("Error updating non-recurring event:", error);
+//     } finally {
+//       setUpdateLoading(false);
+//     }
+//     return;
+//   }
+
+//   // Recurring events get the Alert options
+//   Alert.alert("Update Recurring Event", "What would you like to update?", [
+//     { text: "Cancel", style: "cancel" },
+
+//     {
+//       text: "This occurrence only",
+//       onPress: async () => {
+//         setUpdateLoading(true);
+//         try {
+//           // You can pass additional fields if needed, e.g. edited fields
+//           await updateOneOccurrence(selectedEvent, selectedDate, {
+//             title: selectedEvent.title,
+//             notes: selectedEvent.notes,
+//             // Add other fields if needed
+//           });
+//           await fetchAndSetEvents();
+//           setIsEventModalVisible(false);
+//           console.log("Occurrence updated successfully.");
+//         } catch (error) {
+//           console.error("Error updating one occurrence:", error);
+//         } finally {
+//           setUpdateLoading(false);
+//         }
+//       },
+//     },
+
+//     {
+//       text: "This and future occurrences",
+//       onPress: async () => {
+//         setUpdateLoading(true);
+//         try {
+//           await updateFutureOccurrences(selectedEvent, selectedDate, {
+//             title: selectedEvent.title,
+//             notes: selectedEvent.notes,
+//             // Add other fields if needed
+//           });
+//           await fetchAndSetEvents();
+//           setIsEventModalVisible(false);
+//           console.log("Future occurrences updated successfully.");
+//         } catch (error) {
+//           console.error("Error updating future occurrences:", error);
+//         } finally {
+//           setUpdateLoading(false);
+//         }
+//       },
+//     },
+
+//     {
+//       text: "Entire series",
+//       onPress: async () => {
+//         setUpdateLoading(true);
+//         try {
+//           await updateEvent(selectedEvent);
+//           await fetchAndSetEvents();
+//           setIsEventModalVisible(false);
+//           console.log("Entire series updated successfully.");
+//         } catch (error) {
+//           console.error("Error updating entire series:", error);
+//         } finally {
+//           setUpdateLoading(false);
+//         }
+//       },
+//     },
+//   ]);
+// };
