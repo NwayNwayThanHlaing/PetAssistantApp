@@ -68,8 +68,10 @@ const EventList = ({ events = {}, selectedDate, onEventPress }) => {
 
             {item.appointment && <Text style={styles.vet}>(Appointment)</Text>}
 
-            {item.pets && item.pets.length > 0 && (
-              <Text style={styles.petsText}>Pets: {item.pets.join(", ")}</Text>
+            {item.relatedPets && item.relatedPets.length > 0 && (
+              <Text style={styles.petsText}>
+                Pets: {item.relatedPets.join(", ")}
+              </Text>
             )}
 
             {item.notes && item.notes.trim() !== "" && (
