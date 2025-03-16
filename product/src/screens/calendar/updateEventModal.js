@@ -63,19 +63,27 @@ const EventModal = ({
 
   const handleTimeChange = (event, selectedTime) => {
     if (selectedTime) {
+      const hours = selectedTime.getHours();
+      const minutes = selectedTime.getMinutes();
+
       setSelectedEvent((prevEvent) => ({
         ...prevEvent,
-        dateTime: new Date(
-          prevEvent.dateTime?.getFullYear() || 1970,
-          prevEvent.dateTime?.getMonth() || 0,
-          prevEvent.dateTime?.getDate() || 1,
-          selectedTime.getHours(),
-          selectedTime.getMinutes()
-        ),
+        time: { hours, minutes },
       }));
     }
   };
 
+  const getDateTimeFromEvent = (event) => {
+    const date = new Date(); // today
+    const hours = event?.time?.hours ?? 0;
+    const minutes = event?.time?.minutes ?? 0;
+
+    date.setHours(hours);
+    date.setMinutes(minutes);
+    date.setSeconds(0);
+
+    return date;
+  };
   const togglePetSelection = (petName) => {
     setSelectedEvent((prevEvent) => ({
       ...prevEvent,
@@ -129,7 +137,7 @@ const EventModal = ({
               {/* Time Picker */}
               <Text style={styles.timeText}>Time:</Text>
               <DateTimePicker
-                value={selectedEvent?.dateTime || new Date()}
+                value={getDateTimeFromEvent(selectedEvent)}
                 mode="time"
                 display="default"
                 is24Hour={false}

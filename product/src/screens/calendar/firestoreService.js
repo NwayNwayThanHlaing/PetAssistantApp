@@ -130,10 +130,8 @@ export const fetchEvents = async () => {
           title: data.title || "",
           date: data.date,
           time: data.time
-            ? `${String(data.time.hours).padStart(2, "0")}:${String(
-                data.time.minutes
-              ).padStart(2, "0")}`
-            : "00:00",
+            ? { hours: data.time.hours, minutes: data.time.minutes }
+            : { hours: 0, minutes: 0 },
           notes: data.notes || "",
           relatedPets: data.relatedPets || [],
           appointment: data.appointment || false,

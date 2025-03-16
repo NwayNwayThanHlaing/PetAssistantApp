@@ -203,7 +203,9 @@ const CalendarPage = () => {
   const resetNewEvent = () => {
     setNewEvent({
       title: "",
-      time: { hours: 0, minutes: 0 },
+      time: data.time
+        ? { hours: data.time.hours, minutes: data.time.minutes }
+        : { hours: 0, minutes: 0 },
       notes: "",
       read: false,
       pets: [],
@@ -214,13 +216,33 @@ const CalendarPage = () => {
   };
 
   // HANDLE UPDATE EVENT ==========================================================
-  const handleUpdateEvent = () => {
+  const handleUpdateEvent = async () => {
     if (!selectedEvent || !selectedEvent.id) {
       alert("No event selected!");
       return;
     }
 
-    Alert.alert("Update Event", "What would you like to update?", [
+    const isRecurring =
+      selectedEvent.recurrence && selectedEvent.recurrence !== "none";
+
+    if (!isRecurring) {
+      // Directly update non-recurring events
+      setUpdateLoading(true);
+      try {
+        await updateEvent(selectedEvent);
+        await fetchAndSetEvents();
+        setIsEventModalVisible(false);
+        console.log("Non-recurring event updated successfully.");
+      } catch (error) {
+        console.error("Error updating non-recurring event:", error);
+      } finally {
+        setUpdateLoading(false);
+      }
+      return;
+    }
+
+    // Recurring events get the Alert options
+    Alert.alert("Update Recurring Event", "What would you like to update?", [
       { text: "Cancel", style: "cancel" },
 
       {
@@ -228,9 +250,15 @@ const CalendarPage = () => {
         onPress: async () => {
           setUpdateLoading(true);
           try {
-            await updateOneOccurrence(selectedEvent, selectedDate);
+            // You can pass additional fields if needed, e.g. edited fields
+            await updateOneOccurrence(selectedEvent, selectedDate, {
+              title: selectedEvent.title,
+              notes: selectedEvent.notes,
+              // Add other fields if needed
+            });
             await fetchAndSetEvents();
             setIsEventModalVisible(false);
+            console.log("Occurrence updated successfully.");
           } catch (error) {
             console.error("Error updating one occurrence:", error);
           } finally {
@@ -244,9 +272,14 @@ const CalendarPage = () => {
         onPress: async () => {
           setUpdateLoading(true);
           try {
-            await updateFutureOccurrences(selectedEvent, selectedDate);
+            await updateFutureOccurrences(selectedEvent, selectedDate, {
+              title: selectedEvent.title,
+              notes: selectedEvent.notes,
+              // Add other fields if needed
+            });
             await fetchAndSetEvents();
             setIsEventModalVisible(false);
+            console.log("Future occurrences updated successfully.");
           } catch (error) {
             console.error("Error updating future occurrences:", error);
           } finally {
@@ -260,9 +293,10 @@ const CalendarPage = () => {
         onPress: async () => {
           setUpdateLoading(true);
           try {
-            await updateEvent(selectedEvent); // Existing function for full series update
+            await updateEvent(selectedEvent);
             await fetchAndSetEvents();
             setIsEventModalVisible(false);
+            console.log("Entire series updated successfully.");
           } catch (error) {
             console.error("Error updating entire series:", error);
           } finally {
@@ -280,9 +314,41 @@ const CalendarPage = () => {
       return;
     }
 
+    const isRecurring =
+      selectedEvent.recurrence && selectedEvent.recurrence !== "none";
+
+    if (!isRecurring) {
+      // Delete the whole event directly
+      Alert.alert(
+        "Delete Event",
+        "Are you sure you want to delete this event?",
+        [
+          { text: "Cancel", style: "cancel" },
+          {
+            text: "Delete",
+            style: "destructive",
+            onPress: async () => {
+              setDeleteLoading(true);
+              try {
+                await deleteEvent(selectedEvent.id);
+                await fetchAndSetEvents();
+                setIsEventModalVisible(false);
+              } catch (error) {
+                console.error("Error deleting event:", error);
+              } finally {
+                setDeleteLoading(false);
+              }
+            },
+          },
+        ],
+        { cancelable: true }
+      );
+      return;
+    }
+
+    // Show advanced delete options for recurring events
     Alert.alert("Delete Event", "What would you like to delete?", [
       { text: "Cancel", style: "cancel" },
-
       {
         text: "This occurrence only",
         onPress: async () => {
@@ -296,7 +362,6 @@ const CalendarPage = () => {
               await fetchAndSetEvents();
               setIsEventModalVisible(false);
             }
-            console.log("Deleting occurrence on date:", selectedDate);
           } catch (error) {
             console.error("Error excluding occurrence:", error);
           } finally {
@@ -304,7 +369,6 @@ const CalendarPage = () => {
           }
         },
       },
-
       {
         text: "This and future occurrences",
         onPress: async () => {
@@ -325,7 +389,6 @@ const CalendarPage = () => {
           }
         },
       },
-
       {
         text: "Entire series",
         style: "destructive",
@@ -510,6 +573,9 @@ const CalendarPage = () => {
           deleteEvent={handleDeleteEvent}
           updateLoading={updateLoading}
           deleteLoading={deleteLoading}
+          isRecurring={
+            selectedEvent?.recurrence && selectedEvent.recurrence !== "none"
+          }
         />
       </View>
     </KeyboardAvoidingView>

@@ -32,7 +32,7 @@ const AddEventModal = ({
     setNewEvent((prev) => ({
       title: prev.title || "",
       date: prev.date instanceof Date ? prev.date : new Date(),
-      time: prev.time instanceof Date ? prev.time : new Date(),
+      time: prev.time || { hours: 0, minutes: 0 },
       notes: prev.notes || "",
       appointment: prev.appointment || false,
       recurrence: prev.recurrence || "none",
@@ -67,6 +67,15 @@ const AddEventModal = ({
         ? prevSelected.filter((pet) => pet !== petName)
         : [...prevSelected, petName]
     );
+  };
+
+  const getTimeAsDate = (timeObj) => {
+    const now = new Date();
+    now.setHours(timeObj?.hours ?? 0);
+    now.setMinutes(timeObj?.minutes ?? 0);
+    now.setSeconds(0);
+    now.setMilliseconds(0);
+    return now;
   };
 
   return (
@@ -131,15 +140,16 @@ const AddEventModal = ({
               <DateTimePicker
                 mode="time"
                 value={
-                  newEvent.time && newEvent.time instanceof Date
-                    ? newEvent.time
-                    : new Date()
+                  newEvent.time ? getTimeAsDate(newEvent.time) : new Date()
                 }
                 onChange={(event, selectedTime) => {
                   if (selectedTime) {
                     setNewEvent((prevEvent) => ({
                       ...prevEvent,
-                      time: selectedTime,
+                      time: {
+                        hours: selectedTime.getHours(),
+                        minutes: selectedTime.getMinutes(),
+                      },
                     }));
                   }
                 }}
