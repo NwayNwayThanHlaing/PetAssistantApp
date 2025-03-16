@@ -410,7 +410,21 @@ const CalendarPage = () => {
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.addEventButton}
-              onPress={() => setIsAddingEvent(true)}
+              onPress={() => {
+                setNewEvent((prevEvent) => ({
+                  title: "",
+                  date: selectedDate, // or default to today
+                  time: { hours: 0, minutes: 0 },
+                  notes: "",
+                  pets: [],
+                  appointment: false,
+                  read: false,
+                  recurrence: "none",
+                  endDate: null,
+                }));
+
+                setIsAddingEvent(true);
+              }}
             >
               <Text style={styles.addEventButtonText}>+ Add</Text>
             </TouchableOpacity>
@@ -421,7 +435,15 @@ const CalendarPage = () => {
             <Calendar
               key={formattedDate}
               current={formattedDate}
-              onDayPress={(day) => setSelectedDate(day.dateString)}
+              onDayPress={(day) => {
+                setSelectedDate(day.dateString);
+
+                // Update the newEvent state so the Add Event Modal shows the correct date
+                setNewEvent((prevEvent) => ({
+                  ...prevEvent,
+                  date: day.dateString,
+                }));
+              }}
               markedDates={markedDates}
               markingType="multi-dot"
               theme={{ textDayHeaderFontWeight: "bold" }}

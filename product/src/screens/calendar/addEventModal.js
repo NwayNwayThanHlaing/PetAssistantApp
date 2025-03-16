@@ -104,12 +104,8 @@ const AddEventModal = ({
             <View style={styles.datePickerContainer}>
               <Text style={{ color: colors.primary }}>Event Date</Text>
               <DateTimePicker
+                value={newEvent.date ? new Date(newEvent.date) : new Date()}
                 mode="date"
-                value={
-                  newEvent.date instanceof Date
-                    ? newEvent.date
-                    : new Date(newEvent.date)
-                }
                 onChange={(event, selectedDate) => {
                   if (selectedDate) {
                     // Format the date as YYYY-MM-DD inline
