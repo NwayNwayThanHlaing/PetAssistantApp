@@ -156,11 +156,8 @@ export const addEvent = async (newEvent, selectedPets) => {
   try {
     const userId = getUserId();
     const eventRef = collection(firestore, "users", userId, "events");
-
-    const dateTime = newEvent.time instanceof Date ? newEvent.time : new Date();
-
-    const hours = dateTime.getHours();
-    const minutes = dateTime.getMinutes();
+    const hours = newEvent.time?.hours ?? 0;
+    const minutes = newEvent.time?.minutes ?? 0;
 
     if (!/^\d{4}-\d{2}-\d{2}$/.test(newEvent.date)) {
       throw new Error("Invalid date format. Expected 'YYYY-MM-DD'.");
@@ -211,19 +208,8 @@ export const updateEvent = async (selectedEvent) => {
       "events",
       selectedEvent.id
     );
-
-    let hours, minutes;
-
-    if (selectedEvent.dateTime instanceof Date) {
-      hours = selectedEvent.dateTime.getHours();
-      minutes = selectedEvent.dateTime.getMinutes();
-    } else if (selectedEvent.time) {
-      hours = selectedEvent.time.hours || 0;
-      minutes = selectedEvent.time.minutes || 0;
-    } else {
-      hours = 0;
-      minutes = 0;
-    }
+    const hours = selectedEvent.time?.hours ?? 0;
+    const minutes = selectedEvent.time?.minutes ?? 0;
 
     const updatedDate = selectedEvent.dateTime
       ? selectedEvent.dateTime.toISOString().split("T")[0]
@@ -382,30 +368,49 @@ export const deleteEvent = async (eventId) => {
     throw error;
   }
 };
-
-export const deleteOccurrence = async (event, occurrenceDate) => {
+export const deleteOneOccurrence = async (eventId, occurrenceDate) => {
   try {
-    const eventDocRef = doc(
-      firestore,
-      "users",
-      event.userId,
-      "events",
-      event.id
-    );
+    const userId = getUserId();
 
-    const updatedExceptions = Array.isArray(event.exceptions)
-      ? [...event.exceptions, occurrenceDate]
-      : [occurrenceDate];
+    if (!eventId || !occurrenceDate) {
+      throw new Error("Both eventId and occurrenceDate are required.");
+    }
 
+    const eventDocRef = doc(firestore, "users", userId, "events", eventId);
+
+    // Get the event data
+    const docSnap = await getDoc(eventDocRef);
+
+    if (!docSnap.exists()) {
+      console.error(`Event with ID ${eventId} not found.`);
+      return false;
+    }
+
+    const eventData = docSnap.data();
+
+    // Ensure exceptions array exists and is an array
+    const currentExceptions = Array.isArray(eventData.exceptions)
+      ? eventData.exceptions
+      : [];
+
+    // Prevent duplicates
+    if (currentExceptions.includes(occurrenceDate)) {
+      console.log(`Date ${occurrenceDate} is already excluded.`);
+      return true; // Already deleted/excluded
+    }
+
+    const updatedExceptions = [...currentExceptions, occurrenceDate];
+
+    // Update the event with the new exceptions list
     await updateDoc(eventDocRef, {
       exceptions: updatedExceptions,
       updatedAt: Timestamp.now(),
     });
 
-    console.log(`Occurrence on ${occurrenceDate} excluded from recurrence.`);
+    console.log(`Excluded date ${occurrenceDate} from event ${eventId}`);
     return true;
   } catch (error) {
-    console.error("Error excluding occurrence:", error);
+    console.error("Error deleting one occurrence:", error);
     return false;
   }
 };

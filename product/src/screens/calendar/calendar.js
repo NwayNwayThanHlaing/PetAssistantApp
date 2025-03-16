@@ -20,7 +20,7 @@ import {
   updateOneOccurrence,
   updateFutureOccurrences,
   deleteEvent,
-  deleteOccurrence,
+  deleteOneOccurrence,
   deleteFutureOccurrences,
 } from "./firestoreService";
 import EventList from "./eventList";
@@ -114,7 +114,7 @@ const CalendarPage = () => {
   // UPDATES WHEN EVENTS OR DATE CHANGE ==========================================
   useEffect(() => {
     setMarkedDates(prepareMarkedDates());
-  }, [events, selectedDate]);
+  }, [selectedDate, events]);
 
   // SET TODAY'S DATE ============================================================
   useEffect(() => {
@@ -141,23 +141,25 @@ const CalendarPage = () => {
     const newMarkedDates = {};
 
     Object.keys(events).forEach((date) => {
-      events[date].forEach((event) => {
-        const recurringDates = generateRecurringDates(event);
+      const eventsOnDate = events[date];
 
-        recurringDates.forEach((recDate) => {
-          if (!newMarkedDates[recDate]) {
-            newMarkedDates[recDate] = {
-              marked: true,
-              dots: [{ color: colors.accent }],
-            };
-          }
-        });
-      });
+      if (eventsOnDate && eventsOnDate.length > 0) {
+        newMarkedDates[date] = {
+          marked: true,
+          dots: [{ color: colors.accent }],
+        };
+      }
     });
 
     if (selectedDate) {
+      const existingMark = newMarkedDates[selectedDate];
+
       newMarkedDates[selectedDate] = {
-        ...newMarkedDates[selectedDate],
+        ...(existingMark || {}),
+        marked: true, // ensures dot shows up
+        dots:
+          existingMark?.dots ||
+          (events[selectedDate]?.length ? [{ color: colors.accent }] : []),
         selected: true,
         selectedColor: colors.primary,
       };
@@ -286,11 +288,15 @@ const CalendarPage = () => {
         onPress: async () => {
           setDeleteLoading(true);
           try {
-            const deleted = await deleteOccurrence(selectedEvent, selectedDate);
+            const deleted = await deleteOneOccurrence(
+              selectedEvent.id,
+              selectedDate
+            );
             if (deleted) {
               await fetchAndSetEvents();
               setIsEventModalVisible(false);
             }
+            console.log("Deleting occurrence on date:", selectedDate);
           } catch (error) {
             console.error("Error excluding occurrence:", error);
           } finally {
