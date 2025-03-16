@@ -17,15 +17,17 @@ import {
   fetchEvents,
   addEvent,
   updateEvent,
+  updateOneOccurrence,
+  updateFutureOccurrences,
   deleteEvent,
+  deleteOccurrence,
+  deleteFutureOccurrences,
 } from "./firestoreService";
 import EventList from "./eventList";
 import EventModal from "./updateEventModal";
 import AddEventModal from "./addEventModal";
 import Svg, { Path } from "react-native-svg";
 import { generateRecurringDates } from "../../actions/recurrenceUtils";
-import { doc, updateDoc, deleteDoc, Timestamp } from "firebase/firestore";
-import { firestore } from "../../auth/firebaseConfig";
 
 const CalendarPage = () => {
   const route = useRoute();
@@ -210,23 +212,63 @@ const CalendarPage = () => {
   };
 
   // HANDLE UPDATE EVENT ==========================================================
-  const handleUpdateEvent = async () => {
-    if (!selectedEvent || !selectedEvent.title.trim()) {
-      alert("Event title is required.");
+  const handleUpdateEvent = () => {
+    if (!selectedEvent || !selectedEvent.id) {
+      alert("No event selected!");
       return;
     }
 
-    setUpdateLoading(true);
+    Alert.alert("Update Event", "What would you like to update?", [
+      { text: "Cancel", style: "cancel" },
 
-    try {
-      await updateEvent(selectedEvent);
-      await fetchAndSetEvents();
-      setIsEventModalVisible(false);
-    } catch (error) {
-      console.error("Error updating event:", error);
-    } finally {
-      setUpdateLoading(false);
-    }
+      {
+        text: "This occurrence only",
+        onPress: async () => {
+          setUpdateLoading(true);
+          try {
+            await updateOneOccurrence(selectedEvent, selectedDate);
+            await fetchAndSetEvents();
+            setIsEventModalVisible(false);
+          } catch (error) {
+            console.error("Error updating one occurrence:", error);
+          } finally {
+            setUpdateLoading(false);
+          }
+        },
+      },
+
+      {
+        text: "This and future occurrences",
+        onPress: async () => {
+          setUpdateLoading(true);
+          try {
+            await updateFutureOccurrences(selectedEvent, selectedDate);
+            await fetchAndSetEvents();
+            setIsEventModalVisible(false);
+          } catch (error) {
+            console.error("Error updating future occurrences:", error);
+          } finally {
+            setUpdateLoading(false);
+          }
+        },
+      },
+
+      {
+        text: "Entire series",
+        onPress: async () => {
+          setUpdateLoading(true);
+          try {
+            await updateEvent(selectedEvent); // Existing function for full series update
+            await fetchAndSetEvents();
+            setIsEventModalVisible(false);
+          } catch (error) {
+            console.error("Error updating entire series:", error);
+          } finally {
+            setUpdateLoading(false);
+          }
+        },
+      },
+    ]);
   };
 
   // HANDLE DELETE EVENT ==========================================================
@@ -295,77 +337,6 @@ const CalendarPage = () => {
         },
       },
     ]);
-  };
-
-  const deleteOccurrence = async (event, occurrenceDate) => {
-    try {
-      const eventDocRef = doc(
-        firestore,
-        "users",
-        event.userId,
-        "events",
-        event.id
-      );
-
-      const updatedExceptions = Array.isArray(event.exceptions)
-        ? [...event.exceptions, occurrenceDate]
-        : [occurrenceDate];
-
-      await updateDoc(eventDocRef, {
-        exceptions: updatedExceptions,
-        updatedAt: Timestamp.now(),
-      });
-
-      console.log(`Occurrence on ${occurrenceDate} excluded from recurrence.`);
-      return true;
-    } catch (error) {
-      console.error("Error excluding occurrence:", error);
-      return false;
-    }
-  };
-
-  const deleteFutureOccurrences = async (event, cutoffDate) => {
-    try {
-      const userId = event.userId;
-      const eventDocRef = doc(firestore, "users", userId, "events", event.id);
-
-      // Generate future dates after cutoff
-      const allDates = generateRecurringDates(event);
-      const futureDates = allDates.filter((date) => date >= cutoffDate);
-
-      // Update exceptions array
-      const updatedExceptions = [...(event.exceptions || []), ...futureDates];
-
-      // Update endDate if needed
-      const newEndDate = new Date(cutoffDate);
-
-      // Create updated event data
-      const updatedEventData = {
-        endDate: newEndDate,
-        exceptions: updatedExceptions,
-        updatedAt: Timestamp.now(),
-      };
-
-      // Check if no remaining dates are left
-      const remainingDates = allDates.filter(
-        (date) => !updatedExceptions.includes(date) && date <= cutoffDate
-      );
-
-      if (remainingDates.length === 0) {
-        // Delete entire event if no occurrences remain
-        await deleteDoc(eventDocRef);
-        console.log("All occurrences deleted. Event removed from database.");
-      } else {
-        // Update with new endDate and exceptions
-        await updateDoc(eventDocRef, updatedEventData);
-        console.log("Future occurrences deleted. Updated event in database.");
-      }
-
-      return true;
-    } catch (error) {
-      console.error("Error deleting future occurrences:", error);
-      return false;
-    }
   };
 
   // NAVIGATION HELPERS ============================================================
