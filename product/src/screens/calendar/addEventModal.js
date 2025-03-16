@@ -129,6 +129,10 @@ const AddEventModal = ({
                     setNewEvent((prevEvent) => ({
                       ...prevEvent,
                       date: formattedDate,
+                      time: {
+                        hours: now.getHours(),
+                        minutes: now.getMinutes(),
+                      },
                     }));
                   }
                 }}

@@ -74,7 +74,7 @@ const EventModal = ({
   };
 
   const getDateTimeFromEvent = (event) => {
-    const date = new Date(); // today
+    const date = new Date();
     const hours = event?.time?.hours ?? 0;
     const minutes = event?.time?.minutes ?? 0;
 

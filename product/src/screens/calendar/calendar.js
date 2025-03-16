@@ -451,10 +451,11 @@ const CalendarPage = () => {
             <TouchableOpacity
               style={styles.addEventButton}
               onPress={() => {
+                const now = new Date();
                 setNewEvent((prevEvent) => ({
                   title: "",
                   date: selectedDate, // or default to today
-                  time: { hours: 0, minutes: 0 },
+                  time: { hours: now.getHours(), minutes: now.getMinutes() },
                   notes: "",
                   pets: [],
                   appointment: false,
