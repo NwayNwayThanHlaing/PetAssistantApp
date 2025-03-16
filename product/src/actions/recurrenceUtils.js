@@ -8,18 +8,57 @@ const recurrenceMap = {
 };
 
 export const generateRecurringDates = (event) => {
+  if (!event.date) {
+    console.warn("Missing date on event:", event);
+    return [];
+  }
+
+  const startDate = new Date(event.date);
+
+  if (isNaN(startDate.getTime())) {
+    console.warn("Invalid startDate:", event.date);
+    return [];
+  }
+
+  let untilDate;
+  if (event.endDate) {
+    if (typeof event.endDate.toDate === "function") {
+      untilDate = event.endDate.toDate();
+    } else if (
+      event.endDate.seconds !== undefined &&
+      event.endDate.nanoseconds !== undefined
+    ) {
+      untilDate = new Date(event.endDate.seconds * 1000);
+    } else {
+      untilDate = new Date(event.endDate);
+    }
+
+    if (isNaN(untilDate.getTime())) {
+      console.warn("Invalid untilDate:", event.endDate);
+      untilDate = undefined; // fallback
+    }
+  }
+
   if (!event.recurrence || event.recurrence === "none") {
     return [event.date];
   }
 
-  const rule = new RRule({
+  const ruleOptions = {
     freq: recurrenceMap[event.recurrence],
-    dtstart: new Date(event.date),
-    until: event.endDate ? new Date(event.endDate) : undefined,
-    count: event.endDate ? undefined : 50,
-  });
+    dtstart: startDate,
+  };
 
-  const dates = rule.all();
+  if (untilDate) {
+    ruleOptions.until = untilDate;
+  } else {
+    ruleOptions.count = 50; // prevent infinite
+  }
 
-  return dates.map((date) => date.toISOString().split("T")[0]);
+  const rule = new RRule(ruleOptions);
+  const dates = rule.all().map((date) => date.toISOString().split("T")[0]);
+
+  const exceptions = Array.isArray(event.exceptions) ? event.exceptions : [];
+  const filteredDates = dates.filter((date) => !exceptions.includes(date));
+
+  return filteredDates;
 };
