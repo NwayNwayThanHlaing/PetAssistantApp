@@ -8,6 +8,7 @@ import {
   doc,
   Timestamp,
 } from "firebase/firestore";
+import { RRule } from "rrule";
 
 // Utility function to get the current user ID
 const getUserId = () => {
@@ -31,6 +32,33 @@ export const fetchPetNames = async () => {
   }
 };
 
+// Maps recurrence strings to RRule frequencies
+const recurrenceMap = {
+  daily: RRule.DAILY,
+  weekly: RRule.WEEKLY,
+  monthly: RRule.MONTHLY,
+  yearly: RRule.YEARLY,
+};
+
+// Function that generates the recurring dates for an event
+const generateRecurringDates = (event) => {
+  if (!event.recurrence || event.recurrence === "none") {
+    return [event.date]; // No recurrence, return single date
+  }
+
+  const rule = new RRule({
+    freq: recurrenceMap[event.recurrence],
+    dtstart: new Date(event.date),
+    until: event.endDate
+      ? new Date(event.endDate.toDate ? event.endDate.toDate() : event.endDate)
+      : undefined,
+    count: event.endDate ? undefined : 50, // Limit recurrences to avoid infinite loops
+  });
+
+  const dates = rule.all();
+  return dates.map((date) => date.toISOString().split("T")[0]);
+};
+
 // Function to fetch events
 export const fetchEvents = async () => {
   try {
@@ -39,20 +67,35 @@ export const fetchEvents = async () => {
     const eventsSnapshot = await getDocs(eventsRef);
 
     const eventsData = {};
-    eventsSnapshot.forEach((doc) => {
-      const data = doc.data();
-      const eventDate = data.date;
-      if (!eventsData[eventDate]) {
-        eventsData[eventDate] = [];
-      }
 
-      eventsData[eventDate].push({
-        id: doc.id,
-        title: data.title || "",
-        time: data.time ? `${data.time.hours}:${data.time.minutes}` : "00:00",
-        notes: data.notes || "",
-        pets: data.relatedPets || [],
-        appointment: data.appointment || false,
+    eventsSnapshot.forEach((docSnap) => {
+      const data = docSnap.data();
+      const eventId = docSnap.id;
+
+      // Generate the recurring dates
+      const recurrenceDates = generateRecurringDates({
+        date: data.date,
+        recurrence: data.recurrence || "none",
+        endDate: data.endDate || null,
+      });
+
+      // Add the event to each recurrence date
+      recurrenceDates.forEach((date) => {
+        if (!eventsData[date]) {
+          eventsData[date] = [];
+        }
+
+        eventsData[date].push({
+          id: eventId,
+          title: data.title || "",
+          time: data.time ? `${data.time.hours}:${data.time.minutes}` : "00:00",
+          notes: data.notes || "",
+          pets: data.relatedPets || [],
+          appointment: data.appointment || false,
+          recurrence: data.recurrence || "none",
+          endDate: data.endDate || null,
+          originalDate: data.date, // optional: store the original date
+        });
       });
     });
 
@@ -62,43 +105,6 @@ export const fetchEvents = async () => {
     throw error;
   }
 };
-
-// export const addEvent = async (newEvent, selectedPets) => {
-//   try {
-//     // Get the user ID
-//     const userId = getUserId();
-//     const eventRef = collection(firestore, "users", userId, "events");
-
-//     // Ensure date and time values are properly provided
-//     const dateTime = newEvent.time instanceof Date ? newEvent.time : new Date();
-
-//     const hours = dateTime.getHours();
-//     const minutes = dateTime.getMinutes();
-
-//     // Validate the selectedDate format (ensure it's 'YYYY-MM-DD')
-//     if (!/^\d{4}-\d{2}-\d{2}$/.test(newEvent.date)) {
-//       throw new Error("Invalid date format. Expected 'YYYY-MM-DD'.");
-//     }
-
-//     // Add the new event to Firestore
-//     const docRef = await addDoc(eventRef, {
-//       title: newEvent.title?.trim() || "Untitled Event",
-//       time: { hours, minutes },
-//       notes: newEvent.notes?.trim() || "",
-//       relatedPets: Array.isArray(selectedPets) ? selectedPets : [],
-//       date: newEvent.date,
-//       appointment: newEvent.appointment || false,
-//       createdAt: Timestamp.now(),
-//       updatedAt: Timestamp.now(),
-//       read: false,
-//     });
-
-//     return docRef.id; // Return the document ID for further use
-//   } catch (error) {
-//     console.error("Error adding event to Firestore: ", error);
-//     throw error;
-//   }
-// };
 
 export const addEvent = async (newEvent, selectedPets) => {
   try {
@@ -133,8 +139,8 @@ export const addEvent = async (newEvent, selectedPets) => {
       notes: newEvent.notes?.trim() || "",
       relatedPets: Array.isArray(selectedPets) ? selectedPets : [],
       appointment: newEvent.appointment || false,
-      recurrence: newEvent.recurrence || "none",
-      endDate: newEvent.endDate || null,
+      recurrence: recurrence,
+      endDate: endDate,
       createdAt: Timestamp.now(),
       updatedAt: Timestamp.now(),
       read: false,
@@ -194,6 +200,14 @@ export const updateEvent = async (selectedEvent) => {
       time: { hours, minutes },
       date: updatedDate, // Update the date here to Firestore in 'YYYY-MM-DD' format
       appointment: selectedEvent.appointment || false,
+      recurrence: selectedEvent.recurrence || "none",
+      endDate: selectedEvent.endDate
+        ? Timestamp.fromDate(
+            selectedEvent.endDate instanceof Date
+              ? selectedEvent.endDate
+              : new Date(selectedEvent.endDate)
+          )
+        : null,
     };
     await updateDoc(eventDocRef, updatedData);
   } catch (error) {

@@ -26,6 +26,8 @@ const AddEventModal = ({
   loading,
 }) => {
   const [open, setOpen] = useState(false);
+  const [recurrence, setRecurrence] = useState("none");
+  const [endDate, setEndDate] = useState(null);
   const resetNewEvent = () => {
     setNewEvent((prev) => ({
       title: prev.title || "",
@@ -33,6 +35,8 @@ const AddEventModal = ({
       time: prev.time instanceof Date ? prev.time : new Date(),
       notes: prev.notes || "",
       appointment: prev.appointment || false,
+      recurrence: prev.recurrence || "none",
+      endDate: prev.endDate || null,
     }));
     setSelectedPets((prev) => (prev.length === 0 ? [] : prev));
     setRecurrence("none");
@@ -150,7 +154,7 @@ const AddEventModal = ({
             <Text style={styles.label}>Repeat</Text>
             <DropDownPicker
               open={open}
-              value={recurrence} // This reflects the current state
+              value={recurrence} // Use recurrence state
               items={[
                 { label: "None", value: "none" },
                 { label: "Daily", value: "daily" },
@@ -163,17 +167,22 @@ const AddEventModal = ({
                 setRecurrence(val);
                 if (val === "none") {
                   setEndDate(null);
+                } else {
+                  setEndDate(newEvent.endDate || new Date()); // Set default end date
                 }
               }}
               onChangeValue={(val) => {
                 setRecurrence(val);
                 if (val === "none") {
-                  setEndDate(null); // Optionally reset end date
+                  setEndDate(null);
                 }
               }}
               placeholder="Repeat"
               style={styles.picker}
-              dropDownContainerStyle={styles.dropdownContainer}
+              dropDownContainerStyle={[
+                styles.dropdownContainer,
+                { zIndex: 1000 },
+              ]}
             />
             {recurrence !== "none" && (
               <Text style={{ color: colors.primaryLight, marginTop: 5 }}>
@@ -186,52 +195,14 @@ const AddEventModal = ({
                 <Text style={{ color: colors.primary }}>End Date</Text>
                 <DateTimePicker
                   mode="date"
-                  value={endDate || new Date()}
+                  value={endDate instanceof Date ? endDate : new Date(endDate)}
                   onChange={(event, selectedDate) => {
                     if (selectedDate) setEndDate(selectedDate);
                   }}
                 />
               </View>
             )}
-            {/* 
-            // Recurrence and End Date
-            <View>
-              <Text style={styles.label}>Repeat</Text>
-              <DropDownPicker
-                open={open}
-                value={value}
-                items={[
-                  { label: "None", value: "none" },
-                  { label: "Every Day", value: "daily" },
-                  { label: "Every Week", value: "weekly" },
-                  { label: "Every Two Weeks", value: "biweekly" },
-                  { label: "Every Month", value: "monthly" },
-                  { label: "Every Year", value: "yearly" },
-                ]}
-                setOpen={setOpen}
-                setValue={setValue}
-                onChangeValue={(itemValue) => {
-                  setRecurrence(itemValue);
-                  if (itemValue === "none") setEndDate(null); // Reset end date for non-recurring
-                }}
-                style={styles.picker} // Use the same picker style or customize it further
-                dropDownDirection="BOTTOM" // Open dropdown below
-              />
 
-              {recurrence !== "none" && (
-                <View style={styles.datePickerContainer}>
-                  <Text style={{ color: colors.primaryLighter }}>End Date</Text>
-                  <DateTimePicker
-                    mode="date"
-                    value={endDate || new Date()}
-                    onChange={(event, selectedDate) => {
-                      if (selectedDate) setEndDate(selectedDate);
-                    }}
-                  />
-                </View>
-              )}
-            </View>
-            */}
             {/* Select Pets */}
             <Text style={styles.petsSelectionHeader}>Select Pets</Text>
             <View style={styles.petButtonsContainer}>
@@ -355,17 +326,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: colors.background,
   },
-  // label: {
-  //   fontSize: 16,
-  //   color: colors.primary,
-  //   marginVertical: 10,
-  // },
-  // picker: {
-  //   width: "100%",
-  //   backgroundColor: colors.background,
-  //   borderRadius: 8,
-  //   marginBottom: 10,
-  // },
   picker: {
     backgroundColor: colors.background,
     borderColor: colors.primaryLightest,

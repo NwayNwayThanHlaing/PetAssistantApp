@@ -26,8 +26,7 @@ import EventModal from "./updateEventModal";
 import AddEventModal from "./addEventModal";
 import { Picker } from "@react-native-picker/picker";
 import Svg, { Path } from "react-native-svg";
-import { end } from "@cloudinary/url-gen/qualifiers/textAlignment";
-
+import { generateRecurringDates } from "../../actions/recurrenceUtils";
 const CalendarPage = () => {
   const navigation = useNavigation();
   const route = useRoute();
@@ -42,6 +41,10 @@ const CalendarPage = () => {
     time: { hours: 0, minutes: 0 },
     notes: "",
     pets: [],
+    appointment: false,
+    read: false,
+    recurrence: "none",
+    endDate: null,
   });
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [selectedPets, setSelectedPets] = useState([]);
@@ -211,7 +214,7 @@ const CalendarPage = () => {
     setSelectedYear(new Date().getFullYear().toString());
   };
 
-  const handleAddEvent = async () => {
+  const handleAddEvent = async (eventWithRecurrence) => {
     if (!newEvent.title.trim()) {
       alert("Event title is required.");
       return;
@@ -226,21 +229,37 @@ const CalendarPage = () => {
       const formattedDate = new Date(selectedDate).toISOString().split("T")[0];
 
       const updatedEvent = {
-        ...newEvent,
+        ...eventWithRecurrence,
         date: formattedDate,
         pets: selectedPets,
         read: false,
-        recurrence: newEvent.recurrence || "none",
-        endDate: newEvent.endDate || null,
+        recurrence: eventWithRecurrence.recurrence || "none",
+        endDate: eventWithRecurrence.endDate || null,
       };
 
-      const docId = await addEvent(updatedEvent, selectedPets);
-      updatedEvent.id = docId;
+      const recurrenceDates = generateRecurringDates(updatedEvent);
+      for (let date of recurrenceDates) {
+        const recurringEvent = {
+          ...updatedEvent,
+          date: date,
+        };
 
-      setEvents((prevEvents) => ({
-        ...prevEvents,
-        [formattedDate]: [...(prevEvents[formattedDate] || []), updatedEvent],
-      }));
+        const docId = await addEvent(recurringEvent, selectedPets);
+        recurringEvent.id = docId;
+
+        // ✅ Update local state to show it immediately on the calendar
+        setEvents((prevEvents) => ({
+          ...prevEvents,
+          [date]: [...(prevEvents[date] || []), recurringEvent],
+        }));
+      }
+      // const docId = await addEvent(updatedEvent, selectedPets);
+      // updatedEvent.id = docId;
+
+      // setEvents((prevEvents) => ({
+      //   ...prevEvents,
+      //   [formattedDate]: [...(prevEvents[formattedDate] || []), updatedEvent],
+      // }));
     } catch (error) {
       console.error("Error adding event:", error);
     } finally {
@@ -562,7 +581,9 @@ const CalendarPage = () => {
           selectedPets={selectedPets}
           setSelectedPets={setSelectedPets}
           petNames={petNames}
-          addEvent={handleAddEvent}
+          addEvent={(eventWithRecurrence) =>
+            handleAddEvent(eventWithRecurrence)
+          }
           loading={loading}
         />
 
