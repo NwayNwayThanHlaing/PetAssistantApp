@@ -111,7 +111,9 @@ const AddEventModal = ({
             />
             {/* Event Date */}
             <View style={styles.datePickerContainer}>
-              <Text style={{ color: colors.primary }}>Event Date</Text>
+              <Text style={{ color: colors.primary, fontSize: 16 }}>
+                Event Date
+              </Text>
               <DateTimePicker
                 value={newEvent.date ? new Date(newEvent.date) : new Date()}
                 mode="date"
@@ -140,7 +142,9 @@ const AddEventModal = ({
             </View>
             {/* Event Time */}
             <View style={styles.datePickerContainer}>
-              <Text style={{ color: colors.primary }}>Event Time</Text>
+              <Text style={{ color: colors.primary, fontSize: 16 }}>
+                Event Time
+              </Text>
               <DateTimePicker
                 mode="time"
                 value={
@@ -161,39 +165,50 @@ const AddEventModal = ({
               />
             </View>
 
-            <Text style={styles.label}>Repeat</Text>
-            <DropDownPicker
-              open={open}
-              value={recurrence} // Use recurrence state
-              items={[
-                { label: "None", value: "none" },
-                { label: "Daily", value: "daily" },
-                { label: "Weekly", value: "weekly" },
-                { label: "Monthly", value: "monthly" },
-                { label: "Yearly", value: "yearly" },
-              ]}
-              setOpen={setOpen}
-              setValue={(val) => {
-                setRecurrence(val);
-                if (val === "none") {
-                  setEndDate(null);
-                } else {
-                  setEndDate(newEvent.endDate || new Date()); // Set default end date
-                }
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                //marginBottom: 10,
+                paddingHorizontal: 10,
               }}
-              onChangeValue={(val) => {
-                setRecurrence(val);
-                if (val === "none") {
-                  setEndDate(null);
-                }
-              }}
-              placeholder="Repeat"
-              style={styles.picker}
-              dropDownContainerStyle={[
-                styles.dropdownContainer,
-                { zIndex: 1000 },
-              ]}
-            />
+            >
+              <Text style={styles.label}>Repeat</Text>
+              <DropDownPicker
+                open={open}
+                value={recurrence} // Use recurrence state
+                items={[
+                  { label: "None", value: "none" },
+                  { label: "Daily", value: "daily" },
+                  { label: "Weekly", value: "weekly" },
+                  { label: "Monthly", value: "monthly" },
+                  { label: "Yearly", value: "yearly" },
+                ]}
+                setOpen={setOpen}
+                setValue={(val) => {
+                  setRecurrence(val);
+                  if (val === "none") {
+                    setEndDate(null);
+                  } else {
+                    setEndDate(newEvent.endDate || new Date()); // Set default end date
+                  }
+                }}
+                onChangeValue={(val) => {
+                  setRecurrence(val);
+                  if (val === "none") {
+                    setEndDate(null);
+                  }
+                }}
+                placeholder="Repeat"
+                style={styles.picker}
+                dropDownContainerStyle={[
+                  styles.dropdownContainer,
+                  { zIndex: 1000 },
+                ]}
+                textStyle={{ fontSize: 16 }}
+              />
+            </View>
+
             {recurrence !== "none" && (
               <Text style={{ color: colors.primaryLight, marginTop: 5 }}>
                 Repeats {recurrence}
@@ -319,6 +334,7 @@ const styles = StyleSheet.create({
     borderColor: colors.primaryLightest,
     borderWidth: 1,
     padding: 12,
+    fontSize: 16,
     borderRadius: 8,
     marginBottom: 10,
     width: "100%",
@@ -376,6 +392,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     marginTop: 10,
+    paddingHorizontal: 10,
   },
   petButton: {
     marginTop: 10,
@@ -423,6 +440,26 @@ const styles = StyleSheet.create({
   checkboxLabel: {
     fontSize: 16,
     color: colors.primary,
+  },
+  label: {
+    color: colors.primary,
+    fontSize: 16,
+    width: "50%",
+  },
+  picker: {
+    backgroundColor: colors.background,
+    borderColor: colors.primaryLightest,
+    borderRadius: 8,
+    marginBottom: 10,
+    width: "50%",
+    zIndex: 1000,
+  },
+  dropdownContainer: {
+    width: "50%",
+    backgroundColor: colors.background,
+    borderColor: colors.primaryLightest,
+    borderRadius: 8,
+    zIndex: 1000,
   },
 });
 export default AddEventModal;

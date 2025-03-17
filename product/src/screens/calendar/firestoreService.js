@@ -117,8 +117,6 @@ export const fetchEvents = async () => {
         exceptions: data.exceptions || [],
       });
 
-      console.log("Recurrence dates for event", eventId, recurrenceDates);
-
       recurrenceDates.forEach((date) => {
         if (!eventsData[date]) {
           eventsData[date] = [];
@@ -183,7 +181,6 @@ export const addEvent = async (newEvent, selectedPets) => {
       read: false,
     });
 
-    console.log("Event added successfully with ID:", docRef.id);
     return docRef.id;
   } catch (error) {
     console.error("Error adding event to Firestore:", error);
@@ -251,7 +248,6 @@ export const updateEvent = async (selectedEvent) => {
   }
 };
 
-
 export const updateOneOccurrence = async (
   event,
   occurrenceDate,
@@ -290,9 +286,7 @@ export const updateOneOccurrence = async (
 
     const newDocRef = await addDoc(eventsRef, newEvent);
 
-    console.log(
-      `Updated one occurrence. New event created with ID: ${newDocRef.id}`
-    );
+    //console.log(`Updated one occurrence. New event created with ID: ${newDocRef.id}`);
 
     return newDocRef.id;
   } catch (error) {
@@ -343,9 +337,7 @@ export const updateFutureOccurrences = async (
 
     const docRef = await addDoc(eventsRef, newEvent);
 
-    console.log(
-      `Future occurrences updated. New event created with ID: ${docRef.id}`
-    );
+    //console.log(`Future occurrences updated. New event created with ID: ${docRef.id}`);
 
     return docRef.id;
   } catch (error) {
@@ -394,7 +386,7 @@ export const deleteOneOccurrence = async (eventId, occurrenceDate) => {
 
     // Prevent duplicates
     if (currentExceptions.includes(occurrenceDate)) {
-      console.log(`Date ${occurrenceDate} is already excluded.`);
+      //console.log(`Date ${occurrenceDate} is already excluded.`);
       return true; // Already deleted/excluded
     }
 
@@ -406,7 +398,7 @@ export const deleteOneOccurrence = async (eventId, occurrenceDate) => {
       updatedAt: Timestamp.now(),
     });
 
-    console.log(`Excluded date ${occurrenceDate} from event ${eventId}`);
+    //console.log(`Excluded date ${occurrenceDate} from event ${eventId}`);
     return true;
   } catch (error) {
     console.error("Error deleting one occurrence:", error);
@@ -445,13 +437,10 @@ export const deleteFutureOccurrences = async (event, cutoffDate) => {
     if (remainingDates.length === 0) {
       // Delete entire event if no occurrences remain
       await deleteDoc(eventDocRef);
-      console.log("All occurrences deleted. Event removed from database.");
     } else {
       // Update with new endDate and exceptions
       await updateDoc(eventDocRef, updatedEventData);
-      console.log("Future occurrences deleted. Updated event in database.");
     }
-
     return true;
   } catch (error) {
     console.error("Error deleting future occurrences:", error);

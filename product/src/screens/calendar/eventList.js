@@ -23,9 +23,6 @@ const EventList = ({ events = {}, selectedDate, onEventPress }) => {
 
     const foundEvents = events[selectedDate] || [];
 
-    // Log for debugging
-    console.log("Events for selectedDate:", selectedDate, foundEvents);
-
     // Sort events by time object {hours, minutes}
     const sortedEvents = foundEvents.sort((a, b) => {
       const aHours = a.time?.hours || 0;
