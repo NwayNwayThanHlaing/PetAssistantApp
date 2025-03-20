@@ -9,9 +9,10 @@ import {
   ActivityIndicator,
   StyleSheet,
 } from "react-native";
+
 import Modal from "react-native-modal";
 import DateTimePicker from "@react-native-community/datetimepicker";
-// import DropDownPicker from "react-native-dropdown-picker";
+import DropDownPicker from "react-native-dropdown-picker";
 import { colors } from "../../styles/Theme";
 
 const AddEventModal = ({
@@ -25,17 +26,18 @@ const AddEventModal = ({
   addEvent,
   loading,
 }) => {
+  const [open, setOpen] = useState(false);
   const [recurrence, setRecurrence] = useState("none");
   const [endDate, setEndDate] = useState(null);
-  // const [open, setOpen] = useState(false);
-  // const [value, setValue] = useState(null);
   const resetNewEvent = () => {
     setNewEvent((prev) => ({
       title: prev.title || "",
       date: prev.date instanceof Date ? prev.date : new Date(),
-      time: prev.time instanceof Date ? prev.time : new Date(),
+      time: prev.time || { hours: 0, minutes: 0 },
       notes: prev.notes || "",
       appointment: prev.appointment || false,
+      recurrence: prev.recurrence || "none",
+      endDate: prev.endDate || null,
     }));
     setSelectedPets((prev) => (prev.length === 0 ? [] : prev));
     setRecurrence("none");
@@ -66,6 +68,15 @@ const AddEventModal = ({
         ? prevSelected.filter((pet) => pet !== petName)
         : [...prevSelected, petName]
     );
+  };
+
+  const getTimeAsDate = (timeObj) => {
+    const now = new Date();
+    now.setHours(timeObj?.hours ?? 0);
+    now.setMinutes(timeObj?.minutes ?? 0);
+    now.setSeconds(0);
+    now.setMilliseconds(0);
+    return now;
   };
 
   return (
@@ -99,17 +110,14 @@ const AddEventModal = ({
               onChangeText={(text) => handleTextInputChange("notes", text)}
               multiline
             />
-
             {/* Event Date */}
             <View style={styles.datePickerContainer}>
-              <Text style={{ color: colors.primary }}>Event Date</Text>
+              <Text style={{ color: colors.primary, fontSize: 16 }}>
+                Event Date
+              </Text>
               <DateTimePicker
+                value={newEvent.date ? new Date(newEvent.date) : new Date()}
                 mode="date"
-                value={
-                  newEvent.date instanceof Date
-                    ? newEvent.date
-                    : new Date(newEvent.date)
-                }
                 onChange={(event, selectedDate) => {
                   if (selectedDate) {
                     // Format the date as YYYY-MM-DD inline
@@ -124,6 +132,10 @@ const AddEventModal = ({
                     setNewEvent((prevEvent) => ({
                       ...prevEvent,
                       date: formattedDate,
+                      time: {
+                        hours: now.getHours(),
+                        minutes: now.getMinutes(),
+                      },
                     }));
                   }
                 }}
@@ -131,19 +143,22 @@ const AddEventModal = ({
             </View>
             {/* Event Time */}
             <View style={styles.datePickerContainer}>
-              <Text style={{ color: colors.primary }}>Event Time</Text>
+              <Text style={{ color: colors.primary, fontSize: 16 }}>
+                Event Time
+              </Text>
               <DateTimePicker
                 mode="time"
                 value={
-                  newEvent.time && newEvent.time instanceof Date
-                    ? newEvent.time
-                    : new Date()
+                  newEvent.time ? getTimeAsDate(newEvent.time) : new Date()
                 }
                 onChange={(event, selectedTime) => {
                   if (selectedTime) {
                     setNewEvent((prevEvent) => ({
                       ...prevEvent,
-                      time: selectedTime,
+                      time: {
+                        hours: selectedTime.getHours(),
+                        minutes: selectedTime.getMinutes(),
+                      },
                     }));
                   }
                 }}
@@ -151,45 +166,76 @@ const AddEventModal = ({
               />
             </View>
 
-            {/* 
-            // Recurrence and End Date
-            <View>
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                //marginBottom: 10,
+                paddingHorizontal: 10,
+              }}
+            >
               <Text style={styles.label}>Repeat</Text>
               <DropDownPicker
                 open={open}
-                value={value}
+                value={recurrence}
                 items={[
                   { label: "None", value: "none" },
-                  { label: "Every Day", value: "daily" },
-                  { label: "Every Week", value: "weekly" },
-                  { label: "Every Two Weeks", value: "biweekly" },
-                  { label: "Every Month", value: "monthly" },
-                  { label: "Every Year", value: "yearly" },
+                  { label: "Daily", value: "daily" },
+                  { label: "Weekly", value: "weekly" },
+                  { label: "Monthly", value: "monthly" },
+                  { label: "Yearly", value: "yearly" },
                 ]}
                 setOpen={setOpen}
-                setValue={setValue}
-                onChangeValue={(itemValue) => {
-                  setRecurrence(itemValue);
-                  if (itemValue === "none") setEndDate(null); // Reset end date for non-recurring
+                setValue={(val) => {
+                  setRecurrence(val);
+                  if (val === "none") {
+                    setEndDate(null);
+                  } else {
+                    setEndDate(newEvent.endDate || new Date()); // Set default end date
+                  }
                 }}
-                style={styles.picker} // Use the same picker style or customize it further
-                dropDownDirection="BOTTOM" // Open dropdown below
+                onChangeValue={(val) => {
+                  setRecurrence(val);
+                  if (val === "none") {
+                    setEndDate(null);
+                  }
+                }}
+                placeholder="Repeat"
+                style={styles.picker}
+                dropDownContainerStyle={[
+                  styles.dropdownContainer,
+                  { zIndex: 1000 },
+                ]}
+                textStyle={{ fontSize: 16 }}
               />
-
-              {recurrence !== "none" && (
-                <View style={styles.datePickerContainer}>
-                  <Text style={{ color: colors.primaryLighter }}>End Date</Text>
-                  <DateTimePicker
-                    mode="date"
-                    value={endDate || new Date()}
-                    onChange={(event, selectedDate) => {
-                      if (selectedDate) setEndDate(selectedDate);
-                    }}
-                  />
-                </View>
-              )}
             </View>
-            */}
+
+            {recurrence !== "none" && (
+              <View style={styles.datePickerContainer}>
+                <Text style={{ color: colors.primary, fontSize: 16 }}>
+                  End Date
+                </Text>
+                <DateTimePicker
+                  mode="date"
+                  value={endDate instanceof Date ? endDate : new Date(endDate)}
+                  onChange={(event, selectedDate) => {
+                    if (selectedDate) setEndDate(selectedDate);
+                  }}
+                />
+              </View>
+            )}
+            {recurrence !== "none" && (
+              <Text
+                style={{
+                  color: colors.primaryLight,
+                  marginTop: 5,
+                  marginLeft: 10,
+                }}
+              >
+                Repeats {recurrence}
+                {endDate ? ` until ${endDate.toDateString()}` : ""}
+              </Text>
+            )}
 
             {/* Select Pets */}
             <Text style={styles.petsSelectionHeader}>Select Pets</Text>
@@ -214,7 +260,6 @@ const AddEventModal = ({
                 </TouchableOpacity>
               ))}
             </View>
-
             {/* Appointment Checkbox */}
             <TouchableOpacity
               style={styles.checkboxContainer}
@@ -273,6 +318,7 @@ const styles = StyleSheet.create({
   modalContainer: {
     justifyContent: "center",
     alignItems: "center",
+    flex: 1,
     margin: 10,
   },
   modalContent: {
@@ -280,7 +326,7 @@ const styles = StyleSheet.create({
     padding: 20,
     borderRadius: 10,
     width: "90%",
-    maxHeight: "80%",
+    maxHeight: "90%",
     alignSelf: "center",
   },
   scrollViewContent: {
@@ -298,6 +344,7 @@ const styles = StyleSheet.create({
     borderColor: colors.primaryLightest,
     borderWidth: 1,
     padding: 12,
+    fontSize: 16,
     borderRadius: 8,
     marginBottom: 10,
     width: "100%",
@@ -315,17 +362,19 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: colors.background,
   },
-  // label: {
-  //   fontSize: 16,
-  //   color: colors.primary,
-  //   marginVertical: 10,
-  // },
-  // picker: {
-  //   width: "100%",
-  //   backgroundColor: colors.background,
-  //   borderRadius: 8,
-  //   marginBottom: 10,
-  // },
+  picker: {
+    backgroundColor: colors.background,
+    borderColor: colors.primaryLightest,
+    borderRadius: 8,
+    marginBottom: 10,
+    zIndex: 1000,
+  },
+  dropdownContainer: {
+    backgroundColor: colors.background,
+    borderColor: colors.primaryLightest,
+    borderRadius: 8,
+    zIndex: 1000,
+  },
   buttonContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -352,7 +401,8 @@ const styles = StyleSheet.create({
   petButtonsContainer: {
     flexDirection: "row",
     flexWrap: "wrap",
-    marginTop: 10,
+    marginTop: 5,
+    paddingHorizontal: 10,
   },
   petButton: {
     marginTop: 10,
@@ -376,15 +426,17 @@ const styles = StyleSheet.create({
     color: "white",
   },
   petsSelectionHeader: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: "bold",
     color: colors.primary,
     marginTop: 20,
+    marginLeft: 10,
   },
   checkboxContainer: {
     flexDirection: "row",
     alignItems: "center",
     marginTop: 20,
+    marginLeft: 10,
   },
   checkbox: {
     width: 20,
@@ -400,6 +452,26 @@ const styles = StyleSheet.create({
   checkboxLabel: {
     fontSize: 16,
     color: colors.primary,
+  },
+  label: {
+    color: colors.primary,
+    fontSize: 16,
+    width: "50%",
+  },
+  picker: {
+    backgroundColor: colors.background,
+    borderColor: colors.primaryLightest,
+    borderRadius: 8,
+    marginBottom: 10,
+    width: "50%",
+    zIndex: 1000,
+  },
+  dropdownContainer: {
+    width: "50%",
+    backgroundColor: colors.background,
+    borderColor: colors.primaryLightest,
+    borderRadius: 8,
+    zIndex: 1000,
   },
 });
 export default AddEventModal;
