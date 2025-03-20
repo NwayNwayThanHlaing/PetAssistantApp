@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
   StyleSheet,
 } from "react-native";
+
 import Modal from "react-native-modal";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import DropDownPicker from "react-native-dropdown-picker";
@@ -176,7 +177,7 @@ const AddEventModal = ({
               <Text style={styles.label}>Repeat</Text>
               <DropDownPicker
                 open={open}
-                value={recurrence} // Use recurrence state
+                value={recurrence}
                 items={[
                   { label: "None", value: "none" },
                   { label: "Daily", value: "daily" },
@@ -210,14 +211,10 @@ const AddEventModal = ({
             </View>
 
             {recurrence !== "none" && (
-              <Text style={{ color: colors.primaryLight, marginTop: 5 }}>
-                Repeats {recurrence}
-                {endDate ? ` until ${endDate.toDateString()}` : ""}
-              </Text>
-            )}
-            {recurrence !== "none" && (
               <View style={styles.datePickerContainer}>
-                <Text style={{ color: colors.primary }}>End Date</Text>
+                <Text style={{ color: colors.primary, fontSize: 16 }}>
+                  End Date
+                </Text>
                 <DateTimePicker
                   mode="date"
                   value={endDate instanceof Date ? endDate : new Date(endDate)}
@@ -226,6 +223,18 @@ const AddEventModal = ({
                   }}
                 />
               </View>
+            )}
+            {recurrence !== "none" && (
+              <Text
+                style={{
+                  color: colors.primaryLight,
+                  marginTop: 5,
+                  marginLeft: 10,
+                }}
+              >
+                Repeats {recurrence}
+                {endDate ? ` until ${endDate.toDateString()}` : ""}
+              </Text>
             )}
 
             {/* Select Pets */}
@@ -309,6 +318,7 @@ const styles = StyleSheet.create({
   modalContainer: {
     justifyContent: "center",
     alignItems: "center",
+    flex: 1,
     margin: 10,
   },
   modalContent: {
@@ -316,7 +326,7 @@ const styles = StyleSheet.create({
     padding: 20,
     borderRadius: 10,
     width: "90%",
-    maxHeight: "80%",
+    maxHeight: "90%",
     alignSelf: "center",
   },
   scrollViewContent: {
@@ -391,7 +401,7 @@ const styles = StyleSheet.create({
   petButtonsContainer: {
     flexDirection: "row",
     flexWrap: "wrap",
-    marginTop: 10,
+    marginTop: 5,
     paddingHorizontal: 10,
   },
   petButton: {
@@ -416,15 +426,17 @@ const styles = StyleSheet.create({
     color: "white",
   },
   petsSelectionHeader: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: "bold",
     color: colors.primary,
     marginTop: 20,
+    marginLeft: 10,
   },
   checkboxContainer: {
     flexDirection: "row",
     alignItems: "center",
     marginTop: 20,
+    marginLeft: 10,
   },
   checkbox: {
     width: 20,
