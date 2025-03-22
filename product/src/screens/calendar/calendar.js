@@ -27,7 +27,6 @@ import EventList from "./eventList";
 import EventModal from "./updateEventModal";
 import AddEventModal from "./addEventModal";
 import Svg, { Path } from "react-native-svg";
-import { generateRecurringDates } from "../../actions/recurrenceUtils";
 
 const CalendarPage = () => {
   const route = useRoute();

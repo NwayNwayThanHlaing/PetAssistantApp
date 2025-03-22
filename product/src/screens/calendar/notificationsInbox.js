@@ -93,7 +93,7 @@ const NotificationsInbox = ({ navigation }) => {
     };
 
     fetchNotifications();
-  }, [notifications]);
+  }, [userId]);
 
   // Listen for notification clicks
   useEffect(() => {

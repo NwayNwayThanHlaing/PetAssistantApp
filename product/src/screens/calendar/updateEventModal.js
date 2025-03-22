@@ -91,6 +91,25 @@ const EventModal = ({
         : [...(prevEvent.relatedPets || []), petName],
     }));
   };
+  const hasTimeChanged = (oldDate, oldTime, newDate, newTime) => {
+    return (
+      oldDate !== newDate ||
+      oldTime.hours !== newTime.hours ||
+      oldTime.minutes !== newTime.minutes
+    );
+  };
+
+  const isTimeInFuture = (date, time) => {
+    const [year, month, day] = date.split("-");
+    const eventDateTime = new Date(
+      year,
+      month - 1,
+      day,
+      time.hours,
+      time.minutes
+    );
+    return eventDateTime > new Date();
+  };
 
   return (
     <Modal

@@ -3,8 +3,6 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import Login from "./auth/login";
 import Signup from "./auth/signup";
-import Home from "./screens/home";
-import ReminderPage from "./screens/reminder";
 import Dashboard from "./screens/dashboard";
 import Booking from "./screens/pets/booking";
 import Profile from "./screens/profile";
@@ -41,13 +39,11 @@ const MyStack = () => {
           }}
         />
         <Stack.Screen name="SignUp" component={Signup} />
-        <Stack.Screen name="Home" component={Home} />
         <Stack.Screen name="Maps" component={Maps} />
         <Stack.Screen name="Wall" component={Wall} />
         <Stack.Screen name="CreatePost" component={CreatePost} />
         <Stack.Screen name="ChatInbox" component={ChatInbox} />
         <Stack.Screen name="Chat" component={Chat} />
-        <Stack.Screen name="ReminderPage" component={ReminderPage} />
         <Stack.Screen name="Dashboard" component={Dashboard} />
         <Stack.Screen name="Booking" component={Booking} />
         <Stack.Screen name="Profile" component={Profile} />
