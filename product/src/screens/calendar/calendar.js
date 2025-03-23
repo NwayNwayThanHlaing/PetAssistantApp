@@ -213,7 +213,7 @@ const CalendarPage = () => {
     setSelectedPets([]);
   };
 
-  const updateNonRecurringEvent = async (updatedFields) => {
+  const handleUpdateEvent = async (updatedFields) => {
     setUpdateLoading(true);
     try {
       await updateEvent({
@@ -227,86 +227,6 @@ const CalendarPage = () => {
     } finally {
       setUpdateLoading(false);
     }
-  };
-
-  const handleUpdateEvent = (updatedFields) => {
-    if (!selectedEvent || !selectedEvent.id) {
-      alert("No event selected!");
-      return;
-    }
-
-    const isRecurring =
-      selectedEvent.recurrence && selectedEvent.recurrence !== "none";
-
-    if (!isRecurring) {
-      // Non-recurring event directly update
-      updateNonRecurringEvent(updatedFields);
-      return;
-    }
-
-    // Show options if recurring
-    Alert.alert("Update Event", "What would you like to update?", [
-      { text: "Cancel", style: "cancel" },
-
-      {
-        text: "This occurrence only",
-        onPress: async () => {
-          setUpdateLoading(true);
-          try {
-            await updateOneOccurrence(
-              selectedEvent,
-              selectedDate,
-              updatedFields
-            );
-            await fetchAndSetEvents();
-            setIsEventModalVisible(false);
-          } catch (error) {
-            console.error("Error updating one occurrence:", error);
-          } finally {
-            setUpdateLoading(false);
-          }
-        },
-      },
-
-      {
-        text: "This and future occurrences",
-        onPress: async () => {
-          setUpdateLoading(true);
-          try {
-            await updateFutureOccurrences(
-              selectedEvent,
-              selectedDate,
-              updatedFields
-            );
-            await fetchAndSetEvents();
-            setIsEventModalVisible(false);
-          } catch (error) {
-            console.error("Error updating future occurrences:", error);
-          } finally {
-            setUpdateLoading(false);
-          }
-        },
-      },
-
-      {
-        text: "Entire series",
-        onPress: async () => {
-          setUpdateLoading(true);
-          try {
-            await updateEvent({
-              ...selectedEvent,
-              ...updatedFields,
-            });
-            await fetchAndSetEvents();
-            setIsEventModalVisible(false);
-          } catch (error) {
-            console.error("Error updating entire series:", error);
-          } finally {
-            setUpdateLoading(false);
-          }
-        },
-      },
-    ]);
   };
 
   // HANDLE DELETE EVENT ==========================================================

@@ -38,7 +38,8 @@ const EventModal = ({
           ...prevEvent,
           dateTime: date,
           relatedPets: selectedEvent.relatedPets || [],
-          appointment: selectedEvent.appointment || false, // Initialize appointment field
+          appointment: selectedEvent.appointment || false,
+          read: selectedEvent.read || false,
         }));
       }
     }
@@ -72,6 +73,14 @@ const EventModal = ({
     }
   };
 
+  const isTimeInFuture = (date, time) => {
+    const [year, month, day] = date.split("-");
+    const eventDateTime = new Date(year, month, day, time.hours, time.minutes);
+    console.log("eventDateTime", eventDateTime);
+    console.log(eventDateTime >= new Date());
+    return eventDateTime >= new Date();
+  };
+
   const getDateTimeFromEvent = (event) => {
     const date = new Date();
     const hours = event?.time?.hours ?? 0;
@@ -90,25 +99,6 @@ const EventModal = ({
         ? prevEvent.relatedPets.filter((pet) => pet !== petName)
         : [...(prevEvent.relatedPets || []), petName],
     }));
-  };
-  const hasTimeChanged = (oldDate, oldTime, newDate, newTime) => {
-    return (
-      oldDate !== newDate ||
-      oldTime.hours !== newTime.hours ||
-      oldTime.minutes !== newTime.minutes
-    );
-  };
-
-  const isTimeInFuture = (date, time) => {
-    const [year, month, day] = date.split("-");
-    const eventDateTime = new Date(
-      year,
-      month - 1,
-      day,
-      time.hours,
-      time.minutes
-    );
-    return eventDateTime > new Date();
   };
 
   return (
@@ -231,6 +221,9 @@ const EventModal = ({
                 <TouchableOpacity
                   style={[styles.modalButton, styles.saveButton]}
                   onPress={() => {
+                    const newDate = selectedEvent.date;
+                    const newTime = selectedEvent.time;
+
                     const updatedFields = {
                       title: selectedEvent.title,
                       notes: selectedEvent.notes,
@@ -240,7 +233,13 @@ const EventModal = ({
                       endDate: selectedEvent.endDate,
                       relatedPets: selectedEvent.relatedPets,
                       appointment: selectedEvent.appointment,
+                      read: selectedEvent.read,
                     };
+
+                    const status = isTimeInFuture(newDate, newTime);
+                    if (status) {
+                      updatedFields.read = false;
+                    }
 
                     updateEvent(updatedFields);
                   }}

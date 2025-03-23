@@ -240,6 +240,7 @@ export const updateEvent = async (selectedEvent) => {
       recurrence: selectedEvent.recurrence || "none",
       endDate: formattedEndDate,
       exceptions: selectedEvent.exceptions || [],
+      read: selectedEvent.read || false,
     };
     await updateDoc(eventDocRef, updatedData);
   } catch (error) {
