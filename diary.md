@@ -1,4 +1,46 @@
 ## Term 2
+### Week 10 (24 March 2025)
+
+Summary: 
+
+Challenges: 
+
+Next Step: 
+
+### Week 9 (17 March 2025)
+
+Summary: 
+
+- Implemented chat inbox and finalized chat room with real time messaging feature when clicking on message button of user's profile, with options to delete for myself, delete for everyone and edit option the message within 3 minutes after being sent.
+- Developed post uploading, media uploading up to 9 photos as a post on user's wall.
+- Started working on the project report.
+- Implemented recurring events creation and deletion with options to delete only this event, this and all future occurrences, delete entire series.
+- Adjusted colors and fonts all over the application, and fixed read/unread uni not displaying for notifications.
+
+Challenges: 
+
+- To implement recurring events in different aspects such as repeat events daily, weekly, monthly, yearly for creation and deletion with respective options.
+
+Next Step: 
+
+- To finish report and do the testings.
+
+### Week 8 (10 March 2025)
+
+Summary: 
+
+- Implemented other users discovery on the map.
+- Added message feature to communicate between users
+- Created account profile for each user with message button and posts.
+
+Challenges: 
+
+- To make messaging feature in real time. 
+
+Next Step: 
+
+- To implement chat inbox and chat room.
+
 
 ### Week 6 - 7 (24 February 2025)
 
@@ -10,7 +52,6 @@ Summary:
 Challenges: 
 
 - To ensure indicators are correctly positioned based on real-time geolocation inputs.
-
 
 Next Step: 
 
