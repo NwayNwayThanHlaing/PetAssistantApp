@@ -5,6 +5,22 @@ import CreatePost from "../../src/screens/createPost";
 
 // === MOCKS AND SETUP ===
 
+// Mock react-native-modal to avoid animation/rendering issues in test environment
+beforeAll(() => {
+  jest.spyOn(console, "error").mockImplementation((message) => {
+    if (
+      message.includes("An update to VirtualizedList") ||
+      message.includes("act")
+    )
+      return;
+    console.error(message);
+  });
+});
+
+afterAll(() => {
+  console.error.mockRestore();
+});
+
 // Mock Firebase Auth and Firestore
 jest.mock("../../src/auth/firebaseConfig", () => ({
   auth: { currentUser: { uid: "testUserId" } },
@@ -39,8 +55,8 @@ describe("CreatePost", () => {
     );
 
     expect(getByPlaceholderText("What's on your mind?")).toBeTruthy();
-    expect(getByText("Pick Images (0/9)"));
-    expect(getByText("Post"));
+    expect(getByText("Pick Images (0/9)")).toBeTruthy();
+    expect(getByText("Post")).toBeTruthy();
   });
 
   // Test 2: Allows user to type into the status input
