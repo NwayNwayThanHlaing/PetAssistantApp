@@ -7,6 +7,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { colors } from "../../styles/Theme";
+import { formatTime } from "../../actions/utils";
 
 const EventList = ({ events = {}, selectedDate, onEventPress }) => {
   const [todayEvents, setTodayEvents] = useState([]);
@@ -81,23 +82,6 @@ const EventList = ({ events = {}, selectedDate, onEventPress }) => {
       ))}
     </View>
   );
-};
-
-// Helper to format time consistently
-const formatTime = (time) => {
-  if (
-    !time ||
-    typeof time.hours !== "number" ||
-    typeof time.minutes !== "number"
-  ) {
-    return "00:00 AM";
-  }
-
-  const hours12 = ((time.hours + 11) % 12) + 1;
-  const minutes = time.minutes.toString().padStart(2, "0");
-  const ampm = time.hours >= 12 ? "PM" : "AM";
-
-  return `${hours12}:${minutes} ${ampm}`;
 };
 
 const styles = StyleSheet.create({

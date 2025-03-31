@@ -19,46 +19,16 @@ import {
 } from "../../actions/userActions";
 import * as Notifications from "expo-notifications";
 import { MaterialIcons } from "@expo/vector-icons";
+import {
+  formatDateTime,
+  isWithinLastTwoWeeks,
+  sortNotifications,
+} from "../../actions/utils";
 
 const NotificationsInbox = ({ navigation }) => {
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const userId = auth.currentUser?.uid;
-
-  const isWithinLastTwoWeeks = (dateString, time) => {
-    if (!dateString || !time) return false;
-
-    // Convert date and time to a JavaScript Date object
-    const [year, month, day] = dateString.split("-");
-    const notificationDate = new Date(
-      year,
-      month - 1,
-      day,
-      time.hours,
-      time.minutes
-    );
-    const currentDate = new Date();
-    const differenceInMs = currentDate - notificationDate; // calculate difference in milliseconds
-
-    // Check if the notification is in the past and within the last two weeks
-    return differenceInMs > 0 && differenceInMs <= 14 * 24 * 60 * 60 * 1000;
-  };
-
-  const sortNotifications = (notifications) => {
-    return notifications.sort((a, b) => {
-      // Convert date and time to JavaScript Date objects for comparison
-      const dateA = new Date(
-        `${a.date}T${a.time.hours.toString().padStart(2, "0")}:
-         ${a.time.minutes.toString().padStart(2, "0")}: 00`
-      );
-      const dateB = new Date(
-        `${b.date}T${b.time.hours.toString().padStart(2, "0")}:
-         ${b.time.minutes.toString().padStart(2, "0")}: 00`
-      );
-
-      return dateB - dateA; // Sort in descending order
-    });
-  };
 
   useEffect(() => {
     const fetchNotifications = async () => {
@@ -132,26 +102,6 @@ const NotificationsInbox = ({ navigation }) => {
     } catch (error) {
       console.error("Error updating read status:", error);
     }
-  };
-
-  // Helper function to format date & time as "DD/MM/YYYY HH:MM AM/PM"
-  const formatDateTime = (dateString, time) => {
-    if (!dateString || !time) return "No Date Provided";
-
-    // Convert date from "YYYY-MM-DD" to "DD/MM/YYYY"
-    const parts = dateString.split("-"); // Split "YYYY-MM-DD"
-    if (parts.length !== 3) return dateString; // Return original if format is incorrect
-    const formattedDate = `${parts[2]}/${parts[1]}/${parts[0]}`; // Convert to "DD/MM/YYYY"
-
-    // Format time to "HH:MM AM/PM"
-    let { hours, minutes } = time;
-    const period = hours >= 12 ? "PM" : "AM";
-    hours = hours % 12 || 12; // Convert 24-hour to 12-hour format
-    const formattedTime = `${hours}:${minutes
-      .toString()
-      .padStart(2, "0")}${period}`;
-
-    return `${formattedDate} ${formattedTime}`;
   };
 
   const renderNotificationItem = ({ item }) => (

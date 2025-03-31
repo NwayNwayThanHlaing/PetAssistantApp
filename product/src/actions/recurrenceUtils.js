@@ -9,14 +9,10 @@ const recurrenceMap = {
 
 export const generateRecurringDates = (event) => {
   if (!event.date) {
-    console.warn("Missing date on event:", event);
     return [];
   }
-
   const startDate = new Date(event.date);
-
   if (isNaN(startDate.getTime())) {
-    console.warn("Invalid startDate:", event.date);
     return [];
   }
 
@@ -36,7 +32,6 @@ export const generateRecurringDates = (event) => {
     }
 
     if (isNaN(untilDate.getTime())) {
-      console.warn("Invalid untilDate:", event.endDate);
       untilDate = undefined; // fallback
     }
   }
@@ -91,7 +86,6 @@ const normalizeExceptions = (exceptions = []) => {
         // Firestore Timestamp
         return new Date(ex.seconds * 1000).toISOString().split("T")[0];
       } else {
-        console.warn("Unknown exception format:", ex);
         return null;
       }
     })
