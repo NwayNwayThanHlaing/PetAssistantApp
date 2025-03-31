@@ -17,8 +17,6 @@ import {
   fetchEvents,
   addEvent,
   updateEvent,
-  updateOneOccurrence,
-  updateFutureOccurrences,
   deleteEvent,
   deleteOneOccurrence,
   deleteFutureOccurrences,
@@ -85,24 +83,16 @@ const CalendarPage = () => {
   // FETCH DATA ===================================================================
   useEffect(() => {
     const fetchData = async () => {
-      try {
-        const petList = await fetchPetNames();
-        setPetNames(petList);
-      } catch (error) {
-        console.error("Failed to fetch pet names:", error);
-      }
+      const petList = await fetchPetNames();
+      setPetNames(petList);
     };
 
     fetchData();
   }, []);
 
   const fetchAndSetEvents = async () => {
-    try {
-      const eventsData = await fetchEvents();
-      setEvents(eventsData);
-    } catch (error) {
-      console.error("Failed to fetch events:", error);
-    }
+    const eventsData = await fetchEvents();
+    setEvents(eventsData);
   };
 
   useEffect(() => {
@@ -190,7 +180,6 @@ const CalendarPage = () => {
       // After adding, refetch events
       await fetchAndSetEvents();
     } catch (error) {
-      console.error("Error adding event:", error);
     } finally {
       setLoading(false);
       setIsAddingEvent(false);
@@ -223,7 +212,7 @@ const CalendarPage = () => {
       await fetchAndSetEvents();
       setIsEventModalVisible(false);
     } catch (error) {
-      console.error("Error updating event:", error);
+      //console.error("Error updating event:", error);
     } finally {
       setUpdateLoading(false);
     }
@@ -232,7 +221,7 @@ const CalendarPage = () => {
   // HANDLE DELETE EVENT ==========================================================
   const handleDeleteEvent = () => {
     if (!selectedEvent || !selectedEvent.id) {
-      console.error("No event selected for deletion");
+      //console.error("No event selected for deletion");
       return;
     }
 
@@ -256,7 +245,7 @@ const CalendarPage = () => {
                 await fetchAndSetEvents();
                 setIsEventModalVisible(false);
               } catch (error) {
-                console.error("Error deleting event:", error);
+                //console.error("Error deleting event:", error);
               } finally {
                 setDeleteLoading(false);
               }
@@ -285,7 +274,7 @@ const CalendarPage = () => {
               setIsEventModalVisible(false);
             }
           } catch (error) {
-            console.error("Error excluding occurrence:", error);
+            //console.error("Error excluding occurrence:", error);
           } finally {
             setDeleteLoading(false);
           }
@@ -305,7 +294,7 @@ const CalendarPage = () => {
               setIsEventModalVisible(false);
             }
           } catch (error) {
-            console.error("Error deleting future occurrences:", error);
+            //console.error("Error deleting future occurrences:", error);
           } finally {
             setDeleteLoading(false);
           }
@@ -321,7 +310,7 @@ const CalendarPage = () => {
             await fetchAndSetEvents();
             setIsEventModalVisible(false);
           } catch (error) {
-            console.error("Error deleting event:", error);
+            //console.error("Error deleting event:", error);
           } finally {
             setDeleteLoading(false);
           }
