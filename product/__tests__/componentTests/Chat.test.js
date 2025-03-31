@@ -87,13 +87,13 @@ jest.mock("firebase/firestore", () => {
 // === TEST CASES ===
 
 describe("ChatInbox", () => {
-  // Basic rendering test: should show header title
+  // Test 1: Basic rendering test: should show header title
   it("renders header with title", () => {
     const { getByText } = render(<ChatInbox navigation={mockNavigation} />);
     expect(getByText("Chats")).toBeTruthy();
   });
 
-  // Renders a chat fetched from mocked Firestore
+  // Test 2: Renders a chat fetched from mocked Firestore
   it("renders a chat item from Firestore", async () => {
     const { findByText } = render(<ChatInbox navigation={mockNavigation} />);
 
@@ -102,7 +102,7 @@ describe("ChatInbox", () => {
     expect(await findByText("Hey!")).toBeTruthy();
   });
 
-  // Simulates navigation to chat when user taps on chat item
+  // Test 3: Simulates navigation to chat when user taps on chat item
   it("navigates to Chat screen on chat press", async () => {
     const { findByText } = render(<ChatInbox navigation={mockNavigation} />);
 
@@ -115,7 +115,7 @@ describe("ChatInbox", () => {
     });
   });
 
-  // Simulates pressing the back button in the header
+  // Test 4: Simulates pressing the back button in the header
   it("calls goBack when back button is pressed", () => {
     const { getByTestId } = render(<ChatInbox navigation={mockNavigation} />);
 

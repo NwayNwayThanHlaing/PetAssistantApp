@@ -37,7 +37,7 @@ describe("AddEventModal", () => {
     loading: false,
   };
 
-  // Test: Modal renders all basic input fields and buttons
+  // Test 1: Modal renders all basic input fields and buttons
   it("renders the modal with initial elements", () => {
     const { getByPlaceholderText, getByText } = render(
       <AddEventModal {...defaultProps} />
@@ -48,7 +48,7 @@ describe("AddEventModal", () => {
     expect(getByText("Select Pets")).toBeTruthy(); // Pets dropdown label
   });
 
-  // Test: Typing in the event title input calls setNewEvent()
+  // Test 2: Typing in the event title input calls setNewEvent()
   it("calls setNewEvent when typing in title input", () => {
     const { getByPlaceholderText } = render(
       <AddEventModal {...defaultProps} />

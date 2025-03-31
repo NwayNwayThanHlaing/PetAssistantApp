@@ -58,28 +58,28 @@ jest.mock("../../src/screens/calendar/eventList", () => {
 
 // === TEST CASES ===
 describe("CalendarPage", () => {
-  // Check that important UI buttons render
+  // Test 1: Check that important UI buttons render
   it("renders 'Today' and '+ Add' buttons", () => {
     const { getByText } = render(<CalendarPage />);
     expect(getByText("Today")).toBeTruthy();
     expect(getByText("+ Add")).toBeTruthy();
   });
 
-  // Ensure pressing '+ Add' does not crash
+  // Test 2: Ensure pressing '+ Add' does not crash
   it("pressing '+ Add' does not crash", () => {
     const { getByText } = render(<CalendarPage />);
     fireEvent.press(getByText("+ Add"));
     expect(true).toBe(true); // Placeholder assertion
   });
 
-  // Ensure pressing 'Today' does not crash
+  // Test 3: Ensure pressing 'Today' does not crash
   it("pressing 'Today' does not crash", () => {
     const { getByText } = render(<CalendarPage />);
     fireEvent.press(getByText("Today"));
     expect(true).toBe(true); // Placeholder assertion
   });
 
-  // Check that the calendar header displays the current month and year
+  // Test 4: Check that the calendar header displays the current month and year
   it("renders calendar month and year header correctly", () => {
     const { getByText } = render(<CalendarPage />);
 
@@ -92,7 +92,7 @@ describe("CalendarPage", () => {
     expect(getByText(expectedYear)).toBeTruthy();
   });
 
-  // Check that the calendar displays the current date
+  // Test 5: Check that the calendar displays the current date
   it("shows event section title with selected date", async () => {
     const today = new Date();
     const formattedDate = today.toISOString().split("T")[0];
@@ -103,7 +103,7 @@ describe("CalendarPage", () => {
     });
   });
 
-  // Check that the calendar container renders without crashing
+  // Test 6: Check that the calendar container renders without crashing
   it("renders calendar without crashing", async () => {
     const { getByTestId } = render(<CalendarPage />);
     expect(getByTestId("calendar-container")).toBeTruthy();

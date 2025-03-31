@@ -15,7 +15,6 @@ import * as ImagePicker from "expo-image-picker";
 import { firestore, auth } from "../auth/firebaseConfig";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { colors } from "../styles/Theme";
-import { MaterialIcons } from "@expo/vector-icons";
 
 const MAX_IMAGES = 9;
 const MAX_STATUS_LENGTH = 100;
