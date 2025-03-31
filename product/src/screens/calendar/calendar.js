@@ -385,6 +385,7 @@ const CalendarPage = () => {
           {/* Calendar */}
           <View style={styles.calendarContainer}>
             <Calendar
+              testID="calendar-container"
               key={formattedDate}
               current={formattedDate}
               onDayPress={(day) => {

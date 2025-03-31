@@ -1,5 +1,5 @@
 import React from "react";
-import { render, fireEvent } from "@testing-library/react-native";
+import { render, fireEvent, waitFor } from "@testing-library/react-native";
 import CalendarPage from "../../src/screens/calendar/calendar";
 
 // === MOCKS AND SETUP ===
@@ -57,7 +57,6 @@ jest.mock("../../src/screens/calendar/eventList", () => {
 });
 
 // === TEST CASES ===
-// Begin test suite
 describe("CalendarPage", () => {
   // Check that important UI buttons render
   it("renders 'Today' and '+ Add' buttons", () => {
@@ -78,5 +77,35 @@ describe("CalendarPage", () => {
     const { getByText } = render(<CalendarPage />);
     fireEvent.press(getByText("Today"));
     expect(true).toBe(true); // Placeholder assertion
+  });
+
+  // Check that the calendar header displays the current month and year
+  it("renders calendar month and year header correctly", () => {
+    const { getByText } = render(<CalendarPage />);
+
+    const today = new Date();
+    const expectedMonth = today.toLocaleString("default", { month: "long" });
+    const expectedYear = today.getFullYear().toString();
+
+    // Check if both are rendered independently
+    expect(getByText(expectedMonth)).toBeTruthy();
+    expect(getByText(expectedYear)).toBeTruthy();
+  });
+
+  // Check that the calendar displays the current date
+  it("shows event section title with selected date", async () => {
+    const today = new Date();
+    const formattedDate = today.toISOString().split("T")[0];
+
+    const { getByText } = render(<CalendarPage />);
+    await waitFor(() => {
+      expect(getByText(`Events on ${formattedDate}`)).toBeTruthy();
+    });
+  });
+
+  // Check that the calendar container renders without crashing
+  it("renders calendar without crashing", async () => {
+    const { getByTestId } = render(<CalendarPage />);
+    expect(getByTestId("calendar-container")).toBeTruthy();
   });
 });
