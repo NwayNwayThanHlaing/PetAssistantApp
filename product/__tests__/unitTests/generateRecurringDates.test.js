@@ -1,6 +1,8 @@
 import { generateRecurringDates } from "../../src/actions/recurrenceUtils";
 
+// === TEST CASES ===
 describe("generateRecurringDates", () => {
+  // Test 1: Check if the function generates dates correctly
   it("returns single date if recurrence is none", () => {
     const event = {
       date: "2025-04-01",
@@ -10,6 +12,7 @@ describe("generateRecurringDates", () => {
     expect(result).toEqual(["2025-04-01"]);
   });
 
+  // Test 2: Check if the function generates monthly dates correctly
   it("generates daily recurring dates", () => {
     const event = {
       date: "2025-04-01",
@@ -25,6 +28,7 @@ describe("generateRecurringDates", () => {
     ]);
   });
 
+  // Test 3: Check if the function generates weekly dates with exception array correctly
   it("generates weekly recurring dates with exception", () => {
     const event = {
       date: "2025-04-01",
@@ -36,7 +40,8 @@ describe("generateRecurringDates", () => {
     expect(result).toEqual(["2025-04-01", "2025-04-08", "2025-04-22"]);
   });
 
-  it("handles invalid date gracefully", () => {
+  // Test 4: Check if it handles invalid date format
+  it("handles invalid date properly", () => {
     const event = {
       date: "invalid-date",
       recurrence: "daily",
@@ -45,6 +50,7 @@ describe("generateRecurringDates", () => {
     expect(result).toEqual([]);
   });
 
+  // Test 5: Check if it uses default 50 occurrences when endDate is missing
   it("uses default 50 occurrences when endDate is missing", () => {
     const event = {
       date: "2025-04-01",
