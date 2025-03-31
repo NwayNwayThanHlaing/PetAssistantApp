@@ -62,15 +62,15 @@ export const isWithinLastTwoWeeks = (dateString, time) => {
 // Used in notificationsInbox.js
 export const sortNotifications = (notifications) => {
   return notifications.sort((a, b) => {
-    // Convert date and time to JavaScript Date objects for comparison
-    const dateA = new Date(
-      `${a.date}T${a.time.hours.toString().padStart(2, "0")}:
-         ${a.time.minutes.toString().padStart(2, "0")}: 00`
-    );
-    const dateB = new Date(
-      `${b.date}T${b.time.hours.toString().padStart(2, "0")}:
-         ${b.time.minutes.toString().padStart(2, "0")}: 00`
-    );
+    const timeStrA = `${a.time.hours
+      .toString()
+      .padStart(2, "0")}:${a.time.minutes.toString().padStart(2, "0")}:00`;
+    const timeStrB = `${b.time.hours
+      .toString()
+      .padStart(2, "0")}:${b.time.minutes.toString().padStart(2, "0")}:00`;
+
+    const dateA = new Date(`${a.date}T${timeStrA}`);
+    const dateB = new Date(`${b.date}T${timeStrB}`);
 
     return dateB - dateA;
   });
