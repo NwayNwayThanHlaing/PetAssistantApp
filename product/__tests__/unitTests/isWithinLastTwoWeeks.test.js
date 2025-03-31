@@ -1,4 +1,4 @@
-import { isWithinLastTwoWeeks } from "../src/actions/utils";
+import { isWithinLastTwoWeeks } from "../../src/actions/utils";
 
 describe("isWithinLastTwoWeeks", () => {
   it("should return true for dates within last 14 days", () => {

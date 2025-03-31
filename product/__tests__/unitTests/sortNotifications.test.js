@@ -1,4 +1,4 @@
-import { sortNotifications } from "../src/actions/utils";
+import { sortNotifications } from "../../src/actions/utils";
 
 describe("sortNotifications", () => {
   it("should sort notifications by most recent first", () => {

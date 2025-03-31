@@ -1,5 +1,5 @@
 // tests/formatDateTime.test.js
-import { formatDateTime } from "../src/actions/utils";
+import { formatDateTime } from "../../src/actions/utils";
 
 describe("formatDateTime", () => {
   it("should format PM time correctly", () => {

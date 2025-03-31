@@ -1,4 +1,4 @@
-import { generateRecurringDates } from "../src/actions/recurrenceUtils";
+import { generateRecurringDates } from "../../src/actions/recurrenceUtils";
 
 describe("generateRecurringDates", () => {
   it("returns single date if recurrence is none", () => {

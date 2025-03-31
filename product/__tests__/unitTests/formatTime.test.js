@@ -1,4 +1,4 @@
-import { formatTime } from "../src/actions/utils";
+import { formatTime } from "../../src/actions/utils";
 
 describe("formatTime", () => {
   it("formats morning time correctly", () => {
