@@ -125,6 +125,7 @@ const ChatInbox = ({ navigation }) => {
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity
+          testID="back-button"
           style={styles.back}
           onPress={() => navigation.goBack()}
         >

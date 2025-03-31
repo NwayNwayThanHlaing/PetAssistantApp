@@ -2,11 +2,13 @@ import React from "react";
 import { render, fireEvent } from "@testing-library/react-native";
 import AddEventModal from "../../src/screens/calendar/addEventModal";
 
+// === MOCKS AND SETUP ===
 // Mock react-native-modal to simplify rendering (removes animation wrappers)
 jest.mock("react-native-modal", () => {
   return ({ children }) => children;
 });
 
+// === TEST CASES ===
 describe("AddEventModal", () => {
   // Mock functions to track interactions
   const mockSetIsVisible = jest.fn();

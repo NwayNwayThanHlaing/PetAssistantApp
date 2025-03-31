@@ -2,6 +2,8 @@ import React from "react";
 import { render, fireEvent } from "@testing-library/react-native";
 import CalendarPage from "../../src/screens/calendar/calendar";
 
+// === MOCKS AND SETUP ===
+
 // Mock `react-native-modal` so it renders children directly without animation wrappers
 jest.mock("react-native-modal", () => {
   return ({ children }) => children;
@@ -54,6 +56,7 @@ jest.mock("../../src/screens/calendar/eventList", () => {
   return () => null;
 });
 
+// === TEST CASES ===
 // Begin test suite
 describe("CalendarPage", () => {
   // Check that important UI buttons render
