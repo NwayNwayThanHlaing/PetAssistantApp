@@ -341,7 +341,6 @@ const styles = StyleSheet.create({
     padding: 10,
     paddingHorizontal: 15,
     paddingBottom: 80,
-    backgroundColor: colors.background,
   },
   loadingContainer: {
     flex: 1,
@@ -412,7 +411,6 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     height: 90,
   },
-
   viewAllImage: {
     width: 60,
     height: 60,

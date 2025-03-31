@@ -1,11 +1,31 @@
 ## Term 2
+
+### Week 11 (31 March 2025)
+
+Summary:
+
+- Finalized the complete project submission, including all documentation, presentation slides, and demo video.
+- Conducted a final review of the application to ensure all core features were functional and the UI was polished.
+- Submitted the final report and deployed the last build of the application.
+
+Challenges:
+
+- Handling the submission of all deliverables in the required format and structure while ensuring nothing was missed.
+
 ### Week 10 (24 March 2025)
 
 Summary: 
 
+- Prepared the final project report and began creating presentation materials.
+- Conducted testings across all screens and devices to ensure consistent user experience.
+- Implemented support for screen orientation changes to improve UI responsiveness on different devices.
+
 Challenges: 
 
+- Ensuring app responsiveness and proper layout behavior across both portrait and landscape orientations required additional UI adjustments and testing across devices.
+
 Next Step: 
+- Finalize demo video and perform final documentation checks 
 
 ### Week 9 (17 March 2025)
 
@@ -13,9 +33,9 @@ Summary:
 
 - Implemented chat inbox and finalized chat room with real time messaging feature when clicking on message button of user's profile, with options to delete for myself, delete for everyone and edit option the message within 3 minutes after being sent.
 - Developed post uploading, media uploading up to 9 photos as a post on user's wall.
-- Started working on the project report.
 - Implemented recurring events creation and deletion with options to delete only this event, this and all future occurrences, delete entire series.
 - Adjusted colors and fonts all over the application, and fixed read/unread uni not displaying for notifications.
+- Started working on the project report.
 
 Challenges: 
 
@@ -23,31 +43,31 @@ Challenges:
 
 Next Step: 
 
-- To finish report and do the testings.
+- To finish final project report and conduct the final testings.
 
 ### Week 8 (10 March 2025)
 
 Summary: 
 
-- Implemented other users discovery on the map.
-- Added message feature to communicate between users
+- Implemented user discovery feature on the map.
+- Developed user account profile pages and added message feature to communicate between users
 - Created account profile for each user with message button and posts.
 
 Challenges: 
 
-- To make messaging feature in real time. 
+- Achieving real-time messaging functionality and proper synchronization.
 
 Next Step: 
 
-- To implement chat inbox and chat room.
+- To implement chat inbox and chat room with messaging feature.
 
 
 ### Week 6 - 7 (24 February 2025)
 
 Summary: 
 
-- The veterinary locator feature has been successfully implemented. 
-- It displays markers representing each veterinary clinic within the user’s current town, enhancing accessibility to local veterinary services.
+- Implemented the veterinary locator feature with markers based on real-time user geolocation. 
+- Successfully displayed markers representing each veterinary clinic within the user’s current location, enhancing accessibility to local veterinary services.
 
 Challenges: 
 
@@ -61,8 +81,8 @@ Next Step:
 
 Summary:
 
-- Implemented a notification inbox with a read status indicator.
-- Developed two user interfaces to separate read and unread notifications.
+- Implemented a notification inbox with a read/unread status tracking.
+- Developed separate user interfaces to display read and unread notifications.
 - Integrated sending alerts to the user’s device at the scheduled time of each event.
 - Implemented redirection from notifications to the calendar, to view event details.
 
@@ -100,29 +120,29 @@ Summary:
 
 Challenges:
 
-- The existing notification system stopped working as Native Notify required a paid subscription.
+- The existing notification system, which used Native Notify, stopped working as it required a paid subscription.
 
 Next Step:
 
-- Remove all outdated notification-related code.
-- Implement a new notification inbox with an improved approach.
+- Remove all implemented notification-related code.
+- Develop a new notification inbox with an improved approach.
 
 ### Week 2 (27 January 2025)
 
 Summary:
 
-- Designed the user interface, including wireframes and basic layout structures.
+- Designed the user interface, including wireframes and basic layout structures, using Figma.
 
 Next Step:
 
-- Refactor the notification system to improve reliability and performance.
+- Refactor the notification system to improve reliability, performance, and user experience.
 
 ### Week 1 (20 January 2025)
 
 Summary:
 
 - Documented detailed project requirements and outlined additional features to be developed.
-- Defined a structured project plan, ensuring alignment with project goals.
+- Defined a structured project plan to ensure alignment with project goals.
 
 Next Step:
 
