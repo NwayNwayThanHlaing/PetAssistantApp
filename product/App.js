@@ -94,7 +94,7 @@ const App = () => {
       await Notifications.scheduleNotificationAsync({
         content: {
           title: "PurrNote",
-          body: `You have a new reminder: ${event.title}`,
+          body: `Reminder: ${event.title}`,
           sound: "default",
         },
         trigger: {

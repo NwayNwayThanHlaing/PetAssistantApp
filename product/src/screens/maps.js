@@ -46,7 +46,6 @@ const Maps = ({ navigation }) => {
           return null;
         })
         .filter((user) => user !== null); // Remove null entries
-
       setUserMarkers(locations);
     });
 
@@ -80,7 +79,7 @@ const Maps = ({ navigation }) => {
         {
           accuracy: Location.Accuracy.High,
           timeInterval: 5000, // Update every 5 seconds
-          distanceInterval: 10, // Or every 10 meters
+          distanceInterval: 3, // Or every 3 meters
         },
         async (location) => {
           const coords = location.coords;

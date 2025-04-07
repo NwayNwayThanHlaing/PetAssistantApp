@@ -76,17 +76,12 @@ const CalendarPage = () => {
     { label: "December", value: "12" },
   ];
 
-  const years = Array.from({ length: 30 }, (_, index) => {
-    return (new Date().getFullYear() - 15 + index).toString();
-  });
-
   // FETCH DATA ===================================================================
   useEffect(() => {
     const fetchData = async () => {
       const petList = await fetchPetNames();
       setPetNames(petList);
     };
-
     fetchData();
   }, []);
 
