@@ -249,7 +249,19 @@ const Wall = ({ navigation, route }) => {
                       </TouchableOpacity>
                     </View>
                   )}
-                  <Text style={styles.postDate}>
+                  <Text
+                    style={
+                      isOwner
+                        ? styles.postDate
+                        : {
+                            textAlign: "right",
+                            fontSize: 14,
+                            paddingLeft: 15,
+                            color: colors.primaryLight,
+                            marginTop: 8,
+                          }
+                    }
+                  >
                     {item.date?.toDate().toLocaleDateString("en-GB")}{" "}
                     {item.date?.toDate().toLocaleTimeString("en-US", {
                       hour: "numeric",
