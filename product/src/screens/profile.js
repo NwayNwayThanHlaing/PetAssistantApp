@@ -382,6 +382,35 @@ const Profile = ({ navigation }) => {
           </View>
         </View>
       </Modal>
+      <TouchableOpacity
+        onPress={() => navigation.navigate("PrivacyPolicy")}
+        style={{
+          justifyContent: "center",
+          flexDirection: "row",
+          alignItems: "center",
+        }}
+      >
+        <Text
+          style={{
+            textAlign: "center",
+            color: colors.primaryLighter,
+            fontSize: 16,
+            fontStyle: "italic",
+            textDecorationLine: "underline",
+          }}
+        >
+          Privacy Policy{"   "}
+        </Text>
+        <Text
+          style={{
+            color: colors.primaryLighter,
+            fontSize: 16,
+            fontStyle: "italic",
+          }}
+        >
+          @ 2025 PurrNote
+        </Text>
+      </TouchableOpacity>
     </ScrollView>
   );
 };
@@ -390,7 +419,7 @@ const styles = StyleSheet.create({
   scrollContainer: {
     flexGrow: 1,
     padding: 15,
-    paddingBottom: 90,
+    paddingBottom: 95,
   },
   loadingContainer: {
     flex: 1,
@@ -421,7 +450,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     textAlign: "center",
     color: colors.primaryLight,
-    marginBottom: 30,
+    marginBottom: 15,
   },
 
   settingItem: {
@@ -433,7 +462,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     backgroundColor: colors.primaryLightest,
     borderRadius: 10,
-    marginBottom: 15,
+    marginBottom: 10,
   },
   settingText: {
     marginTop: 10,
