@@ -10,6 +10,7 @@ import {
   ActivityIndicator,
   Alert,
 } from "react-native";
+
 import { SafeAreaView } from "react-native-safe-area-context";
 import ImageViewing from "react-native-image-viewing";
 import { colors } from "../styles/Theme";
@@ -21,6 +22,10 @@ import {
   onSnapshot,
   deleteDoc,
   doc,
+  getDocs,
+  addDoc,
+  where,
+  serverTimestamp,
   updateDoc,
 } from "firebase/firestore";
 
@@ -35,9 +40,7 @@ const transformCloudinaryUrl = (
 const Wall = ({ navigation, route }) => {
   const currentUserId = auth.currentUser.uid;
   const { userId, userName, userImage } = route.params;
-
   const isOwner = currentUserId === userId;
-
   const [posts, setPosts] = useState([]);
   const [loadingPosts, setLoadingPosts] = useState(true);
   const [isImageViewerVisible, setImageViewerVisible] = useState(false);
@@ -73,12 +76,47 @@ const Wall = ({ navigation, route }) => {
     setImageViewerVisible(true);
   };
 
-  const startChat = () => {
-    navigation.navigate("ChatInbox", {
-      chatId: userId,
-      chatName: userName,
-      userImage: userImage,
-    });
+  const startChat = async (navigation, currentUserId, otherUserId) => {
+    try {
+      const chatsRef = collection(firestore, "chats");
+      const chatQuery = query(
+        chatsRef,
+        where("participants", "array-contains", currentUserId)
+      );
+      const snapshot = await getDocs(chatQuery);
+
+      let existingChat = null;
+
+      snapshot.forEach((docSnap) => {
+        const data = docSnap.data();
+        if (
+          data.participants.includes(otherUserId) &&
+          data.participants.length === 2
+        ) {
+          existingChat = { id: docSnap.id, ...data };
+        }
+      });
+
+      if (existingChat) {
+        navigation.navigate("Chat", {
+          chatId: existingChat.id,
+          friendId: otherUserId,
+        });
+        return;
+      }
+      const newChatRef = await addDoc(chatsRef, {
+        participants: [currentUserId, otherUserId],
+        lastMessage: "",
+        lastSenderId: "",
+        updatedAt: serverTimestamp(),
+      });
+      navigation.navigate("Chat", {
+        chatId: newChatRef.id,
+        friendId: otherUserId,
+      });
+    } catch (error) {
+      alert("Failed to start chat. Please try again.");
+    }
   };
 
   const handleDeletePost = (postId) => {
@@ -158,7 +196,10 @@ const Wall = ({ navigation, route }) => {
               <Text style={styles.buttonText}>+ Create Post</Text>
             </TouchableOpacity>
           ) : (
-            <TouchableOpacity style={styles.messageButton} onPress={startChat}>
+            <TouchableOpacity
+              style={styles.messageButton}
+              onPress={() => startChat(navigation, currentUserId, userId)}
+            >
               <Text style={styles.buttonText}>Message</Text>
             </TouchableOpacity>
           )}
