@@ -44,7 +44,7 @@ const Profile = ({ navigation }) => {
     { id: "1", title: "Your Posts", icon: "photo" },
     { id: "2", title: "Your Pets", icon: "pets" },
     { id: "3", title: "Edit Profile", icon: "person" },
-    { id: "4", title: "Reset Password", icon: "lock" },
+    { id: "4", title: "Change Password", icon: "lock" },
     { id: "5", title: "Delete Account", icon: "delete" },
     { id: "6", title: "Log Out", icon: "logout" },
   ];
@@ -97,7 +97,7 @@ const Profile = ({ navigation }) => {
       handleSignOut(navigation, user.uid);
     } else if (title === "Delete Account") {
       handleDeleteAccount(navigation);
-    } else if (title === "Reset Password") {
+    } else if (title === "Change Password") {
       setModalVisible(true);
     } else if (title === "Edit Profile") {
       setEditModalVisible(true);
@@ -275,7 +275,7 @@ const Profile = ({ navigation }) => {
       >
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Reset Password</Text>
+            <Text style={styles.modalTitle}>Change Password</Text>
             <TextInput
               style={styles.input}
               placeholder="Current Password"
