@@ -33,6 +33,7 @@ const transformCloudinaryUrl = (
   url,
   options = "w_300,h_300,c_fill,q_auto,f_auto"
 ) => {
+  if (typeof url !== "string") return "";
   if (!url.includes("/upload/")) return url;
   return url.replace("/upload/", `/upload/${options}/`);
 };
@@ -174,18 +175,13 @@ const Wall = ({ navigation, route }) => {
         <View style={styles.profileContainer}>
           <Image
             source={
-              userImage === "default"
+              !userImage || userImage === "default"
                 ? require("../../assets/dog.png")
                 : {
-                    uri: transformCloudinaryUrl(
-                      userImage,
-                      "w_300,h_300,c_fill,q_auto,f_auto"
-                    ),
+                    uri: transformCloudinaryUrl(userImage),
                   }
             }
-            style={styles.avatar}
           />
-
           <Text style={styles.userName}>{userName}</Text>
 
           {isOwner ? (

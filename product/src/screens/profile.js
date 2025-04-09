@@ -23,12 +23,12 @@ import {
 } from "../actions/authActions";
 import { firestore, auth } from "../auth/firebaseConfig";
 import { doc, updateDoc } from "firebase/firestore";
-import { updateEmail } from "firebase/auth";
 import * as ImagePicker from "expo-image-picker";
 import profile from "../../assets/profile.jpg";
 
 const Profile = ({ navigation }) => {
   const [user, setUser] = useState(null);
+  const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
@@ -36,7 +36,6 @@ const Profile = ({ navigation }) => {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [name, setName] = useState("");
-  const [newEmail, setNewEmail] = useState("");
   const [profileImage, setProfileImage] = useState(null);
   const defaultProfileImage = profile;
 
@@ -73,7 +72,7 @@ const Profile = ({ navigation }) => {
         if (fetchedUserData) {
           setUser(fetchedUserData);
           setName(fetchedUserData.name || "");
-          setNewEmail(fetchedUserData.email || "");
+          setEmail(fetchedUserData.email || "");
           setProfileImage(fetchedUserData.profileImage || "default");
         } else {
           Alert.alert(
@@ -197,21 +196,17 @@ const Profile = ({ navigation }) => {
 
       const updateData = {
         name: name,
-        email: newEmail || user.email,
+        email: user.email,
         profileImage: profileImageUrl || "default", // Use "default" if no image
       };
 
       await updateDoc(userRef, updateData);
 
-      if (newEmail && newEmail !== user.email) {
-        await updateEmail(auth.currentUser, newEmail);
-      }
-
       Alert.alert("Success", "Your profile has been updated.");
       setUser({
         ...user,
         name: name,
-        email: newEmail || user.email,
+        email: user.email,
         profileImage: profileImageUrl,
       });
       setEditModalVisible(false);
@@ -352,13 +347,13 @@ const Profile = ({ navigation }) => {
             />
 
             <TextInput
-              style={styles.input}
+              style={styles.emailInput}
               placeholder="Email"
               placeholderTextColor={colors.primaryLighter}
-              value={newEmail || email}
-              onChangeText={setNewEmail}
+              value={email}
               keyboardType="email-address"
               autoCapitalize="none"
+              editable={false}
             />
 
             <TouchableOpacity
@@ -492,7 +487,17 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     paddingHorizontal: 10,
     borderRadius: 5,
-    fontSize: 18,
+    fontSize: 16,
+  },
+  emailInput: {
+    height: 40,
+    borderColor: colors.primaryLightest,
+    borderWidth: 1,
+    marginBottom: 10,
+    paddingHorizontal: 10,
+    borderRadius: 5,
+    fontSize: 16,
+    color: colors.primaryLighter,
   },
   buttonText: {
     color: "white",
