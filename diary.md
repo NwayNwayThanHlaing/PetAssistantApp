@@ -1,11 +1,12 @@
 ## Term 2
 
-### Week 11 (31 March 2025)
+### Week 11 - 12 (31 March 2025)
 
 Summary:
 
 - Finalized the complete project submission, including all documentation, presentation slides, and demo video.
 - Conducted a final review of the application to ensure all core features were functional and the UI was polished.
+- Added Privacy Policy page for the users’ awareness of how the data collected will be utilized, stored, and the users’ privacy rights.
 - Submitted the final report and deployed the last build of the application.
 
 Challenges:
