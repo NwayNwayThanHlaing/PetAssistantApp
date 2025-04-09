@@ -112,9 +112,16 @@ const ChatInbox = ({ navigation }) => {
         </View>
 
         <Text style={styles.timestamp}>
+          {item.updatedAt?.toDate().toLocaleDateString("en-GB", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "2-digit",
+          })}
+          {"\n"}
           {item.updatedAt?.toDate().toLocaleTimeString("en-US", {
             hour: "2-digit",
             minute: "2-digit",
+            hour12: true,
           })}
         </Text>
       </TouchableOpacity>
@@ -203,8 +210,12 @@ const styles = StyleSheet.create({
     color: colors.primary,
     fontWeight: "500",
   },
-  lastMessage: { color: colors.primaryLight, marginTop: 4 },
-  timestamp: { fontSize: 12, color: colors.primaryLight },
+  lastMessage: { color: colors.primaryLight, marginTop: 4, fontSize: 15 },
+  timestamp: {
+    fontSize: 13,
+    color: colors.primaryLight,
+    textAlign: "right",
+  },
 });
 
 export default ChatInbox;
