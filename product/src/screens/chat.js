@@ -267,13 +267,42 @@ const Chat = ({ route, navigation }) => {
           ref={flatListRef}
           data={filteredMessages}
           keyExtractor={(item) => item.id}
+          ListHeaderComponent={() => (
+            <View style={styles.friendImageHeader}>
+              <Image
+                source={
+                  friend?.profileImage === "default"
+                    ? require("../../assets/dog.png")
+                    : { uri: friend?.profileImage }
+                }
+                style={styles.friendAvatarHeader}
+              />
+              <Text style={styles.friendNameHeader}>
+                {friend?.name || "Friend"}
+              </Text>
+              <TouchableOpacity
+                onPress={() =>
+                  navigation.navigate("FriendProfile", { friendId })
+                }
+                style={styles.viewProfileButton}
+              >
+                <Text style={styles.viewProfileText}>View Profile</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+          ListEmptyComponent={() => (
+            <View style={{ alignItems: "center", marginTop: 40 }}>
+              <Text style={{ color: colors.primaryLight, fontSize: 16 }}>
+                Say hello! 👋
+              </Text>
+            </View>
+          )}
           renderItem={renderItem}
           contentContainerStyle={styles.messageList}
           onContentSizeChange={() =>
             flatListRef.current.scrollToEnd({ animated: true })
           }
         />
-
         {/* Input Area */}
         <View
           style={
@@ -340,6 +369,33 @@ const Chat = ({ route, navigation }) => {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
+  friendImageHeader: {
+    justifyContent: "center",
+    alignItems: "center",
+    paddingTop: 10,
+    paddingBottom: 40,
+  },
+  friendAvatarHeader: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+  },
+  friendNameHeader: {
+    color: colors.primary,
+    fontSize: 20,
+    marginTop: 10,
+    fontWeight: "bold",
+  },
+  viewProfileButton: {
+    backgroundColor: colors.primaryLightest,
+    padding: 10,
+    borderRadius: 20,
+    marginTop: 10,
+  },
+  viewProfileText: {
+    color: colors.primary,
+    fontWeight: "bold",
+  },
   messageList: { padding: 12 },
   messageContainer: {
     padding: 10,
@@ -411,6 +467,7 @@ const styles = StyleSheet.create({
   friendName: {
     color: colors.primary,
     fontSize: 16,
+    fontWeight: "bold",
   },
   editingInputContainer: {
     padding: 10,

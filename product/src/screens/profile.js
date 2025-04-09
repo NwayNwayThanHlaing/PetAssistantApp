@@ -394,21 +394,18 @@ const Profile = ({ navigation }) => {
           style={{
             textAlign: "center",
             color: colors.primaryLighter,
-            fontSize: 16,
-            fontStyle: "italic",
             textDecorationLine: "underline",
           }}
         >
-          Privacy Policy{"   "}
+          Privacy Policy
         </Text>
         <Text
           style={{
             color: colors.primaryLighter,
-            fontSize: 16,
             fontStyle: "italic",
           }}
         >
-          @ 2025 PurrNote
+          {"  "}@ 2025 PurrNote
         </Text>
       </TouchableOpacity>
     </ScrollView>
