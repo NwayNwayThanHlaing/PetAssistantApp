@@ -96,8 +96,28 @@ const Login = ({ navigation }) => {
 
             <TouchableOpacity onPress={() => navigation.navigate("SignUp")}>
               <Text style={AuthStyles.loginText}>
-                Don't have an account?{" "}
+                No account yet?{" "}
                 <Text style={AuthStyles.loginLink}>Sign Up</Text>
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={{
+                marginTop: 15,
+              }}
+              onPress={() => navigation.navigate("PrivacyPolicy")}
+            >
+              <Text
+                style={
+                  (AuthStyles.loginText,
+                  {
+                    textAlign: "center",
+                    color: "blue",
+                    fontSize: 16,
+                    textDecorationLine: "underline",
+                  })
+                }
+              >
+                Privacy Policy
               </Text>
             </TouchableOpacity>
           </View>

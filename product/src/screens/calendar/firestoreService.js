@@ -44,13 +44,13 @@ const recurrenceMap = {
 // Function that generates the recurring dates for an event
 const generateRecurringDates = (event) => {
   if (!event.date) {
-    console.warn("Missing date on event:", event);
+    //console.warn("Missing date on event:", event);
     return [];
   }
 
   const startDate = new Date(event.date);
   if (isNaN(startDate.getTime())) {
-    console.warn("Invalid startDate:", event.date);
+    // console.warn("Invalid startDate:", event.date);
     return [];
   }
 
@@ -70,7 +70,7 @@ const generateRecurringDates = (event) => {
     }
 
     if (isNaN(untilDate.getTime())) {
-      console.warn("Invalid endDate:", event.endDate);
+      //console.warn("Invalid endDate:", event.endDate);
       untilDate = undefined;
     }
   }
@@ -143,7 +143,7 @@ export const fetchEvents = async () => {
 
     return eventsData;
   } catch (error) {
-    console.error("Error fetching events from Firestore: ", error);
+    // console.error("Error fetching events from Firestore: ", error);
     throw error;
   }
 };
@@ -183,7 +183,7 @@ export const addEvent = async (newEvent, selectedPets) => {
 
     return docRef.id;
   } catch (error) {
-    console.error("Error adding event to Firestore:", error);
+    //console.error("Error adding event to Firestore:", error);
     throw error;
   }
 };
@@ -224,8 +224,6 @@ export const updateEvent = async (selectedEvent) => {
       // Check if parsedDate is valid
       if (!isNaN(parsedDate.getTime())) {
         formattedEndDate = Timestamp.fromDate(parsedDate);
-      } else {
-        console.warn("Invalid endDate provided:", selectedEvent.endDate);
       }
     }
 
@@ -244,7 +242,7 @@ export const updateEvent = async (selectedEvent) => {
     };
     await updateDoc(eventDocRef, updatedData);
   } catch (error) {
-    console.error("Error updating event: ", error);
+    //console.error("Error updating event: ", error);
     throw error;
   }
 };
@@ -291,7 +289,6 @@ export const updateOneOccurrence = async (
 
     return newDocRef.id;
   } catch (error) {
-    console.error("Error updating one occurrence:", error);
     throw error;
   }
 };
@@ -310,7 +307,7 @@ export const updateFutureOccurrences = async (
     const data = docSnap.data();
 
     if (!data) {
-      console.error("Event not found for ID:", eventId);
+      //console.error("Event not found for ID:", eventId);
       return;
     }
 
@@ -342,7 +339,6 @@ export const updateFutureOccurrences = async (
 
     return docRef.id;
   } catch (error) {
-    console.error("Error updating future occurrences:", error);
     throw error;
   }
 };
@@ -356,30 +352,24 @@ export const deleteEvent = async (eventId) => {
     const eventDocRef = doc(firestore, "users", userId, "events", eventId);
     await deleteDoc(eventDocRef);
   } catch (error) {
-    console.error("Error deleting event: ", error);
     throw error;
   }
 };
+
 export const deleteOneOccurrence = async (eventId, occurrenceDate) => {
   try {
     const userId = getUserId();
-
     if (!eventId || !occurrenceDate) {
       throw new Error("Both eventId and occurrenceDate are required.");
     }
-
     const eventDocRef = doc(firestore, "users", userId, "events", eventId);
-
     // Get the event data
     const docSnap = await getDoc(eventDocRef);
-
     if (!docSnap.exists()) {
-      console.error(`Event with ID ${eventId} not found.`);
+      //console.error(`Event with ID ${eventId} not found.`);
       return false;
     }
-
     const eventData = docSnap.data();
-
     // Ensure exceptions array exists and is an array
     const currentExceptions = Array.isArray(eventData.exceptions)
       ? eventData.exceptions
@@ -392,7 +382,6 @@ export const deleteOneOccurrence = async (eventId, occurrenceDate) => {
     }
 
     const updatedExceptions = [...currentExceptions, occurrenceDate];
-
     // Update the event with the new exceptions list
     await updateDoc(eventDocRef, {
       exceptions: updatedExceptions,
@@ -402,7 +391,6 @@ export const deleteOneOccurrence = async (eventId, occurrenceDate) => {
     //console.log(`Excluded date ${occurrenceDate} from event ${eventId}`);
     return true;
   } catch (error) {
-    console.error("Error deleting one occurrence:", error);
     return false;
   }
 };
@@ -444,7 +432,6 @@ export const deleteFutureOccurrences = async (event, cutoffDate) => {
     }
     return true;
   } catch (error) {
-    console.error("Error deleting future occurrences:", error);
     return false;
   }
 };

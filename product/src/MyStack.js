@@ -16,7 +16,7 @@ import Chat from "./screens/chat";
 import ChatInbox from "./screens/chatInbox";
 import Wall from "./screens/wall";
 import CreatePost from "./screens/createPost";
-
+import PrivacyPolicy from "./screens/privacyPolicy";
 const Stack = createNativeStackNavigator();
 
 const MyStack = () => {
@@ -55,6 +55,7 @@ const MyStack = () => {
           name="NotificationsInbox"
           component={NotificationsInbox}
         />
+        <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicy} />
       </Stack.Navigator>
     </NavigationContainer>
   );

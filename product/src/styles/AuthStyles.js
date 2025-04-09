@@ -75,14 +75,12 @@ const AuthStyles = StyleSheet.create({
   },
   loginText: {
     textAlign: "center",
-    marginTop: 10,
     fontSize: 16,
     color: colors.primary,
   },
   loginLink: {
     color: colors.accent,
     fontWeight: "bold",
-    textDecorationLine: "underline",
   },
 });
 
