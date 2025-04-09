@@ -181,19 +181,28 @@ const styles = StyleSheet.create({
   },
   logo: { width: 45, height: 45, marginRight: 5 },
   listContainer: {
-    padding: 12,
+    paddingHorizontal: 15,
+    paddingVertical: 10,
     borderBottomWidth: 1,
     borderBottomColor: colors.primaryLightest,
   },
   headerTitle: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: "bold",
     color: colors.accent,
   },
-  chatItem: { flexDirection: "row", alignItems: "center" },
+  chatItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginVertical: 8,
+  },
   avatar: { width: 50, height: 50, borderRadius: 25, marginRight: 12 },
   textContainer: { flex: 1 },
-  friendName: { fontSize: 14 },
+  friendName: {
+    fontSize: 17,
+    color: colors.primary,
+    fontWeight: "500",
+  },
   lastMessage: { color: colors.primaryLight, marginTop: 4 },
   timestamp: { fontSize: 12, color: colors.primaryLight },
 });
