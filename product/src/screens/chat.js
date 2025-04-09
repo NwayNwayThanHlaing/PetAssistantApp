@@ -135,6 +135,22 @@ const Chat = ({ route, navigation }) => {
         deletedForEveryone: true,
         deletedAt: serverTimestamp(),
       });
+
+      // Check if this message is the last one
+      const lastMsg = messages[messages.length - 1];
+      if (lastMsg?.id === messageId) {
+        // Either clear or fallback to second-last message
+        const secondLast = messages[messages.length - 2];
+
+        const chatRef = doc(firestore, "chats", chatId);
+        await updateDoc(chatRef, {
+          lastMessage: secondLast
+            ? secondLast.text
+            : "This message was deleted.",
+          lastSenderId: secondLast ? secondLast.senderId : "",
+          updatedAt: serverTimestamp(),
+        });
+      }
     } catch (error) {
       console.error("Error deleting for everyone:", error);
     }
