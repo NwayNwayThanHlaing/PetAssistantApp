@@ -280,8 +280,15 @@ const Chat = ({ route, navigation }) => {
               <Text style={styles.friendNameHeader}>
                 {friend?.name || "Friend"}
               </Text>
+
               <TouchableOpacity
-                onPress={() => navigation.navigate("Wall", { friendId })}
+                onPress={() =>
+                  navigation.navigate("Wall", {
+                    userId: friendId,
+                    userName: friend?.name || "Friend",
+                    userImage: friend?.profileImage || "default",
+                  })
+                }
                 style={styles.viewProfileButton}
               >
                 <Text style={styles.viewProfileText}>View Profile</Text>
