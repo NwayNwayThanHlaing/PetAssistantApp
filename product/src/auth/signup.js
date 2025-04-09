@@ -128,6 +128,27 @@ const Signup = ({ navigation }) => {
                 <Text style={AuthStyles.loginLink}>Log In</Text>
               </Text>
             </TouchableOpacity>
+
+            <TouchableOpacity
+              style={{
+                marginTop: 15,
+              }}
+              onPress={() => navigation.navigate("PrivacyPolicy")}
+            >
+              <Text
+                style={
+                  (AuthStyles.loginText,
+                  {
+                    textAlign: "center",
+                    color: "blue",
+                    fontSize: 16,
+                    textDecorationLine: "underline",
+                  })
+                }
+              >
+                Privacy Policy
+              </Text>
+            </TouchableOpacity>
           </View>
         </View>
       </ScrollView>
