@@ -1,17 +1,27 @@
 ## Term 2
 
-### Week 11 - 12 (31 March 2025)
+### Week 12 (7 April 2025)
 
 Summary:
 
-- Finalized the complete project submission, including all documentation, presentation slides, and demo video.
-- Conducted a final review of the application to ensure all core features were functional and the UI was polished.
 - Added Privacy Policy page for the users’ awareness of how the data collected will be utilized, stored, and the users’ privacy rights.
+- Added minor features such as adding date and time for the chat messages, view profile button at the beginning of the chat, implementation of chat deletion, and direct navigation to the chat room when clicking on message button from the user account profile.
 - Submitted the final report and deployed the last build of the application.
 
 Challenges:
 
 - Handling the submission of all deliverables in the required format and structure while ensuring nothing was missed.
+
+### Week 11 (31 March 2025)
+
+Summary:
+
+- Tested all the functions of the project and prepared for the project submission, including all documentation, presentation slides, and demo video.
+- Refactored and reviewed all the feature and tests in the application to ensure all core features were functional and the UI was polished.
+
+Challenges:
+
+- Considering potential edge cases for all implemented features and addressing them as much as possible during the final stages of development.
 
 ### Week 10 (24 March 2025)
 
