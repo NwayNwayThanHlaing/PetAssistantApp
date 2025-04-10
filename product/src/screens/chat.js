@@ -279,7 +279,12 @@ const Chat = ({ route, navigation }) => {
     return (
       <>
         {showDateLabel && (
-          <View style={{ alignItems: "center", marginVertical: 10 }}>
+          <View
+            style={{
+              alignItems: "center",
+              paddingVertical: 10,
+            }}
+          >
             <Text style={{ color: colors.primaryLight, fontWeight: "600" }}>
               {formatDateLabel(item.createdAt.toDate())}
             </Text>
@@ -306,23 +311,28 @@ const Chat = ({ route, navigation }) => {
               <Text style={isMe ? styles.myText : styles.messageText}>
                 {item.text}
               </Text>
-              {item.editedAt && (
-                <Text
-                  style={isMe ? styles.editedLabel : styles.editedLabelOther}
-                >
-                  (edited)
-                </Text>
-              )}
+              <View style={{ flexDirection: "row", alignItems: "center" }}>
+                {item.editedAt && (
+                  <Text
+                    style={isMe ? styles.editedLabel : styles.editedLabelOther}
+                  >
+                    edited
+                  </Text>
+                )}
 
-              {/* Time */}
-              {item.createdAt && (
-                <Text style={isMe ? styles.myTimeLabel : styles.theirTimeLabel}>
-                  {item.createdAt.toDate().toLocaleTimeString([], {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </Text>
-              )}
+                {/* Time */}
+                {item.createdAt && (
+                  <Text
+                    style={isMe ? styles.myTimeLabel : styles.theirTimeLabel}
+                  >
+                    {item.createdAt.toDate().toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      hour12: true,
+                    })}
+                  </Text>
+                )}
+              </View>
             </>
           )}
         </TouchableOpacity>
@@ -471,7 +481,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     paddingTop: 10,
-    paddingBottom: 40,
+    paddingBottom: 20,
   },
   friendAvatarHeader: {
     width: 100,
@@ -493,6 +503,7 @@ const styles = StyleSheet.create({
   viewProfileText: {
     color: colors.primary,
     fontWeight: "bold",
+    fontSize: 16,
   },
   messageList: { padding: 12 },
   messageContainer: {
@@ -532,19 +543,21 @@ const styles = StyleSheet.create({
     fontStyle: "italic",
     flex: "start",
   },
-  messageText: { color: colors.primary },
-  myText: { color: colors.background },
+  messageText: { color: colors.primary, fontSize: 16, fontWeight: "500" },
+  myText: { color: colors.background, fontSize: 16, fontWeight: "500" },
   editedLabel: {
-    fontSize: 10,
+    fontSize: 12,
     color: colors.background,
     marginTop: 2,
+    marginRight: 5,
     alignSelf: "flex-end",
     fontStyle: "italic",
   },
   editedLabelOther: {
-    fontSize: 10,
+    fontSize: 12,
     color: colors.primaryLight,
     marginTop: 2,
+    marginRight: 5,
     alignSelf: "flex-start",
     fontStyle: "italic",
   },
@@ -627,13 +640,12 @@ const styles = StyleSheet.create({
     color: colors.primaryLight,
   },
   myTimeLabel: {
-    fontSize: 9,
+    fontSize: 12,
     color: colors.background,
-    marginTop: 2,
     alignSelf: "flex-end",
   },
   theirTimeLabel: {
-    fontSize: 9,
+    fontSize: 12,
     color: colors.primaryLight,
     marginTop: 2,
     alignSelf: "flex-start",

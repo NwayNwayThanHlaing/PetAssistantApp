@@ -212,7 +212,7 @@ const ChatInbox = ({ navigation }) => {
               {item.updatedAt?.toDate().toLocaleDateString("en-GB", {
                 day: "2-digit",
                 month: "2-digit",
-                year: "2-digit",
+                year: "numeric",
               })}
               {"\n"}
               {item.updatedAt?.toDate().toLocaleTimeString("en-US", {
