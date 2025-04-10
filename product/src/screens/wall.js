@@ -76,9 +76,53 @@ const Wall = ({ navigation, route }) => {
     setImageViewerVisible(true);
   };
 
+  // const startChat = async (navigation, currentUserId, otherUserId) => {
+  //   try {
+  //     const chatsRef = collection(firestore, "chats");
+  //     const chatQuery = query(
+  //       chatsRef,
+  //       where("participants", "array-contains", currentUserId)
+  //     );
+  //     const snapshot = await getDocs(chatQuery);
+
+  //     let existingChat = null;
+
+  //     snapshot.forEach((docSnap) => {
+  //       const data = docSnap.data();
+  //       if (
+  //         data.participants.includes(otherUserId) &&
+  //         data.participants.length === 2
+  //       ) {
+  //         existingChat = { id: docSnap.id, ...data };
+  //       }
+  //     });
+
+  //     if (existingChat) {
+  //       navigation.navigate("Chat", {
+  //         chatId: existingChat.id,
+  //         friendId: otherUserId,
+  //       });
+  //       return;
+  //     }
+  //     const newChatRef = await addDoc(chatsRef, {
+  //       participants: [currentUserId, otherUserId],
+  //       lastMessage: "",
+  //       lastSenderId: "",
+  //       updatedAt: serverTimestamp(),
+  //     });
+  //     navigation.navigate("Chat", {
+  //       chatId: newChatRef.id,
+  //       friendId: otherUserId,
+  //     });
+  //   } catch (error) {
+  //     alert("Failed to start chat. Please try again.");
+  //   }
+  // };
+
   const startChat = async (navigation, currentUserId, otherUserId) => {
     try {
       const chatsRef = collection(firestore, "chats");
+
       const chatQuery = query(
         chatsRef,
         where("participants", "array-contains", currentUserId)
@@ -104,17 +148,21 @@ const Wall = ({ navigation, route }) => {
         });
         return;
       }
+
       const newChatRef = await addDoc(chatsRef, {
         participants: [currentUserId, otherUserId],
         lastMessage: "",
         lastSenderId: "",
         updatedAt: serverTimestamp(),
+        starter: currentUserId, // 👈 this user initiated the chat
       });
+
       navigation.navigate("Chat", {
         chatId: newChatRef.id,
         friendId: otherUserId,
       });
     } catch (error) {
+      console.error("❌ Error creating chat:", error);
       alert("Failed to start chat. Please try again.");
     }
   };

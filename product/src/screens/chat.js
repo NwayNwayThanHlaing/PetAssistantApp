@@ -30,7 +30,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 const Chat = ({ route, navigation }) => {
   const { chatId, friendId } = route.params;
   const currentUser = auth.currentUser;
-
+  const [chatData, setChatData] = useState(null);
   const [friend, setFriend] = useState(null);
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
@@ -43,9 +43,22 @@ const Chat = ({ route, navigation }) => {
     setHiddenMessages((prev) => [...prev, messageId]);
   };
 
-  const filteredMessages = messages.filter(
-    (msg) => !hiddenMessages.includes(msg.id)
-  );
+  // Fetch Chat Data
+  useEffect(() => {
+    const fetchChatData = async () => {
+      try {
+        const chatRef = doc(firestore, "chats", chatId);
+        const chatSnap = await getDoc(chatRef);
+        if (chatSnap.exists()) {
+          setChatData(chatSnap.data());
+        }
+      } catch (error) {
+        console.error("Error fetching chat data:", error);
+      }
+    };
+
+    fetchChatData();
+  }, [chatId]);
 
   // Fetch Friend Info
   useEffect(() => {
@@ -77,26 +90,43 @@ const Chat = ({ route, navigation }) => {
     return () => unsubscribe();
   }, [chatId]);
 
+  const hiddenSince = chatData?.hiddenMap?.[currentUser.uid];
+
+  const filteredMessages = messages.filter((msg) => {
+    if (!hiddenSince) return true;
+    return msg.createdAt?.toMillis() > hiddenSince.toMillis();
+  });
+
   // Send New Message
   const sendMessage = async () => {
     if (!input.trim()) return;
-
     const messagesRef = collection(firestore, "chats", chatId, "messages");
-
     const newMessage = {
       text: input.trim(),
       senderId: currentUser.uid,
       createdAt: serverTimestamp(),
     };
-
     await addDoc(messagesRef, newMessage);
-
     const chatRef = doc(firestore, "chats", chatId);
-    await updateDoc(chatRef, {
-      lastMessage: input.trim(),
-      lastSenderId: currentUser.uid,
-      updatedAt: serverTimestamp(),
-    });
+    const chatSnap = await getDoc(chatRef);
+    if (!chatSnap.exists()) {
+      await setDoc(chatRef, {
+        participants: [currentUser.uid, friendId],
+        hiddenMap: {},
+        hiddenFor: [],
+        starter: currentUser.uid,
+        lastMessage: input.trim(),
+        lastSenderId: currentUser.uid,
+        updatedAt: serverTimestamp(),
+      });
+    } else {
+      await updateDoc(chatRef, {
+        hiddenFor: [],
+        lastMessage: input.trim(),
+        lastSenderId: currentUser.uid,
+        updatedAt: serverTimestamp(),
+      });
+    }
 
     setInput("");
     flatListRef.current.scrollToEnd({ animated: true });
@@ -118,7 +148,17 @@ const Chat = ({ route, navigation }) => {
         text: editedMessageText.trim(),
         editedAt: serverTimestamp(),
       });
+      // Check if this is the last message
+      const lastMsg = messages[messages.length - 1];
+      if (lastMsg?.id === editingMessageId) {
+        const chatRef = doc(firestore, "chats", chatId);
+        await updateDoc(chatRef, {
+          lastMessage: editedMessageText.trim(),
+          updatedAt: serverTimestamp(),
+        });
+      }
 
+      // Reset editing state
       setEditingMessageId(null);
       setEditedMessageText("");
     } catch (error) {

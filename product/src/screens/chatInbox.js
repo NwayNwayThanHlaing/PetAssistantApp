@@ -20,6 +20,7 @@ import {
   updateDoc,
   deleteDoc,
   doc,
+  serverTimestamp,
 } from "firebase/firestore";
 import { colors } from "../styles/Theme";
 import { MaterialIcons } from "@expo/vector-icons";
@@ -78,6 +79,13 @@ const ChatInbox = ({ navigation }) => {
     return () => unsubscribe();
   }, []);
 
+  const visibleChats = chats.filter((item) => {
+    const isHidden = item.hiddenFor?.includes(currentUser.uid);
+    const hasMessage = !!item.lastMessage;
+    const startedByMe = item.starter === currentUser.uid;
+    return !isHidden && (hasMessage || startedByMe);
+  });
+
   const openChat = (chat) => {
     const friendId = chat.participants.find((id) => id !== currentUser.uid);
     navigation.navigate("Chat", {
@@ -107,6 +115,7 @@ const ChatInbox = ({ navigation }) => {
                 const currentUserId = auth.currentUser.uid;
                 const participants = data.participants || [];
                 const hiddenFor = data.hiddenFor || [];
+                const hiddenMap = data.hiddenMap || {};
 
                 const updatedHiddenFor = [
                   ...new Set([...hiddenFor, currentUserId]),
@@ -119,10 +128,15 @@ const ChatInbox = ({ navigation }) => {
                   // Hide for current user only
                   await updateDoc(chatRef, {
                     hiddenFor: updatedHiddenFor,
+                    hiddenMap: {
+                      ...hiddenMap,
+                      [currentUserId]: serverTimestamp(),
+                    },
                   });
                 }
               }
             } catch (error) {
+              console.error("Error deleting chat:", error);
               Alert.alert(
                 "Error",
                 "Something went wrong while deleting the chat."
@@ -141,10 +155,13 @@ const ChatInbox = ({ navigation }) => {
 
     // Check if the last message sender is you
     const isLastMessageFromMe = item.lastSenderId === currentUser.uid;
-    if (item.hiddenFor?.includes(currentUser.uid)) {
-      return null;
-    }
 
+    // if (
+    //   item.hiddenFor?.includes(currentUser.uid) ||
+    //   (!item.lastMessage && item?.starter && item.starter !== currentUser.uid)
+    // ) {
+    //   return null;
+    // }
     const renderRightActions = (progress, dragX, chatId) => {
       return (
         <TouchableOpacity
@@ -234,16 +251,20 @@ const ChatInbox = ({ navigation }) => {
       </View>
 
       <FlatList
-        data={chats}
+        data={visibleChats}
         keyExtractor={(item) => item.id}
         renderItem={renderItem}
         showsVerticalScrollIndicator={chats.length > 10}
-        contentContainerStyle={[
-          styles.listContainer,
-          chats.length === 0 && { flex: 1, justifyContent: "center" },
-        ]}
+        contentContainerStyle={
+          visibleChats.length === 0
+            ? { flex: 1, justifyContent: "center" }
+            : {
+                borderBottomWidth: 1,
+                borderBottomColor: colors.primaryLightest,
+              }
+        }
         ListEmptyComponent={() => (
-          <Text style={{ textAlign: "center", color: "#888" }}>
+          <Text style={{ textAlign: "center", color: "#888", fontSize: 18 }}>
             No chats available
           </Text>
         )}
@@ -269,10 +290,6 @@ const styles = StyleSheet.create({
     top: 17,
   },
   logo: { width: 45, height: 45, marginRight: 5 },
-  listContainer: {
-    borderBottomWidth: 1,
-    borderBottomColor: colors.primaryLightest,
-  },
   headerTitle: {
     fontSize: 20,
     fontWeight: "bold",
