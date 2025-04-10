@@ -122,7 +122,10 @@ const Pets = ({ navigation }) => {
           >
             No pets found! {"\n"} Add a pet to get started.
           </Text>
-          <TouchableOpacity onPress={() => navigation.navigate("AddPet")}>
+          <TouchableOpacity
+            style={styles.addPetButton}
+            onPress={() => navigation.navigate("AddPet")}
+          >
             <Text style={styles.addButtonText}>Add a Pet</Text>
           </TouchableOpacity>
         </>
@@ -225,6 +228,15 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: "center",
     paddingHorizontal: 15,
+  },
+  addPetButton: {
+    backgroundColor: colors.accent,
+    paddingVertical: 10,
+    borderRadius: 10,
+    alignItems: "center",
+    marginHorizontal: 20,
+    marginTop: 20,
+    marginBottom: 30,
   },
   addButtonText: {
     color: "#fff",

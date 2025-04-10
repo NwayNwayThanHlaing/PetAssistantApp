@@ -5,73 +5,107 @@ import { colors } from "../styles/Theme";
 
 const PrivacyPolicy = ({ navigation }) => {
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
       <ScrollView style={styles.container}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Text style={styles.back}>Back</Text>
         </TouchableOpacity>
+
         <Text style={styles.header}>PURRNOTE Privacy Policy</Text>
-        <Text style={styles.date}>Last Updated: April 7, 2025</Text>
-        <Text style={styles.section}>1. Information We Collect</Text>
+        <Text style={styles.date}>Last Updated: April 10, 2025</Text>
+
+        <Text style={styles.section}>1. Introduction</Text>
         <Text style={styles.text}>
-          We collect user data like name, email, pet info, calendar events,
-          uploaded content, and location data if enabled.
+          PURRNOTE is committed to protecting your personal data. This Privacy
+          Policy explains how we collect, use, and safeguard your information
+          when you use our mobile application.
         </Text>
-        <Text style={styles.section}>2. How We Use Your Information</Text>
+
+        <Text style={styles.section}>2. Information We Collect</Text>
         <Text style={styles.text}>
-          Your data helps manage reminders, personalize features, and provide
-          notifications and location services.
+          We collect information that you provide directly and indirectly when
+          using PURRNOTE, including:
         </Text>
-        <Text style={styles.section}>3. Data Storage and Protection</Text>
-        <Text style={styles.text}>
-          We use Firebase and Cloudinary with security rules and encryption to
-          protect your data.
+        <Text
+          style={
+            (styles.text,
+            {
+              marginLeft: 10,
+              lineHeight: 20,
+            })
+          }
+        >
+          • Name, email address, and profile picture (via Firebase
+          Authentication){"\n"}• Pet profiles (name, breed, age, health notes,
+          etc.){"\n"}• Calendar events, reminders, and diary posts{"\n"}•
+          Uploaded media (images through Cloudinary){"\n"}• Location data (for
+          vet locator and user discovery via Google Maps){"\n"}• Notification
+          preferences (using Expo Notifications)
         </Text>
-        <Text style={styles.section}>4. Third-Party Services</Text>
+
+        <Text style={styles.section}>3. How We Use Your Information</Text>
         <Text style={styles.text}>
-          We use Firebase, Cloudinary, Google Maps, and Native Notify. These may
-          process some data as needed.
+          Your data is used to personalize your app experience, send reminders,
+          improve functionality, and deliver relevant services such as vet
+          locations and messaging features.
         </Text>
-        <Text style={styles.section}>5. Your Privacy Rights</Text>
+
+        <Text style={styles.section}>4. Data Storage and Security</Text>
         <Text style={styles.text}>
-          You may access, update, or delete your data. Contact us if needed.
+          We store your data using secure services including Firebase and
+          Cloudinary. Data is protected using HTTPS encryption, authentication
+          checks, and Firestore Security Rules. Users cannot access others'
+          private data.
         </Text>
-        <Text style={styles.section}>6. Data Retention</Text>
+
+        <Text style={styles.section}>5. Third-Party Services</Text>
         <Text style={styles.text}>
-          Data is kept while your account is active. Deleting your account
-          removes your data.
+          We work with trusted providers such as Firebase, Cloudinary, Expo
+          Notifications, and Google Maps. These services may process some data
+          as part of providing functionality within the app.
         </Text>
-        <Text style={styles.section}>7. Children’s Privacy</Text>
+
+        <Text style={styles.section}>6. Your Privacy Rights</Text>
         <Text style={styles.text}>
-          PURRNOTE is not for children under 13. We do not knowingly collect
-          data from them.
+          You have the right to access, correct, or delete your personal data.
+          You can manage this within the app (e.g., edit profile, delete
+          account), or contact us if needed.
         </Text>
-        <Text style={styles.section}>8. Changes to This Policy</Text>
+
+        <Text style={styles.section}>7. Data Retention</Text>
         <Text style={styles.text}>
-          We may update this policy. We’ll notify users of any major changes
-          within the app.
+          We retain your data only for as long as your account is active. Upon
+          account deletion, your data will be permanently removed from our
+          systems.
         </Text>
-        <Text style={styles.section}>9. Contact Us</Text>
+
+        <Text style={styles.section}>8. Children’s Privacy</Text>
         <Text style={styles.text}>
-          If you have questions, please feel free to reach us at:{" "}
-          <Text
-            style={{
-              color: "blue",
-              fontSize: 16,
-              fontWeight: "bold",
-            }}
-          >
-            purrnote@gmail.com {"\n"}
+          PURRNOTE is not intended for children under 13. We do not knowingly
+          collect data from children without parental consent.
+        </Text>
+
+        <Text style={styles.section}>9. Changes to This Policy</Text>
+        <Text style={styles.text}>
+          This policy may be updated periodically. Users will be notified of
+          significant changes via the app. Continued use of the app implies
+          acceptance of the updated policy.
+        </Text>
+
+        <Text style={styles.section}>10. Contact Us</Text>
+        <Text style={styles.text}>
+          For any questions or concerns about this Privacy Policy, please
+          contact us at:{"\n"}
+          <Text>Email: </Text>
+          <Text style={{ color: "blue", fontWeight: "bold" }}>
+            purrnote@gmail.com
           </Text>
         </Text>
+
+        <Text style={styles.section}>11. Consent</Text>
         <Text style={styles.text}>
-          This Privacy Policy explains how PURRNOTE collects, uses, and protects
-          your information. By using our app, you agree to the collection and
-          use of information in accordance with this policy. {"\n"}
-          PURRNOTE is committed to protecting your privacy. We will not share
-          your personal information with third parties without your consent,
-          except as required by law or as necessary to provide our services.
-          {"\n"}
+          By using PURRNOTE, you agree to this Privacy Policy and the collection
+          and use of your data as outlined above.
         </Text>
       </ScrollView>
     </SafeAreaView>
@@ -82,7 +116,6 @@ const styles = StyleSheet.create({
   container: {
     paddingHorizontal: 20,
     paddingTop: 10,
-    backgroundColor: colors.light,
   },
   back: {
     fontSize: 16,
@@ -96,6 +129,8 @@ const styles = StyleSheet.create({
   },
   date: {
     fontSize: 14,
+    color: "gray",
+    marginBottom: 10,
   },
   section: {
     fontSize: 18,
@@ -105,7 +140,7 @@ const styles = StyleSheet.create({
   },
   text: {
     fontSize: 15,
-    lineHeight: 20,
+    lineHeight: 22,
   },
 });
 

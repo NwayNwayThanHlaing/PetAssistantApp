@@ -278,7 +278,7 @@ const Chat = ({ route, navigation }) => {
     const showDateLabel = currentDate !== prevDate;
     return (
       <>
-        {showDateLabel && (
+        {showDateLabel && item.createdAt && (
           <View
             style={{
               alignItems: "center",

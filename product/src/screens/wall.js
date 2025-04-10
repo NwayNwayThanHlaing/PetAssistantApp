@@ -223,7 +223,7 @@ const Wall = ({ navigation, route }) => {
           <Image
             source={
               !userImage || userImage === "default"
-                ? require("../../assets/dog.png")
+                ? require("../../assets/profile.jpg")
                 : {
                     uri: transformCloudinaryUrl(userImage),
                   }
