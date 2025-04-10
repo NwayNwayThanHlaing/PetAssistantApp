@@ -4,8 +4,8 @@
 
 Summary:
 
-- Added Privacy Policy page for the users’ awareness of how the data collected will be utilized, stored, and the users’ privacy rights.
-- Added minor features such as adding date and time for the chat messages, view profile button at the beginning of the chat, implementation of chat deletion, and direct navigation to the chat room when clicking on message button from the user account profile.
+- Added Privacy Policy page for the users' awareness of how the data collected will be utilized, stored, and the users’ privacy rights.
+- Added minor features such as adding date and time for the chat messages, visualization of the chat with unread messages, 'view profile' button at the beginning of the chat, implementation of chat deletion, and direct navigation to the chat room when clicking on message button from the user account profile.
 - Submitted the final report and deployed the last build of the application.
 
 Challenges:
