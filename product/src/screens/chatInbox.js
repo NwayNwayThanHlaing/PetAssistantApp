@@ -141,6 +141,9 @@ const ChatInbox = ({ navigation }) => {
 
     // Check if the last message sender is you
     const isLastMessageFromMe = item.lastSenderId === currentUser.uid;
+    if (item.hiddenFor?.includes(currentUser.uid)) {
+      return null;
+    }
 
     const renderRightActions = (progress, dragX, chatId) => {
       return (
