@@ -1,4 +1,5 @@
 import React from "react";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import Login from "./auth/login";
@@ -21,43 +22,45 @@ const Stack = createNativeStackNavigator();
 
 const MyStack = () => {
   return (
-    <NavigationContainer>
-      <Stack.Navigator
-        initialRouteName="Login"
-        screenOptions={{
-          headerMode: "screen",
-          headerShown: false,
-          gestureEnabled: true,
-        }}
-      >
-        <Stack.Screen
-          name="Login"
-          component={Login}
-          options={{
-            gestureEnabled: false,
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <NavigationContainer>
+        <Stack.Navigator
+          initialRouteName="Login"
+          screenOptions={{
+            headerMode: "screen",
             headerShown: false,
+            gestureEnabled: true,
           }}
-        />
-        <Stack.Screen name="SignUp" component={Signup} />
-        <Stack.Screen name="Maps" component={Maps} />
-        <Stack.Screen name="Wall" component={Wall} />
-        <Stack.Screen name="CreatePost" component={CreatePost} />
-        <Stack.Screen name="ChatInbox" component={ChatInbox} />
-        <Stack.Screen name="Chat" component={Chat} />
-        <Stack.Screen name="Dashboard" component={Dashboard} />
-        <Stack.Screen name="Booking" component={Booking} />
-        <Stack.Screen name="Profile" component={Profile} />
-        <Stack.Screen name="CalendarPage" component={CalendarPage} />
-        <Stack.Screen name="Pets" component={Pets} />
-        <Stack.Screen name="AddPet" component={AddPet} />
-        <Stack.Screen name="PetProfile" component={PetProfile} />
-        <Stack.Screen
-          name="NotificationsInbox"
-          component={NotificationsInbox}
-        />
-        <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicy} />
-      </Stack.Navigator>
-    </NavigationContainer>
+        >
+          <Stack.Screen
+            name="Login"
+            component={Login}
+            options={{
+              gestureEnabled: false,
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen name="SignUp" component={Signup} />
+          <Stack.Screen name="Maps" component={Maps} />
+          <Stack.Screen name="Wall" component={Wall} />
+          <Stack.Screen name="CreatePost" component={CreatePost} />
+          <Stack.Screen name="ChatInbox" component={ChatInbox} />
+          <Stack.Screen name="Chat" component={Chat} />
+          <Stack.Screen name="Dashboard" component={Dashboard} />
+          <Stack.Screen name="Booking" component={Booking} />
+          <Stack.Screen name="Profile" component={Profile} />
+          <Stack.Screen name="CalendarPage" component={CalendarPage} />
+          <Stack.Screen name="Pets" component={Pets} />
+          <Stack.Screen name="AddPet" component={AddPet} />
+          <Stack.Screen name="PetProfile" component={PetProfile} />
+          <Stack.Screen
+            name="NotificationsInbox"
+            component={NotificationsInbox}
+          />
+          <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicy} />
+        </Stack.Navigator>
+      </NavigationContainer>
+    </GestureHandlerRootView>
   );
 };
 

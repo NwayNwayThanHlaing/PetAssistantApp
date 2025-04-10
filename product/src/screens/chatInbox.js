@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   Image,
   StyleSheet,
+  Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { firestore, auth } from "../auth/firebaseConfig";
@@ -16,10 +17,13 @@ import {
   onSnapshot,
   orderBy,
   getDoc,
+  updateDoc,
+  deleteDoc,
   doc,
 } from "firebase/firestore";
 import { colors } from "../styles/Theme";
 import { MaterialIcons } from "@expo/vector-icons";
+import { Swipeable } from "react-native-gesture-handler";
 
 const ChatInbox = ({ navigation }) => {
   const currentUser = auth.currentUser;
@@ -82,6 +86,55 @@ const ChatInbox = ({ navigation }) => {
     });
   };
 
+  const handleDeleteChat = (chatId) => {
+    Alert.alert(
+      "Delete Chat",
+      "Are you sure you want to delete this chat?",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              const chatRef = doc(firestore, "chats", chatId);
+              const chatSnap = await getDoc(chatRef);
+              if (chatSnap.exists()) {
+                const data = chatSnap.data();
+                const currentUserId = auth.currentUser.uid;
+                const participants = data.participants || [];
+                const hiddenFor = data.hiddenFor || [];
+
+                const updatedHiddenFor = [
+                  ...new Set([...hiddenFor, currentUserId]),
+                ];
+
+                if (updatedHiddenFor.length === participants.length) {
+                  // All participants have hidden — permanently delete
+                  await deleteDoc(chatRef);
+                } else {
+                  // Hide for current user only
+                  await updateDoc(chatRef, {
+                    hiddenFor: updatedHiddenFor,
+                  });
+                }
+              }
+            } catch (error) {
+              Alert.alert(
+                "Error",
+                "Something went wrong while deleting the chat."
+              );
+            }
+          },
+        },
+      ],
+      { cancelable: true }
+    );
+  };
+
   const renderItem = ({ item }) => {
     const friendId = item.participants.find((id) => id !== currentUser.uid);
     const friend = friends[friendId];
@@ -89,42 +142,68 @@ const ChatInbox = ({ navigation }) => {
     // Check if the last message sender is you
     const isLastMessageFromMe = item.lastSenderId === currentUser.uid;
 
+    const renderRightActions = (progress, dragX, chatId) => {
+      return (
+        <TouchableOpacity
+          style={styles.deleteAction}
+          onPress={() => handleDeleteChat(chatId)}
+        >
+          <MaterialIcons name="delete" size={24} color="#fff" />
+        </TouchableOpacity>
+      );
+    };
+
     return (
-      <TouchableOpacity style={styles.chatItem} onPress={() => openChat(item)}>
-        <Image
-          source={
-            friend?.profileImage === "default" || !friend?.profileImage
-              ? require("../../assets/dog.png")
-              : { uri: friend.profileImage }
-          }
-          style={styles.avatar}
-          resizeMode="cover"
-        />
+      <Swipeable
+        renderRightActions={(progress, dragX) =>
+          renderRightActions(progress, dragX, item.id)
+        }
+        overshootRight={false}
+        friction={3}
+      >
+        <View style={{ backgroundColor: "#fff" }}>
+          <TouchableOpacity
+            style={styles.chatItem}
+            onPress={() => openChat(item)}
+          >
+            <Image
+              source={
+                friend?.profileImage === "default" || !friend?.profileImage
+                  ? require("../../assets/dog.png")
+                  : { uri: friend.profileImage }
+              }
+              style={styles.avatar}
+              resizeMode="cover"
+            />
 
-        <View style={styles.textContainer}>
-          <Text style={styles.friendName}>{friend?.name || "Loading..."}</Text>
+            <View style={styles.textContainer}>
+              <Text style={styles.friendName}>
+                {friend?.name || "Loading..."}
+              </Text>
 
-          <Text style={styles.lastMessage}>
-            {item.lastMessage
-              ? `${isLastMessageFromMe ? "You: " : ""}${item.lastMessage}`
-              : "Say hello!"}
-          </Text>
+              <Text style={styles.lastMessage}>
+                {item.lastMessage
+                  ? `${isLastMessageFromMe ? "You: " : ""}${item.lastMessage}`
+                  : "Say hello!"}
+              </Text>
+            </View>
+
+            <Text style={styles.timestamp}>
+              {item.updatedAt?.toDate().toLocaleDateString("en-GB", {
+                day: "2-digit",
+                month: "2-digit",
+                year: "2-digit",
+              })}
+              {"\n"}
+              {item.updatedAt?.toDate().toLocaleTimeString("en-US", {
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: true,
+              })}
+            </Text>
+          </TouchableOpacity>
         </View>
-
-        <Text style={styles.timestamp}>
-          {item.updatedAt?.toDate().toLocaleDateString("en-GB", {
-            day: "2-digit",
-            month: "2-digit",
-            year: "2-digit",
-          })}
-          {"\n"}
-          {item.updatedAt?.toDate().toLocaleTimeString("en-US", {
-            hour: "2-digit",
-            minute: "2-digit",
-            hour12: true,
-          })}
-        </Text>
-      </TouchableOpacity>
+      </Swipeable>
     );
   };
 
@@ -188,8 +267,6 @@ const styles = StyleSheet.create({
   },
   logo: { width: 45, height: 45, marginRight: 5 },
   listContainer: {
-    paddingHorizontal: 15,
-    paddingVertical: 10,
     borderBottomWidth: 1,
     borderBottomColor: colors.primaryLightest,
   },
@@ -199,9 +276,11 @@ const styles = StyleSheet.create({
     color: colors.accent,
   },
   chatItem: {
+    paddingHorizontal: 15,
+    paddingVertical: 10,
     flexDirection: "row",
     alignItems: "center",
-    marginVertical: 8,
+    overflow: "hidden",
   },
   avatar: { width: 50, height: 50, borderRadius: 25, marginRight: 12 },
   textContainer: { flex: 1 },
@@ -215,6 +294,13 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: colors.primaryLight,
     textAlign: "right",
+  },
+  deleteAction: {
+    backgroundColor: "red",
+    justifyContent: "center",
+    alignItems: "center",
+    width: 60,
+    height: "100%",
   },
 });
 
