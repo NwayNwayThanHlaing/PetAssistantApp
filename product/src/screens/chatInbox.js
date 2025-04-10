@@ -17,6 +17,7 @@ import {
   onSnapshot,
   orderBy,
   getDoc,
+  getDocs,
   updateDoc,
   deleteDoc,
   doc,
@@ -80,10 +81,7 @@ const ChatInbox = ({ navigation }) => {
   }, []);
 
   const visibleChats = chats.filter((item) => {
-    const isHidden = item.hiddenFor?.includes(currentUser.uid);
-    const hasMessage = !!item.lastMessage;
-    const startedByMe = item.starter === currentUser.uid;
-    return !isHidden && (hasMessage || startedByMe);
+    return !(item.hiddenFor || []).includes(currentUser.uid);
   });
 
   const openChat = (chat) => {
@@ -92,6 +90,20 @@ const ChatInbox = ({ navigation }) => {
       chatId: chat.id,
       friendId: friendId,
     });
+  };
+
+  const deleteChatWithMessages = async (chatId) => {
+    const chatRef = doc(firestore, "chats", chatId);
+
+    // Delete all messages first
+    const messagesRef = collection(firestore, "chats", chatId, "messages");
+    const messagesSnap = await getDocs(messagesRef);
+
+    const deletePromises = messagesSnap.docs.map((doc) => deleteDoc(doc.ref));
+    await Promise.all(deletePromises);
+
+    // Delete the chat itself
+    await deleteDoc(chatRef);
   };
 
   const handleDeleteChat = (chatId) => {
@@ -123,7 +135,7 @@ const ChatInbox = ({ navigation }) => {
 
                 if (updatedHiddenFor.length === participants.length) {
                   // All participants have hidden — permanently delete
-                  await deleteDoc(chatRef);
+                  await deleteChatWithMessages(chatId);
                 } else {
                   // Hide for current user only
                   await updateDoc(chatRef, {
@@ -156,12 +168,6 @@ const ChatInbox = ({ navigation }) => {
     // Check if the last message sender is you
     const isLastMessageFromMe = item.lastSenderId === currentUser.uid;
 
-    // if (
-    //   item.hiddenFor?.includes(currentUser.uid) ||
-    //   (!item.lastMessage && item?.starter && item.starter !== currentUser.uid)
-    // ) {
-    //   return null;
-    // }
     const renderRightActions = (progress, dragX, chatId) => {
       return (
         <TouchableOpacity

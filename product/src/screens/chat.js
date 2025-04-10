@@ -130,7 +130,6 @@ const Chat = ({ route, navigation }) => {
         participants: [currentUser.uid, friendId],
         hiddenMap: {},
         hiddenFor: [],
-        starter: currentUser.uid,
         lastMessage: input.trim(),
         lastSenderId: currentUser.uid,
         updatedAt: serverTimestamp(),
