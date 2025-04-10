@@ -97,6 +97,22 @@ const Chat = ({ route, navigation }) => {
     return msg.createdAt?.toMillis() > hiddenSince.toMillis();
   });
 
+  // Format Date Label
+  const formatDateLabel = (date) => {
+    const today = new Date();
+    const messageDate = new Date(date);
+
+    const isToday = messageDate.toDateString() === today.toDateString();
+
+    return isToday
+      ? "Today"
+      : messageDate.toLocaleDateString("en-GB", {
+          day: "2-digit",
+          month: "short",
+          year: "numeric",
+        });
+  };
+
   // Send New Message
   const sendMessage = async () => {
     if (!input.trim()) return;
@@ -250,46 +266,67 @@ const Chat = ({ route, navigation }) => {
   };
 
   // Render Each Message
-  const renderItem = ({ item }) => {
+  const renderItem = ({ item, index }) => {
     const isMe = item.senderId === currentUser.uid;
     const isDeleted = item.deletedForEveryone === true;
+    const currentDate = item.createdAt?.toDate().toDateString();
+    const prevDate =
+      index > 0
+        ? filteredMessages[index - 1].createdAt?.toDate().toDateString()
+        : null;
 
+    const showDateLabel = currentDate !== prevDate;
     return (
-      <TouchableOpacity
-        onLongPress={() => !isDeleted && handleLongPress(item)}
-        activeOpacity={0.8}
-        style={[
-          styles.messageContainer,
-          isDeleted
-            ? isMe
-              ? styles.myDeletedMessage
-              : styles.theirDeletedMessage
-            : isMe
-            ? styles.myMessage
-            : styles.theirMessage,
-        ]}
-      >
-        {isDeleted ? (
-          <Text style={styles.deletedText}>This message was deleted.</Text>
-        ) : (
-          <>
-            <Text style={isMe ? styles.myText : styles.messageText}>
-              {item.text}
+      <>
+        {showDateLabel && (
+          <View style={{ alignItems: "center", marginVertical: 10 }}>
+            <Text style={{ color: colors.primaryLight, fontWeight: "600" }}>
+              {formatDateLabel(item.createdAt.toDate())}
             </Text>
-            {item.editedAt && <Text style={styles.editedLabel}>(edited)</Text>}
-
-            {/* Time */}
-            {item.createdAt && (
-              <Text style={isMe ? styles.myTimeLabel : styles.theirTimeLabel}>
-                {item.createdAt.toDate().toLocaleTimeString([], {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}
-              </Text>
-            )}
-          </>
+          </View>
         )}
-      </TouchableOpacity>
+        <TouchableOpacity
+          onLongPress={() => !isDeleted && handleLongPress(item)}
+          activeOpacity={0.8}
+          style={[
+            styles.messageContainer,
+            isDeleted
+              ? isMe
+                ? styles.myDeletedMessage
+                : styles.theirDeletedMessage
+              : isMe
+              ? styles.myMessage
+              : styles.theirMessage,
+          ]}
+        >
+          {isDeleted ? (
+            <Text style={styles.deletedText}>This message was deleted.</Text>
+          ) : (
+            <>
+              <Text style={isMe ? styles.myText : styles.messageText}>
+                {item.text}
+              </Text>
+              {item.editedAt && (
+                <Text
+                  style={isMe ? styles.editedLabel : styles.editedLabelOther}
+                >
+                  (edited)
+                </Text>
+              )}
+
+              {/* Time */}
+              {item.createdAt && (
+                <Text style={isMe ? styles.myTimeLabel : styles.theirTimeLabel}>
+                  {item.createdAt.toDate().toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </Text>
+              )}
+            </>
+          )}
+        </TouchableOpacity>
+      </>
     );
   };
 
@@ -499,8 +536,17 @@ const styles = StyleSheet.create({
   myText: { color: colors.background },
   editedLabel: {
     fontSize: 10,
+    color: colors.background,
+    marginTop: 2,
+    alignSelf: "flex-end",
+    fontStyle: "italic",
+  },
+  editedLabelOther: {
+    fontSize: 10,
     color: colors.primaryLight,
     marginTop: 2,
+    alignSelf: "flex-start",
+    fontStyle: "italic",
   },
   header: {
     flexDirection: "row",
