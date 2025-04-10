@@ -84,8 +84,11 @@ const ChatInbox = ({ navigation }) => {
     return !(item.hiddenFor || []).includes(currentUser.uid);
   });
 
-  const openChat = (chat) => {
+  const openChat = async (chat) => {
     const friendId = chat.participants.find((id) => id !== currentUser.uid);
+    await updateDoc(doc(firestore, "chats", chat.id), {
+      [`lastSeen.${currentUser.uid}`]: serverTimestamp(),
+    });
     navigation.navigate("Chat", {
       chatId: chat.id,
       friendId: friendId,
@@ -164,7 +167,10 @@ const ChatInbox = ({ navigation }) => {
   const renderItem = ({ item }) => {
     const friendId = item.participants.find((id) => id !== currentUser.uid);
     const friend = friends[friendId];
-
+    const lastSeen = item.lastSeen?.[currentUser.uid];
+    const isUnread =
+      item.updatedAt?.toMillis() > (lastSeen?.toMillis?.() || 0) &&
+      item.lastSenderId !== currentUser.uid;
     // Check if the last message sender is you
     const isLastMessageFromMe = item.lastSenderId === currentUser.uid;
 
@@ -177,6 +183,11 @@ const ChatInbox = ({ navigation }) => {
           <MaterialIcons name="delete" size={24} color="#fff" />
         </TouchableOpacity>
       );
+    };
+    const truncateByChar = (text, maxChars = 20) => {
+      return text.length > maxChars
+        ? text.slice(0, maxChars).trim() + "..."
+        : text;
     };
 
     return (
@@ -203,30 +214,39 @@ const ChatInbox = ({ navigation }) => {
             />
 
             <View style={styles.textContainer}>
-              <Text style={styles.friendName}>
+              <Text
+                style={[styles.friendName, isUnread && { fontWeight: "bold" }]}
+              >
                 {friend?.name || "Loading..."}
               </Text>
 
-              <Text style={styles.lastMessage}>
-                {item.lastMessage
-                  ? `${isLastMessageFromMe ? "You: " : ""}${item.lastMessage}`
-                  : "Say hello!"}
-              </Text>
+              <View
+                style={{ flexDirection: "row", alignItems: "center", gap: 5 }}
+              >
+                <Text
+                  numberOfLines={1}
+                  ellipsizeMode="tail"
+                  style={[
+                    styles.lastMessage,
+                    isUnread && { color: colors.primary, fontWeight: "bold" },
+                  ]}
+                >
+                  {item.lastMessage
+                    ? `${isLastMessageFromMe ? "You: " : ""}${truncateByChar(
+                        item.lastMessage
+                      )}`
+                    : "Say hello!"}
+                </Text>
+                <Text style={styles.timestamp}>
+                  {item.updatedAt?.toDate().toLocaleTimeString("en-US", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    hour12: true,
+                  })}
+                </Text>
+              </View>
             </View>
-
-            <Text style={styles.timestamp}>
-              {item.updatedAt?.toDate().toLocaleDateString("en-GB", {
-                day: "2-digit",
-                month: "2-digit",
-                year: "numeric",
-              })}
-              {"\n"}
-              {item.updatedAt?.toDate().toLocaleTimeString("en-US", {
-                hour: "2-digit",
-                minute: "2-digit",
-                hour12: true,
-              })}
-            </Text>
+            {isUnread && <View style={styles.unreadDot} />}
           </TouchableOpacity>
         </View>
       </Swipeable>
@@ -297,7 +317,7 @@ const styles = StyleSheet.create({
   },
   logo: { width: 45, height: 45, marginRight: 5 },
   headerTitle: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: "bold",
     color: colors.accent,
   },
@@ -308,18 +328,23 @@ const styles = StyleSheet.create({
     alignItems: "center",
     overflow: "hidden",
   },
-  avatar: { width: 50, height: 50, borderRadius: 25, marginRight: 12 },
+  avatar: { width: 55, height: 55, borderRadius: 55, marginRight: 10 },
   textContainer: { flex: 1 },
   friendName: {
     fontSize: 17,
     color: colors.primary,
     fontWeight: "500",
   },
-  lastMessage: { color: colors.primaryLight, marginTop: 4, fontSize: 15 },
+  lastMessage: {
+    color: colors.primaryLight,
+    marginTop: 2,
+    fontSize: 15,
+  },
   timestamp: {
     fontSize: 13,
     color: colors.primaryLight,
     textAlign: "right",
+    marginTop: 2,
   },
   deleteAction: {
     backgroundColor: "red",
@@ -327,6 +352,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
     width: 60,
     height: "100%",
+  },
+  unreadDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: colors.accent,
+    marginHorizontal: 10,
+    marginTop: 4,
   },
 });
 

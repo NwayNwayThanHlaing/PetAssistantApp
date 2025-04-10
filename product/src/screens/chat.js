@@ -97,6 +97,22 @@ const Chat = ({ route, navigation }) => {
     return msg.createdAt?.toMillis() > hiddenSince.toMillis();
   });
 
+  // Update Last Seen
+  useEffect(() => {
+    const updateLastSeen = async () => {
+      if (!chatId || !currentUser?.uid) return;
+
+      const chatRef = doc(firestore, "chats", chatId);
+      await updateDoc(chatRef, {
+        [`lastSeen.${currentUser.uid}`]: serverTimestamp(),
+      });
+    };
+
+    if (messages.length > 0) {
+      updateLastSeen();
+    }
+  }, [messages]);
+
   // Format Date Label
   const formatDateLabel = (date) => {
     const today = new Date();
