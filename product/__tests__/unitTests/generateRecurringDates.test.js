@@ -1,4 +1,4 @@
-import { RRule } from "rrule"; // still needed
+import { RRule } from "rrule";
 
 // Define the function locally to avoid Firebase import issues
 function generateRecurringDates(event) {
