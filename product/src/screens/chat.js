@@ -20,6 +20,7 @@ import {
   addDoc,
   doc,
   getDoc,
+  arrayUnion,
   updateDoc,
   serverTimestamp,
 } from "firebase/firestore";
@@ -36,11 +37,22 @@ const Chat = ({ route, navigation }) => {
   const [input, setInput] = useState("");
   const [editingMessageId, setEditingMessageId] = useState(null);
   const [editedMessageText, setEditedMessageText] = useState("");
-  const [hiddenMessages, setHiddenMessages] = useState([]);
+  // const [hiddenMessages, setHiddenMessages] = useState([]);
   const flatListRef = useRef(null);
 
+  // const deleteForMe = async (messageId) => {
+  //   setHiddenMessages((prev) => [...prev, messageId]);
+  // };
+
   const deleteForMe = async (messageId) => {
-    setHiddenMessages((prev) => [...prev, messageId]);
+    try {
+      const messageRef = doc(firestore, "chats", chatId, "messages", messageId);
+      await updateDoc(messageRef, {
+        hiddenFor: arrayUnion(currentUser.uid),
+      });
+    } catch (error) {
+      console.error("❌ Error hiding message:", error);
+    }
   };
 
   // Fetch Chat Data
@@ -83,7 +95,18 @@ const Chat = ({ route, navigation }) => {
     const q = query(messagesRef, orderBy("createdAt", "asc"));
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
-      const msgs = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+      // const msgs = snapshot.docs.map((doc) => ({
+      //   id: doc.id,
+      //   ...doc.data(),
+      // }));
+      const msgs = snapshot.docs.map((docSnap) => {
+        const data = docSnap.data();
+        return {
+          id: docSnap.id,
+          ...data,
+          hiddenFor: data.hiddenFor || [],
+        };
+      });
       setMessages(msgs);
     });
 
@@ -92,9 +115,19 @@ const Chat = ({ route, navigation }) => {
 
   const hiddenSince = chatData?.hiddenMap?.[currentUser.uid];
 
+  // const filteredMessages = messages.filter((msg) => {
+  //   if (!hiddenSince) return true;
+  //   return msg.createdAt?.toMillis() > hiddenSince.toMillis();
+  // });
+
   const filteredMessages = messages.filter((msg) => {
-    if (!hiddenSince) return true;
-    return msg.createdAt?.toMillis() > hiddenSince.toMillis();
+    const isHiddenSince = hiddenSince
+      ? msg.createdAt?.toMillis() > hiddenSince.toMillis()
+      : true;
+
+    const isHiddenForMe = (msg.hiddenFor || []).includes(currentUser.uid);
+
+    return isHiddenSince && !isHiddenForMe;
   });
 
   // Update Last Seen

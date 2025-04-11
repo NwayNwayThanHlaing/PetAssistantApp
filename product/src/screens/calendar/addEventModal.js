@@ -121,6 +121,7 @@ const AddEventModal = ({
                 onChange={(event, selectedDate) => {
                   if (selectedDate) {
                     // Format the date as YYYY-MM-DD inline
+                    const now = new Date();
                     const year = selectedDate.getFullYear();
                     const month = String(selectedDate.getMonth() + 1).padStart(
                       2,

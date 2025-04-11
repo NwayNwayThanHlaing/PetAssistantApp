@@ -76,8 +76,6 @@ const EventModal = ({
   const isTimeInFuture = (date, time) => {
     const [year, month, day] = date.split("-");
     const eventDateTime = new Date(year, month, day, time.hours, time.minutes);
-    console.log("eventDateTime", eventDateTime);
-    console.log(eventDateTime >= new Date());
     return eventDateTime >= new Date();
   };
 
