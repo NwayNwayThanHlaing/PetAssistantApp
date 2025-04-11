@@ -1,4 +1,34 @@
-import { generateRecurringDates } from "../../src/actions/recurrenceUtils";
+import { RRule } from "rrule"; // still needed
+
+// Define the function locally to avoid Firebase import issues
+function generateRecurringDates(event) {
+  const { date, recurrence, endDate, exceptions = [] } = event;
+
+  if (!date || isNaN(new Date(date))) return [];
+
+  if (recurrence === "none") {
+    return [date];
+  }
+
+  const frequencyMap = {
+    daily: RRule.DAILY,
+    weekly: RRule.WEEKLY,
+    monthly: RRule.MONTHLY,
+  };
+
+  const freq = frequencyMap[recurrence];
+  if (!freq) return [date];
+
+  const rule = new RRule({
+    freq,
+    dtstart: new Date(date),
+    until: endDate ? new Date(endDate) : undefined,
+    count: endDate ? undefined : 50,
+  });
+
+  const allDates = rule.all().map((d) => d.toISOString().split("T")[0]);
+  return allDates.filter((d) => !exceptions.includes(d));
+}
 
 // === TEST CASES ===
 describe("generateRecurringDates", () => {

@@ -1,9 +1,17 @@
 // React and Testing Library imports
 import React from "react";
-import { render, fireEvent } from "@testing-library/react-native";
+import { render, fireEvent, waitFor } from "@testing-library/react-native";
 import ChatInbox from "../../src/screens/chatInbox";
-
 // === MOCKS AND SETUP ===
+
+// Mock react-native-gesture-handler to avoid native crashes
+jest.mock("react-native-gesture-handler", () => {
+  return {
+    Swipeable: ({ children }) => children,
+    GestureHandlerRootView: ({ children }) => children,
+    // add more mocks if needed later
+  };
+});
 
 // Mock react-native-modal to avoid animation/rendering issues in test environment
 jest.mock("react-native-modal", () => {
@@ -53,16 +61,15 @@ jest.mock("firebase/firestore", () => {
     where: jest.fn(),
     orderBy: jest.fn(),
     doc: jest.fn(),
+    updateDoc: jest.fn(() => Promise.resolve()),
 
-    // Mock getDoc to return a user profile
+    serverTimestamp: jest.fn(() => "MOCK_TIMESTAMP"),
     getDoc: jest.fn(() =>
       Promise.resolve({
         exists: () => true,
         data: () => ({ name: "Buddy", profileImage: "default" }),
       })
     ),
-
-    // Simulate a real-time listener returning one chat document
     onSnapshot: (q, callback) => {
       callback({
         docs: [
@@ -74,12 +81,13 @@ jest.mock("firebase/firestore", () => {
               lastSenderId: "friendId",
               updatedAt: {
                 toDate: () => new Date("2024-01-01T12:00:00Z"),
+                toMillis: () => new Date("2024-01-01T12:00:00Z").getTime(),
               },
             }),
           },
         ],
       });
-      return jest.fn(); // mock unsubscribe function
+      return jest.fn(); // unsubscribe
     },
   };
 });
@@ -109,10 +117,13 @@ describe("ChatInbox", () => {
     const chatItem = await findByText("Buddy");
     fireEvent.press(chatItem);
 
-    expect(mockNavigate).toHaveBeenCalledWith("Chat", {
-      chatId: "chat1",
-      friendId: "friendId",
-    });
+    // ✅ Wait for navigation to happen
+    await waitFor(() =>
+      expect(mockNavigate).toHaveBeenCalledWith("Chat", {
+        chatId: "chat1",
+        friendId: "friendId",
+      })
+    );
   });
 
   // Test 4: Simulates pressing the back button in the header

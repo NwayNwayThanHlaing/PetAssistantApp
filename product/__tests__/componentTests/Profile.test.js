@@ -124,11 +124,11 @@ describe("Profile", () => {
   });
 
   // Test 5: Ensure Reset Password modal shows inputs and closes on Cancel
-  it("shows and closes Reset Password modal", async () => {
+  it("shows and closes Change Password modal", async () => {
     const { findByText, getByText, getByPlaceholderText } = render(
       <Profile navigation={mockNavigation} />
     );
-    const resetButton = await findByText("Reset Password");
+    const resetButton = await findByText("Change Password");
     fireEvent.press(resetButton);
 
     // Check for modal input fields
