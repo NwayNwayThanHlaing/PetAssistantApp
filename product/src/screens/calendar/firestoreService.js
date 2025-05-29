@@ -382,6 +382,22 @@ export const deleteOneOccurrence = async (eventId, occurrenceDate) => {
     }
 
     const updatedExceptions = [...currentExceptions, occurrenceDate];
+
+    const startDate = new Date(eventData.date);
+    // untilDate = new Date(event.endDate.seconds * 1000);
+    const endDate = new Date(eventData.endDate.seconds * 1000);
+
+    const timeDiff = endDate - startDate;
+
+    // Convert milliseconds to days
+    const daysDiff = Math.floor(timeDiff / (1000 * 60 * 60 * 24)) + 1;
+
+    if (daysDiff == updatedExceptions.length) {
+      // If the occurrenceDate is the only date left, delete the entire event
+      await deleteDoc(eventDocRef);
+      //console.log(`Deleted event ${eventId} as it had no remaining occurrences.`);
+      return true;
+    }
     // Update the event with the new exceptions list
     await updateDoc(eventDocRef, {
       exceptions: updatedExceptions,
@@ -413,7 +429,7 @@ export const deleteFutureOccurrences = async (event, cutoffDate) => {
 
     // Create updated event data
     const updatedEventData = {
-      endDate: newEndDate,
+      // endDate: newEndDate,
       exceptions: updatedExceptions,
       updatedAt: Timestamp.now(),
     };

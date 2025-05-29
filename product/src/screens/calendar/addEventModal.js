@@ -140,6 +140,7 @@ const AddEventModal = ({
                     }));
                   }
                 }}
+                disabled
               />
             </View>
             {/* Event Time */}
